@@ -20,6 +20,7 @@ export type SeatOpportunity = {
   createdAt: number;
   expectedTimeMins?: number; // Estimated minutes until handoff
   price?: number; // Optional price if monetization is enabled
+  trainId?: string; // ID of the selected train from the timetable
 };
 
 export type Match = {

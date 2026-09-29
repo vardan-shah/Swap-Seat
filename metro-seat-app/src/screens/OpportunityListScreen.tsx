@@ -5,6 +5,7 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
 import { getStationById, ENABLE_PAYMENTS } from '../data/stations';
+import { getTrainLabel } from '../data/timetable';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'OpportunityList'>;
@@ -39,6 +40,9 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
           <Text style={styles.stationText}>Becomes available at: {handoffStation?.name}</Text>
           <Text style={styles.timeText}>in ~{item.expectedTimeMins} mins</Text>
         </View>
+        {item.trainId && (
+          <Text style={styles.trainText}>Train: {getTrainLabel(item.trainId)}</Text>
+        )}
         <Text style={styles.giverText}>Trust Score: 4.8/5.0</Text>
         
         {ENABLE_PAYMENTS && item.price !== undefined && (
@@ -81,6 +85,7 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   stationText: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   timeText: { fontSize: 14, color: '#FF8200', fontWeight: 'bold' },
+  trainText: { fontSize: 14, color: '#0056b3', marginBottom: 4, fontWeight: '500' },
   giverText: { fontSize: 13, color: '#666', marginBottom: 16 },
   priceText: { fontSize: 16, fontWeight: 'bold', color: '#28a745', marginBottom: 16 },
   requestBtn: { backgroundColor: '#0056b3', padding: 12, borderRadius: 8, alignItems: 'center' },

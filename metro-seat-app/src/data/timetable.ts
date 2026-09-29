@@ -1,0 +1,23 @@
+export const NORTHBOUND_TRAINS = [
+  "06:20", "06:45", "06:58", "07:23", "07:34", "07:47", "08:03", "08:17", "08:33", "08:59", 
+  "09:11", "09:19", "09:48", "10:12", "10:36", "10:59", "11:25", "11:49", "12:13", "12:37", 
+  "13:02", "13:27", "13:50", "14:15", "14:40", "15:04", "15:16", "15:28", "15:53", "16:03", 
+  "16:17", "16:40", "17:06", "17:16", "17:30", "17:54", "18:06", "18:18", "18:43", "19:08", 
+  "19:42", "20:45"
+].map(time => ({ label: `Train starting from APMC at ${time}`, value: `NB_${time}` }));
+
+export const SOUTHBOUND_TRAINS = [
+  "06:40", "07:33", "07:48 (GIFT)", "08:00", "08:25", "08:37 (GIFT)", "08:49", "09:01 (GIFT)", 
+  "09:13", "09:37", "10:01", "10:18 (GIFT)", "10:26", "10:50", "11:14", "11:38", "12:03", 
+  "12:26", "12:51", "13:15", "13:40", "14:04", "14:28", "14:52", "15:16", "15:41", "16:06", 
+  "16:17 (GIFT)", "16:30", "16:54", "17:08 (GIFT)", "17:19", "17:44", "18:08", "18:21 (GIFT)", 
+  "18:32", "18:56", "19:13 (GIFT)", "19:20", "19:44", "20:09", "21:00"
+].map(time => ({ label: `Train starting from Gandhinagar at ${time}`, value: `SB_${time}` }));
+
+export const getTrainsByDirection = (direction: 'Northbound' | 'Southbound') => {
+  return direction === 'Northbound' ? NORTHBOUND_TRAINS : SOUTHBOUND_TRAINS;
+};
+
+export const getTrainLabel = (value: string) => {
+  return [...NORTHBOUND_TRAINS, ...SOUTHBOUND_TRAINS].find(t => t.value === value)?.label || 'Unknown Train';
+};

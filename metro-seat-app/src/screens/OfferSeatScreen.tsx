@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
-import { STATIONS, ENABLE_PAYMENTS } from '../data/stations';
+import { STATIONS, ENABLE_PAYMENTS, isStationAfter } from '../data/stations';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
+import SelectModal from '../components/SelectModal';
+import { getTrainsByDirection } from '../data/timetable';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'OfferSeat'>;
@@ -14,13 +16,14 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const [direction, setDirection] = useState<Direction>('Northbound');
   const [currentStationId, setCurrentStationId] = useState<string>('');
   const [handoffStationId, setHandoffStationId] = useState<string>('');
+  const [trainId, setTrainId] = useState<string>('');
   const [price, setPrice] = useState<string>('');
   
   const offerSeat = useAppStore(state => state.offerSeat);
 
   const handleSubmit = () => {
-    if (!currentStationId || !handoffStationId) {
-      Alert.alert('Error', 'Please select both stations.');
+    if (!currentStationId || !handoffStationId || !trainId) {
+      Alert.alert('Error', 'Please select a train and both stations.');
       return;
     }
     if (currentStationId === handoffStationId) {
@@ -28,19 +31,35 @@ export default function OfferSeatScreen({ navigation }: Props) {
       return;
     }
     
-    // In a real app, validate that handoff is actually after current based on direction
+    // Validate handoff is actually after current based on direction
+    if (!isStationAfter(handoffStationId, currentStationId, direction)) {
+      Alert.alert('Error', 'Handoff station must be AFTER your current station in the chosen direction.');
+      return;
+    }
+    
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
-    offerSeat(direction, currentStationId, handoffStationId, priceNum);
+    offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
     Alert.alert('Success', 'Your seat opportunity is now active!', [
       { text: 'OK', onPress: () => navigation.goBack() }
     ]);
   };
 
-  // Simple dropdown alternative for MVP since react-native-picker requires native modules sometimes
-  // We'll just map a few stations to buttons for the demo
-  const displayStations = STATIONS.filter(s => 
-    direction === 'Northbound' ? s.sequence % 3 === 0 || s.sequence === 1 || s.sequence === 20 : true
-  ).slice(0, 5); // Just picking a subset for easy selection in demo
+  const stationItems = useMemo(() => {
+    // Show stations based on direction order
+    const ordered = [...STATIONS].sort((a, b) => 
+      direction === 'Northbound' ? a.sequence - b.sequence : b.sequence - a.sequence
+    );
+    return ordered.map(s => ({ label: s.name, value: s.id }));
+  }, [direction]);
+
+  const trainItems = useMemo(() => getTrainsByDirection(direction), [direction]);
+
+  const handleDirectionChange = (newDir: Direction) => {
+    setDirection(newDir);
+    setCurrentStationId('');
+    setHandoffStationId('');
+    setTrainId('');
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -48,7 +67,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
       <View style={styles.buttonRow}>
         <TouchableOpacity 
           style={[styles.toggleBtn, direction === 'Northbound' && styles.toggleBtnActive]}
-          onPress={() => setDirection('Northbound')}
+          onPress={() => handleDirectionChange('Northbound')}
         >
           <Text style={[styles.toggleText, direction === 'Northbound' && styles.toggleTextActive]}>Northbound</Text>
           <Text style={styles.smallText}>(Towards Mahatma Mandir)</Text>
@@ -56,42 +75,40 @@ export default function OfferSeatScreen({ navigation }: Props) {
         
         <TouchableOpacity 
           style={[styles.toggleBtn, direction === 'Southbound' && styles.toggleBtnActive]}
-          onPress={() => setDirection('Southbound')}
+          onPress={() => handleDirectionChange('Southbound')}
         >
           <Text style={[styles.toggleText, direction === 'Southbound' && styles.toggleTextActive]}>Southbound</Text>
-          <Text style={styles.smallText}>(Towards Motera Stadium)</Text>
+          <Text style={styles.smallText}>(Towards APMC)</Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.label}>2. Where are you now?</Text>
-      <View style={styles.grid}>
-        {STATIONS.filter(s => s.sequence % 4 === 1).map(station => (
-          <TouchableOpacity 
-            key={`curr-${station.id}`} 
-            style={[styles.stationBtn, currentStationId === station.id && styles.stationBtnActive]}
-            onPress={() => setCurrentStationId(station.id)}
-          >
-            <Text style={[styles.stationText, currentStationId === station.id && styles.stationTextActive]}>{station.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <SelectModal 
+        label="2. Expected Train"
+        items={trainItems}
+        selectedValue={trainId}
+        onSelect={setTrainId}
+        placeholder="Select train time..."
+      />
 
-      <Text style={styles.label}>3. Where will you vacate the seat?</Text>
-      <View style={styles.grid}>
-        {displayStations.map(station => (
-          <TouchableOpacity 
-            key={`hand-${station.id}`} 
-            style={[styles.stationBtn, handoffStationId === station.id && styles.stationBtnActive]}
-            onPress={() => setHandoffStationId(station.id)}
-          >
-            <Text style={[styles.stationText, handoffStationId === station.id && styles.stationTextActive]}>{station.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <SelectModal 
+        label="3. Where are you now?"
+        items={stationItems}
+        selectedValue={currentStationId}
+        onSelect={setCurrentStationId}
+        placeholder="Select current station..."
+      />
+
+      <SelectModal 
+        label="4. Where will you vacate the seat?"
+        items={stationItems}
+        selectedValue={handoffStationId}
+        onSelect={setHandoffStationId}
+        placeholder="Select handoff station..."
+      />
 
       {ENABLE_PAYMENTS && (
-        <>
-          <Text style={styles.label}>4. Requested Amount (₹)</Text>
+        <View style={styles.priceContainer}>
+          <Text style={styles.label}>5. Requested Amount (₹)</Text>
           <TextInput 
             style={styles.input}
             keyboardType="number-pad"
@@ -99,7 +116,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
             value={price}
             onChangeText={setPrice}
           />
-        </>
+        </View>
       )}
 
       <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
@@ -112,8 +129,8 @@ export default function OfferSeatScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 20 },
-  label: { fontSize: 16, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#333' },
-  buttonRow: { flexDirection: 'row', gap: 10 },
+  label: { fontSize: 16, fontWeight: 'bold', marginTop: 10, marginBottom: 10, color: '#333' },
+  buttonRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   toggleBtn: { 
     flex: 1, padding: 15, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, alignItems: 'center' 
   },
@@ -121,15 +138,9 @@ const styles = StyleSheet.create({
   toggleText: { fontWeight: 'bold', color: '#555' },
   toggleTextActive: { color: '#fff' },
   smallText: { fontSize: 10, color: '#888', marginTop: 4, textAlign: 'center' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  stationBtn: { 
-    paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: '#ccc', borderRadius: 16 
-  },
-  stationBtnActive: { backgroundColor: '#0056b3', borderColor: '#0056b3' },
-  stationText: { color: '#333' },
-  stationTextActive: { color: '#fff' },
+  priceContainer: { marginTop: 10 },
   submitBtn: { 
-    backgroundColor: '#28a745', padding: 18, borderRadius: 10, alignItems: 'center', marginTop: 40 
+    backgroundColor: '#28a745', padding: 18, borderRadius: 10, alignItems: 'center', marginTop: 30 
   },
   submitBtnText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 15, fontSize: 16 }

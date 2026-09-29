@@ -8,7 +8,7 @@ interface AppState {
   matches: Match[];
   
   // Actions
-  offerSeat: (direction: Direction, currentStationId: string, handoffStationId: string, price?: number) => void;
+  offerSeat: (direction: Direction, currentStationId: string, handoffStationId: string, price?: number, trainId?: string) => void;
   requestSeat: (opportunityId: string, seekerId: string) => void;
   acceptMatch: (matchId: string) => void;
   rejectMatch: (matchId: string) => void;
@@ -58,7 +58,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   opportunities: SEED_OPPORTUNITIES,
   matches: [],
   
-  offerSeat: (direction, currentStationId, handoffStationId, price) => set((state) => {
+  offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => set((state) => {
     const newOpp: SeatOpportunity = {
       id: Math.random().toString(36).substring(7),
       giverId: state.currentUser.id,
@@ -69,6 +69,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       createdAt: Date.now(),
       expectedTimeMins: Math.floor(Math.random() * 15) + 5, // Mock timing
       price,
+      trainId,
     };
     return { opportunities: [...state.opportunities, newOpp] };
   }),
