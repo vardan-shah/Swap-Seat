@@ -25,26 +25,41 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const t = translations[lang];
 
   const handleSubmit = () => {
+    const showAlert = (title: string, msg: string) => {
+      if (typeof window !== 'undefined' && window.alert) {
+        window.alert(title + ': ' + msg);
+      } else {
+        Alert.alert(title, msg);
+      }
+    };
+
     if (!currentStationId || !handoffStationId || !trainId) {
-      Alert.alert('Error', 'Please select a train and both stations.');
+      showAlert('Error', 'Please select a train and both stations.');
       return;
     }
     if (currentStationId === handoffStationId) {
-      Alert.alert('Error', 'Current and handoff stations cannot be the same.');
+      showAlert('Error', 'Current and handoff stations cannot be the same.');
       return;
     }
     
     // Validate handoff is actually after current based on direction
     if (!isStationAfter(handoffStationId, currentStationId, direction)) {
-      Alert.alert('Error', 'Handoff station must be AFTER your current station in the chosen direction.');
+      showAlert('Error', 'Handoff station must be AFTER your current station in the chosen direction.');
       return;
     }
     
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
     offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
-    Alert.alert('Success', 'Your seat opportunity is now active!', [
-      { text: 'OK', onPress: () => navigation.goBack() }
-    ]);
+    
+    // On Web, sometimes React Native's Alert with buttons fails silently
+    if (typeof window !== 'undefined' && window.alert) {
+      window.alert('Success: Your seat opportunity is now active!');
+      navigation.goBack();
+    } else {
+      Alert.alert('Success', 'Your seat opportunity is now active!', [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
+    }
   };
 
   const stationItems = useMemo(() => {
