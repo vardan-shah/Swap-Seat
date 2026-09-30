@@ -8,6 +8,8 @@ import { getStationById, ENABLE_PAYMENTS } from '../data/stations';
 import { getTrainLabel } from '../data/timetable';
 import { translations } from '../i18n';
 
+import { notify } from '../utils/dialog';
+
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'OpportunityList'>;
   route: RouteProp<RootStackParamList, 'OpportunityList'>;
@@ -15,23 +17,27 @@ type Props = {
 
 export default function OpportunityListScreen({ navigation, route }: Props) {
   const { currentStationId, destinationStationId, direction } = route.params;
-  const { currentUser, getCompatibleOpportunities, requestSeat, getActiveMatchForUser, language } = useAppStore();
+  const { currentUser, getCompatibleOpportunities, requestSeat, getActiveMatchesForUser, language } = useAppStore();
   const t = translations[language];
   
   const opportunities = getCompatibleOpportunities(currentStationId, destinationStationId, direction);
 
-  const handleRequest = (oppId: string) => {
+  const handleRequest = async (oppId: string) => {
     // Check if user already has active match
-    const existingMatch = getActiveMatchForUser(currentUser.id);
-    if (existingMatch) {
-      Alert.alert('Error', 'You already have an active match or request.');
+    const existingMatches = getActiveMatchesForUser(currentUser.id);
+    if (existingMatches.length > 0) {
+      await notify('Error', 'You already have an active match or request.');
       return;
     }
 
-    requestSeat(oppId, currentUser.id);
-    Alert.alert('Requested', 'Your request has been sent. Wait for the giver to accept.', [
-      { text: 'OK', onPress: () => navigation.navigate('Home') }
-    ]);
+    const success = requestSeat(oppId, currentUser.id);
+    if (!success) {
+      await notify('Error', 'Could not request this seat. It might be taken or expired.');
+      return;
+    }
+    
+    await notify('Requested', 'Your request has been sent. Wait for the giver to accept.');
+    navigation.popToTop();
   };
 
   const renderItem = ({ item }: { item: any }) => {

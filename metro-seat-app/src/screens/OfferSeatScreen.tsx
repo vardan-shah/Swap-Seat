@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { STATIONS, ENABLE_PAYMENTS, isStationAfter } from '../data/stations';
@@ -24,47 +25,31 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const lang = useAppStore(state => state.language);
   const t = translations[lang];
 
-  const handleSubmit = () => {
-    const showAlert = (title: string, msg: string) => {
-      if (typeof window !== 'undefined' && window.alert) {
-        window.alert(title + ': ' + msg);
-      } else {
-        Alert.alert(title, msg);
-      }
-    };
-
+  const handleSubmit = async () => {
     if (!currentStationId || !handoffStationId || !trainId) {
-      showAlert('Error', 'Please select a train and both stations.');
+      await notify('Error', 'Please select a train and both stations.');
       return;
     }
     if (currentStationId === handoffStationId) {
-      showAlert('Error', 'Current and handoff stations cannot be the same.');
+      await notify('Error', 'Current and handoff stations cannot be the same.');
       return;
     }
     
     if (ENABLE_PAYMENTS && !price.trim()) {
-      showAlert('Error', 'Please enter a requested amount.');
+      await notify('Error', 'Please enter a requested amount.');
       return;
     }
     
-    // Validate handoff is actually after current based on direction
     if (!isStationAfter(handoffStationId, currentStationId, direction)) {
-      showAlert('Error', 'Handoff station must be AFTER your current station in the chosen direction.');
+      await notify('Error', 'Handoff station must be AFTER your current station in the chosen direction.');
       return;
     }
     
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
     offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
     
-    // On Web, sometimes React Native's Alert with buttons fails silently
-    if (typeof window !== 'undefined' && window.alert) {
-      window.alert('Success: Your seat opportunity is now active!');
-      navigation.goBack();
-    } else {
-      Alert.alert('Success', 'Your seat opportunity is now active!', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
-    }
+    await notify('Success', 'Your seat opportunity is now active!');
+    navigation.goBack();
   };
 
   const stationItems = useMemo(() => {

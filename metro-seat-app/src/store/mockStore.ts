@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SeatOpportunity, Match, User, Direction } from '../types';
+import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
 import { STATIONS, isStationAfter, getStationById } from '../data/stations';
 import { Language } from '../i18n';
 
@@ -10,7 +10,7 @@ interface AppState {
   
   // Auth
   isAuthenticated: boolean;
-  login: (phone: string) => void;
+  login: (name: string) => void;
   logout: () => void;
   
   // User Profile
@@ -26,7 +26,7 @@ interface AppState {
   
   // Actions
   offerSeat: (direction: Direction, currentStationId: string, handoffStationId: string, price?: number, trainId?: string) => void;
-  requestSeat: (opportunityId: string, seekerId: string) => void;
+  requestSeat: (opportunityId: string, seekerId: string) => boolean;
   transition: (matchId: string, actorId: string, to: import('../types').MatchStatus) => boolean;
   acceptMatch: (matchId: string) => boolean;
   rejectMatch: (matchId: string) => boolean;
@@ -36,7 +36,7 @@ interface AppState {
   
   // Queries
   getCompatibleOpportunities: (currentStationId: string, destinationStationId: string, direction: Direction) => SeatOpportunity[];
-  getActiveMatchForUser: (userId: string) => Match | undefined;
+  getActiveMatchesForUser: (userId: string) => Match[];
   getMyOpportunity: (userId: string) => SeatOpportunity | undefined;
 }
 
@@ -47,6 +47,12 @@ const MOCK_USER: User = {
   reputation: 4.8,
 };
 
+const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
+  PENDING:   ['ACCEPTED', 'REJECTED', 'CANCELLED'],
+  ACCEPTED:  ['COMPLETED', 'CANCELLED'],
+  REJECTED:  [], COMPLETED: [], CANCELLED: [],
+};
+
 export const useAppStore = create<AppState>((set, get) => ({
   // Config
   language: 'en',
@@ -54,11 +60,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   
   // Auth
   isAuthenticated: false,
-  login: (phone) => set({ 
+  login: (name: string) => set({ 
     isAuthenticated: true, 
-    currentUser: { id: 'u_me', displayName: phone || 'Me', reputation: 5.0 } 
+    currentUser: { id: 'u_me', displayName: name, reputation: 0 } 
   }),
-  logout: () => set({ isAuthenticated: false }),
+  logout: () => set({ 
+    isAuthenticated: false,
+    currentUser: MOCK_USER,
+    upiId: null,
+    upiQrUri: null,
+    opportunities: [],
+    matches: []
+  }),
   
   // User Profile
   currentUser: MOCK_USER,
@@ -87,30 +100,35 @@ export const useAppStore = create<AppState>((set, get) => ({
     return { opportunities: [...state.opportunities, newOpp] };
   }),
 
-  requestSeat: (opportunityId, seekerId) => set((state) => {
-    const newMatch: Match = {
-      id: Math.random().toString(36).substring(7),
-      opportunityId,
-      seekerId,
-      giverId: state.opportunities.find(o => o.id === opportunityId)?.giverId || '',
-      status: 'PENDING',
-      createdAt: Date.now(),
-    };
-    
-    return {
-      matches: [...state.matches, newMatch]
-    };
-  }),
+  requestSeat: (opportunityId, seekerId) => {
+    let success = false;
+    set((state) => {
+      const opp = state.opportunities.find(o => o.id === opportunityId);
+      if (!opp || opp.status !== 'ACTIVE' || opp.giverId === seekerId) return state;
+      
+      const existingPending = state.matches.find(m => 
+        m.opportunityId === opportunityId && m.seekerId === seekerId && m.status === 'PENDING'
+      );
+      if (existingPending) return state;
+
+      success = true;
+      const newMatch: Match = {
+        id: Math.random().toString(36).substring(7),
+        opportunityId,
+        seekerId,
+        giverId: opp.giverId,
+        status: 'PENDING',
+        createdAt: Date.now(),
+      };
+      
+      return { matches: [...state.matches, newMatch] };
+    });
+    return success;
+  },
 
   transition: (matchId: string, actorId: string, to: MatchStatus): boolean => {
     const state = get();
     const m = state.matches.find(x => x.id === matchId);
-    
-    const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
-      PENDING:   ['ACCEPTED', 'REJECTED', 'CANCELLED'],
-      ACCEPTED:  ['COMPLETED', 'CANCELLED'],
-      REJECTED:  [], COMPLETED: [], CANCELLED: [],
-    };
     
     if (!m || !TRANSITIONS[m.status].includes(to)) return false;
 
@@ -170,9 +188,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   },
 
-  getActiveMatchForUser: (userId) => {
+  getActiveMatchesForUser: (userId) => {
     const state = get();
-    return state.matches.find(m => 
+    return state.matches.filter(m => 
       (m.seekerId === userId || m.giverId === userId) && 
       (m.status === 'PENDING' || m.status === 'ACCEPTED')
     );

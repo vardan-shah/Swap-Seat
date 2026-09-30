@@ -4,6 +4,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAppStore } from '../../store/mockStore';
 import { translations } from '../../i18n';
 
+import { notify } from '../../utils/dialog';
+
 export default function ProfileScreen() {
   const lang = useAppStore(state => state.language);
   const t = translations[lang];
@@ -18,13 +20,9 @@ export default function ProfileScreen() {
 
   const [tempUpiId, setTempUpiId] = useState(upiId || '');
 
-  const saveUpi = () => {
+  const saveUpi = async () => {
     setUpiId(tempUpiId);
-    if (typeof window !== 'undefined' && window.alert) {
-      window.alert('Saved: UPI ID updated successfully.');
-    } else {
-      Alert.alert('Saved', 'UPI ID updated successfully.');
-    }
+    await notify('Saved', 'UPI ID updated successfully.');
   };
   
   const pickImage = async () => {

@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
 import { getStationById } from '../data/stations';
+import { notify } from '../utils/dialog';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'ActiveMatch'>;
@@ -26,28 +27,22 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
   const isGiver = match.giverId === currentUser.id;
   const handoffStation = getStationById(opp?.handoffStationId || '');
 
-  const handleComplete = () => {
-    completeMatch(match.id);
-    if (typeof window !== 'undefined' && window.alert) {
-      window.alert('Success: Handoff completed!');
-      navigation.popToTop();
-    } else {
-      Alert.alert('Success', 'Handoff completed!', [
-        { text: 'OK', onPress: () => navigation.popToTop() }
-      ]);
+  const handleComplete = async () => {
+    if (!completeMatch(match.id)) {
+      await notify('Not allowed', 'Only the seat holder can confirm the handoff.');
+      return;
     }
+    await notify('Success', 'Handoff completed!');
+    navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
   };
 
-  const handleCancel = () => {
-    cancelMatch(match.id);
-    if (typeof window !== 'undefined' && window.alert) {
-      window.alert('Cancelled: Handoff cancelled.');
-      navigation.popToTop();
-    } else {
-      Alert.alert('Cancelled', 'Handoff cancelled.', [
-        { text: 'OK', onPress: () => navigation.popToTop() }
-      ]);
+  const handleCancel = async () => {
+    if (!cancelMatch(match.id)) {
+      await notify('Error', 'Unable to cancel this handoff.');
+      return;
     }
+    await notify('Cancelled', 'Handoff cancelled.');
+    navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
   };
 
   return (
@@ -93,9 +88,15 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
 
         {match.status === 'ACCEPTED' && (
           <View style={styles.actionRow}>
-            <TouchableOpacity style={[styles.btn, styles.acceptBtn]} onPress={handleComplete}>
-              <Text style={styles.btnText}>Confirm Handoff</Text>
-            </TouchableOpacity>
+            {isGiver ? (
+              <TouchableOpacity style={[styles.btn, styles.acceptBtn]} onPress={handleComplete}>
+                <Text style={styles.btnText}>Confirm Handoff</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={[styles.btn, styles.disabledBtn]}>
+                <Text style={[styles.btnText, styles.disabledBtnText]}>Waiting for Confirm</Text>
+              </View>
+            )}
             <TouchableOpacity style={[styles.btn, styles.rejectBtn]} onPress={handleCancel}>
               <Text style={styles.btnText}>Cancel</Text>
             </TouchableOpacity>
@@ -121,6 +122,8 @@ const styles = StyleSheet.create({
   btn: { flex: 1, padding: 15, borderRadius: 8, alignItems: 'center' },
   acceptBtn: { backgroundColor: '#28a745' },
   rejectBtn: { backgroundColor: '#dc3545' },
+  disabledBtn: { backgroundColor: '#e9ecef', borderWidth: 1, borderColor: '#ccc' },
+  disabledBtnText: { color: '#6c757d' },
   btnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   waitText: { textAlign: 'center', color: '#666', fontStyle: 'italic', marginTop: 10 }
 });

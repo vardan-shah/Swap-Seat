@@ -10,15 +10,22 @@ type Props = {
 };
 
 export default function HomeScreen({ navigation }: Props) {
-  const { currentUser, getActiveMatchForUser, getMyOpportunity, language } = useAppStore();
+  const language = useAppStore(s => s.language);
+  const currentUser = useAppStore(s => s.currentUser);
   const t = translations[language];
   
-  const activeMatch = getActiveMatchForUser(currentUser.id);
-  const myOpportunity = getMyOpportunity(currentUser.id);
-
-  useEffect(() => {
-    // If the user has an active match, we can redirect or show it prominently.
-  }, [activeMatch, navigation]);
+  const activeMatches = useAppStore(s => 
+    s.matches.filter(m => 
+      (m.giverId === currentUser.id || m.seekerId === currentUser.id) && 
+      (m.status === 'PENDING' || m.status === 'ACCEPTED')
+    )
+  );
+  
+  const myOpportunity = useAppStore(s => 
+    s.opportunities.find(o => 
+      o.giverId === currentUser.id && (o.status === 'ACTIVE' || o.status === 'MATCHED')
+    )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -28,15 +35,20 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={styles.subtitle}>Ahmedabad-Gandhinagar Metro Phase 2</Text>
         </View>
 
-        {activeMatch ? (
+        {activeMatches.length > 0 ? (
           <View style={styles.activeCard}>
-            <Text style={styles.activeCardTitle}>You have an active handoff!</Text>
-            <TouchableOpacity 
-              style={styles.primaryButton}
-              onPress={() => navigation.navigate('ActiveMatch', { matchId: activeMatch.id })}
-            >
-              <Text style={styles.buttonText}>View Active Match</Text>
-            </TouchableOpacity>
+            <Text style={styles.activeCardTitle}>
+              {activeMatches.length === 1 ? 'You have an active handoff!' : `You have ${activeMatches.length} active handoffs!`}
+            </Text>
+            {activeMatches.map(match => (
+              <TouchableOpacity 
+                key={match.id}
+                style={[styles.primaryButton, { marginTop: 10 }]}
+                onPress={() => navigation.navigate('ActiveMatch', { matchId: match.id })}
+              >
+                <Text style={styles.buttonText}>View Match ({match.status})</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         ) : myOpportunity ? (
           <View style={styles.activeCard}>
@@ -46,13 +58,10 @@ export default function HomeScreen({ navigation }: Props) {
             
             <TouchableOpacity 
               style={[styles.primaryButton, { marginTop: 20, backgroundColor: '#0056b3' }]}
-              onPress={() => {
+              onPress={async () => {
                 useAppStore.getState().requestSeat(myOpportunity.id, 'mock_seeker_1');
-                if (typeof window !== 'undefined' && window.alert) {
-                  window.alert('Simulation: A rider just requested your seat!');
-                } else {
-                  Alert.alert('Simulation', 'A rider just requested your seat!');
-                }
+                const { notify } = require('../utils/dialog');
+                await notify('Simulation', 'A rider just requested your seat!');
               }}
             >
               <Text style={styles.buttonText}>Simulate Rider Request</Text>
