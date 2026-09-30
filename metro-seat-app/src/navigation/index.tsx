@@ -14,6 +14,7 @@ import OpportunityListScreen from '../screens/OpportunityListScreen';
 import ActiveMatchScreen from '../screens/ActiveMatchScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import TimetableScreen from '../screens/timetable/TimetableScreen';
+import AboutScreen from '../screens/about/AboutScreen';
 import { Direction } from '../types';
 
 export type RootStackParamList = {
@@ -32,6 +33,7 @@ export type TabParamList = {
   Home: undefined;
   Timetable: undefined;
   Profile: undefined;
+  About: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -58,6 +60,11 @@ function TabNavigator() {
         name="Profile" 
         component={ProfileScreen} 
         options={{ tabBarLabel: t.profile, tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
+      />
+      <Tab.Screen 
+        name="About" 
+        component={AboutScreen} 
+        options={{ tabBarLabel: 'About', tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
       />
     </Tab.Navigator>
   );

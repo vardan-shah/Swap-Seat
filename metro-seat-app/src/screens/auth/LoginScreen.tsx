@@ -1,15 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { useAppStore } from '../../store/mockStore';
-import { translations, Language } from '../../i18n';
+import { translations } from '../../i18n';
 
 export default function LoginScreen() {
+  const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+  
   const login = useAppStore(state => state.login);
   const lang = useAppStore(state => state.language);
   const setLang = useAppStore(state => state.setLanguage);
   
   const t = translations[lang];
+
+  const handleSendOtp = () => {
+    if (name.trim().length < 2) {
+      Alert.alert('Invalid Name', 'Please enter your full name.');
+      return;
+    }
+    if (phone.length !== 10) {
+      Alert.alert('Invalid Phone', 'Please enter a valid 10-digit phone number.');
+      return;
+    }
+    setOtpSent(true);
+    Alert.alert('OTP Sent', 'For this demo, please enter 1234 as your OTP.');
+  };
+
+  const handleVerifyOtp = () => {
+    if (otp === '1234') {
+      login(name.trim());
+    } else {
+      Alert.alert('Invalid OTP', 'Please enter the correct OTP (1234).');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,23 +54,59 @@ export default function LoginScreen() {
         <Text style={styles.title}>{t.welcome}</Text>
         <Text style={styles.subtitle}>{t.login}</Text>
         
-        <Text style={styles.label}>{t.phone}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder={t.enterPhone}
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-          maxLength={10}
-        />
-        
-        <TouchableOpacity 
-          style={[styles.btn, phone.length === 10 ? styles.btnActive : styles.btnDisabled]}
-          disabled={phone.length < 10}
-          onPress={() => login(phone)}
-        >
-          <Text style={styles.btnText}>{t.continue}</Text>
-        </TouchableOpacity>
+        {!otpSent ? (
+          <>
+            <Text style={styles.label}>Full Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your name"
+              value={name}
+              onChangeText={setName}
+            />
+
+            <Text style={styles.label}>{t.phone}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={t.enterPhone}
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+              maxLength={10}
+            />
+            
+            <TouchableOpacity 
+              style={[styles.btn, (phone.length === 10 && name.length >= 2) ? styles.btnActive : styles.btnDisabled]}
+              disabled={phone.length < 10 || name.length < 2}
+              onPress={handleSendOtp}
+            >
+              <Text style={styles.btnText}>Send OTP</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <Text style={styles.label}>Enter OTP</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter 4-digit OTP (1234)"
+              keyboardType="number-pad"
+              value={otp}
+              onChangeText={setOtp}
+              maxLength={4}
+            />
+            
+            <TouchableOpacity 
+              style={[styles.btn, otp.length === 4 ? styles.btnActive : styles.btnDisabled]}
+              disabled={otp.length < 4}
+              onPress={handleVerifyOtp}
+            >
+              <Text style={styles.btnText}>Verify & Login</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={{ marginTop: 20, alignItems: 'center' }} onPress={() => setOtpSent(false)}>
+              <Text style={{ color: '#0056b3', fontWeight: 'bold' }}>Edit Phone Number</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </SafeAreaView>
   );
