@@ -20,7 +20,11 @@ export default function ProfileScreen() {
 
   const saveUpi = () => {
     setUpiId(tempUpiId);
-    Alert.alert('Saved', 'UPI ID updated successfully.');
+    if (typeof window !== 'undefined' && window.alert) {
+      window.alert('Saved: UPI ID updated successfully.');
+    } else {
+      Alert.alert('Saved', 'UPI ID updated successfully.');
+    }
   };
   
   const pickImage = async () => {

@@ -43,6 +43,20 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.activeCardTitle}>You are offering a seat.</Text>
             <Text style={styles.statusText}>Status: {myOpportunity.status}</Text>
             <Text style={styles.instructionText}>Waiting for someone to request it...</Text>
+            
+            <TouchableOpacity 
+              style={[styles.primaryButton, { marginTop: 20, backgroundColor: '#0056b3' }]}
+              onPress={() => {
+                useAppStore.getState().requestSeat(myOpportunity.id, 'mock_seeker_1');
+                if (typeof window !== 'undefined' && window.alert) {
+                  window.alert('Simulation: A rider just requested your seat!');
+                } else {
+                  Alert.alert('Simulation', 'A rider just requested your seat!');
+                }
+              }}
+            >
+              <Text style={styles.buttonText}>Simulate Rider Request</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.actionContainer}>
