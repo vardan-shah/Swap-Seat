@@ -26,13 +26,6 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={styles.header}>
           <Text style={styles.welcome}>Hello, Commuter</Text>
           <Text style={styles.subtitle}>Ahmedabad-Gandhinagar Metro Phase 2</Text>
-          
-          <View style={styles.disclaimerBox}>
-            <Text style={styles.disclaimerText}>
-              Note: This is a free courtesy network. We do NOT sell tickets or guarantee seats. 
-              Please yield priority seats to elderly or disabled passengers.
-            </Text>
-          </View>
         </View>
 
         {activeMatch ? (
@@ -80,15 +73,6 @@ const styles = StyleSheet.create({
   header: { marginBottom: 30 },
   welcome: { fontSize: 24, fontWeight: 'bold', color: '#333' },
   subtitle: { fontSize: 14, color: '#666', marginTop: 4 },
-  disclaimerBox: { 
-    marginTop: 16, 
-    padding: 12, 
-    backgroundColor: '#fff3cd', 
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ffe69c'
-  },
-  disclaimerText: { fontSize: 12, color: '#664d03', lineHeight: 18 },
   actionContainer: { marginTop: 10 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#333' },
   largeButton: {
