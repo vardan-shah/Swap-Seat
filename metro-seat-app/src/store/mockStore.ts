@@ -27,9 +27,11 @@ interface AppState {
   // Actions
   offerSeat: (direction: Direction, currentStationId: string, handoffStationId: string, price?: number, trainId?: string) => void;
   requestSeat: (opportunityId: string, seekerId: string) => void;
-  acceptMatch: (matchId: string) => void;
-  rejectMatch: (matchId: string) => void;
-  completeMatch: (matchId: string) => void;
+  transition: (matchId: string, actorId: string, to: import('../types').MatchStatus) => boolean;
+  acceptMatch: (matchId: string) => boolean;
+  rejectMatch: (matchId: string) => boolean;
+  cancelMatch: (matchId: string) => boolean;
+  completeMatch: (matchId: string) => boolean;
   expireOpportunity: (oppId: string) => void;
   
   // Queries
@@ -100,30 +102,49 @@ export const useAppStore = create<AppState>((set, get) => ({
     };
   }),
 
-  acceptMatch: (matchId) => set((state) => {
-    const match = state.matches.find(m => m.id === matchId);
-    if (!match) return state;
-
-    return {
-      matches: state.matches.map(m => m.id === matchId ? { ...m, status: 'ACCEPTED' } : m),
-      opportunities: state.opportunities.map(o => o.id === match.opportunityId ? { ...o, status: 'MATCHED' } : o)
+  transition: (matchId: string, actorId: string, to: MatchStatus): boolean => {
+    const state = get();
+    const m = state.matches.find(x => x.id === matchId);
+    
+    const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
+      PENDING:   ['ACCEPTED', 'REJECTED', 'CANCELLED'],
+      ACCEPTED:  ['COMPLETED', 'CANCELLED'],
+      REJECTED:  [], COMPLETED: [], CANCELLED: [],
     };
-  }),
+    
+    if (!m || !TRANSITIONS[m.status].includes(to)) return false;
 
-  rejectMatch: (matchId) => set((state) => {
-    return {
-      matches: state.matches.map(m => m.id === matchId ? { ...m, status: 'REJECTED' } : m),
-    };
-  }),
+    const isGiver = actorId === m.giverId;
+    const isSeeker = actorId === m.seekerId;
+    
+    const allowed =
+      to === 'ACCEPTED' || to === 'REJECTED' ? isGiver :
+      to === 'CANCELLED' ? isGiver || isSeeker :
+      isGiver; // COMPLETED: decided by giver for MVP
+    
+    if (!allowed) return false;
 
-  completeMatch: (matchId) => set((state) => {
-    const match = state.matches.find(m => m.id === matchId);
-    if (!match) return state;
-    return {
-      matches: state.matches.map(m => m.id === matchId ? { ...m, status: 'COMPLETED' } : m),
-      opportunities: state.opportunities.map(o => o.id === match.opportunityId ? { ...o, status: 'COMPLETED' } : o)
-    };
-  }),
+    set(s => ({
+      matches: s.matches.map(x =>
+        x.id === matchId ? { ...x, status: to }
+        : to === 'ACCEPTED' && x.opportunityId === m.opportunityId && x.status === 'PENDING'
+          ? { ...x, status: 'REJECTED' } : x),
+      opportunities: s.opportunities.map(o => {
+        if (o.id !== m.opportunityId) return o;
+        if (to === 'ACCEPTED')  return { ...o, status: 'MATCHED' };
+        if (to === 'COMPLETED') return { ...o, status: 'COMPLETED' };
+        if (to === 'CANCELLED' && m.status === 'ACCEPTED')
+          return { ...o, status: 'ACTIVE' }; // reopen the seat
+        return o;
+      }),
+    }));
+    return true;
+  },
+
+  acceptMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'ACCEPTED'),
+  rejectMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'REJECTED'),
+  cancelMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'CANCELLED'),
+  completeMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'COMPLETED'),
 
   expireOpportunity: (oppId) => set((state) => {
     return {

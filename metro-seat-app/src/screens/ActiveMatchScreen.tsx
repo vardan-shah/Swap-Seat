@@ -13,7 +13,7 @@ type Props = {
 
 export default function ActiveMatchScreen({ navigation, route }: Props) {
   const { matchId } = route.params;
-  const { matches, opportunities, currentUser, acceptMatch, rejectMatch, completeMatch } = useAppStore();
+  const { matches, opportunities, currentUser, acceptMatch, rejectMatch, cancelMatch, completeMatch } = useAppStore();
   
   const match = matches.find(m => m.id === matchId);
   if (!match) {
@@ -28,16 +28,26 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
 
   const handleComplete = () => {
     completeMatch(match.id);
-    Alert.alert('Success', 'Handoff completed!', [
-      { text: 'OK', onPress: () => navigation.navigate('Home') }
-    ]);
+    if (typeof window !== 'undefined' && window.alert) {
+      window.alert('Success: Handoff completed!');
+      navigation.popToTop();
+    } else {
+      Alert.alert('Success', 'Handoff completed!', [
+        { text: 'OK', onPress: () => navigation.popToTop() }
+      ]);
+    }
   };
 
   const handleCancel = () => {
-    rejectMatch(match.id); // Re-using reject logic for cancel in MVP
-    Alert.alert('Cancelled', 'Handoff cancelled.', [
-      { text: 'OK', onPress: () => navigation.navigate('Home') }
-    ]);
+    cancelMatch(match.id);
+    if (typeof window !== 'undefined' && window.alert) {
+      window.alert('Cancelled: Handoff cancelled.');
+      navigation.popToTop();
+    } else {
+      Alert.alert('Cancelled', 'Handoff cancelled.', [
+        { text: 'OK', onPress: () => navigation.popToTop() }
+      ]);
+    }
   };
 
   return (

@@ -135,9 +135,10 @@ export default function OfferSeatScreen({ navigation }: Props) {
           <TextInput 
             style={styles.input}
             keyboardType="number-pad"
+            maxLength={3}
             placeholder="e.g. 20"
             value={price}
-            onChangeText={setPrice}
+            onChangeText={t => setPrice(t.replace(/\D/g, ''))}
           />
         </View>
       )}
