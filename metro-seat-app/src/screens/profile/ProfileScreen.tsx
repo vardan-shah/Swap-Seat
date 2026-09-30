@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import { useAppStore } from '../../store/mockStore';
 import { translations } from '../../i18n';
 
@@ -9,23 +8,16 @@ export default function ProfileScreen() {
   const t = translations[lang];
   
   const user = useAppStore(state => state.currentUser);
-  const upiQrUri = useAppStore(state => state.upiQrUri);
-  const setUpiQrUri = useAppStore(state => state.setUpiQrUri);
+  const upiId = useAppStore(state => state.upiId);
+  const setUpiId = useAppStore(state => state.setUpiId);
   const logout = useAppStore(state => state.logout);
   const setLanguage = useAppStore(state => state.setLanguage);
 
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+  const [tempUpiId, setTempUpiId] = useState(upiId || '');
 
-    if (!result.canceled) {
-      setUpiQrUri(result.assets[0].uri);
-    }
+  const saveUpi = () => {
+    setUpiId(tempUpiId);
+    Alert.alert('Saved', 'UPI ID updated successfully.');
   };
 
   return (
@@ -39,20 +31,19 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t.uploadQR}</Text>
+        <Text style={styles.sectionTitle}>Receive Payments (UPI)</Text>
         
-        {upiQrUri ? (
-          <View style={styles.qrContainer}>
-            <Image source={{ uri: upiQrUri }} style={styles.qrImage} />
-            <TouchableOpacity style={styles.btnSecondary} onPress={pickImage}>
-              <Text style={styles.btnSecondaryText}>Change QR Code</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.btnPrimary} onPress={pickImage}>
-            <Text style={styles.btnPrimaryText}>{t.uploadQR}</Text>
-          </TouchableOpacity>
-        )}
+        <TextInput 
+          style={styles.input}
+          placeholder="e.g. name@upi"
+          value={tempUpiId}
+          onChangeText={setTempUpiId}
+          autoCapitalize="none"
+        />
+        
+        <TouchableOpacity style={styles.btnPrimary} onPress={saveUpi}>
+          <Text style={styles.btnPrimaryText}>Save UPI ID</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
@@ -94,8 +85,7 @@ const styles = StyleSheet.create({
   btnSecondary: { backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8, alignItems: 'center', marginTop: 15 },
   btnSecondaryText: { color: '#333', fontWeight: '500', fontSize: 14 },
   
-  qrContainer: { alignItems: 'center' },
-  qrImage: { width: 200, height: 200, borderRadius: 8 },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 15, fontSize: 16, marginBottom: 15 },
   
   langRow: { flexDirection: 'row', gap: 15 },
   langBtn: { flex: 1, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#ccc', alignItems: 'center' },

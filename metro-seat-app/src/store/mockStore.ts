@@ -15,8 +15,8 @@ interface AppState {
   
   // User Profile
   currentUser: User;
-  upiQrUri: string | null;
-  setUpiQrUri: (uri: string | null) => void;
+  upiId: string | null;
+  setUpiId: (id: string | null) => void;
   
   // App Data
   opportunities: SeatOpportunity[];
@@ -43,31 +43,6 @@ const MOCK_USER: User = {
   reputation: 4.8,
 };
 
-// Seed opportunities
-const SEED_OPPORTUNITIES: SeatOpportunity[] = [
-  {
-    id: 'opp1',
-    giverId: 'u2',
-    direction: 'Northbound',
-    currentStationId: 'motera-stadium', // Motera
-    handoffStationId: 'gnlu', // GNLU
-    status: 'ACTIVE',
-    createdAt: Date.now(),
-    expectedTimeMins: 15,
-  },
-  {
-    id: 'opp2',
-    giverId: 'u3',
-    direction: 'Northbound',
-    currentStationId: 'narmada-canal', // Narmada
-    handoffStationId: 'sachivalaya', // Sachivalaya
-    status: 'ACTIVE',
-    createdAt: Date.now(),
-    expectedTimeMins: 20,
-    price: 30, // Mocked price for testing monetization
-  }
-];
-
 export const useAppStore = create<AppState>((set, get) => ({
   // Config
   language: 'en',
@@ -83,11 +58,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   
   // User Profile
   currentUser: MOCK_USER,
-  upiQrUri: null,
-  setUpiQrUri: (uri) => set({ upiQrUri: uri }),
+  upiId: null,
+  setUpiId: (id) => set({ upiId: id }),
   
   // App Data
-  opportunities: SEED_OPPORTUNITIES,
+  opportunities: [],
   matches: [],
   
   offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => set((state) => {
