@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
@@ -12,19 +12,21 @@ type Props = {
 export default function HomeScreen({ navigation }: Props) {
   const language = useAppStore(s => s.language);
   const currentUser = useAppStore(s => s.currentUser);
+  const matches = useAppStore(s => s.matches);
+  const opportunities = useAppStore(s => s.opportunities);
   const t = translations[language];
   
-  const activeMatches = useAppStore(s => 
-    s.matches.filter(m => 
+  const activeMatches = useMemo(() => 
+    matches.filter(m => 
       (m.giverId === currentUser.id || m.seekerId === currentUser.id) && 
       (m.status === 'PENDING' || m.status === 'ACCEPTED')
-    )
+    ), [matches, currentUser.id]
   );
   
-  const myOpportunity = useAppStore(s => 
-    s.opportunities.find(o => 
+  const myOpportunity = useMemo(() => 
+    opportunities.find(o => 
       o.giverId === currentUser.id && (o.status === 'ACTIVE' || o.status === 'MATCHED')
-    )
+    ), [opportunities, currentUser.id]
   );
 
   return (
@@ -59,9 +61,13 @@ export default function HomeScreen({ navigation }: Props) {
             <TouchableOpacity 
               style={[styles.primaryButton, { marginTop: 20, backgroundColor: '#0056b3' }]}
               onPress={async () => {
-                useAppStore.getState().requestSeat(myOpportunity.id, 'mock_seeker_1');
+                const success = useAppStore.getState().requestSeat(myOpportunity.id, 'mock_seeker_1');
                 const { notify } = require('../utils/dialog');
-                await notify('Simulation', 'A rider just requested your seat!');
+                if (success) {
+                  await notify('Simulation', 'A rider just requested your seat!');
+                } else {
+                  await notify('Error', 'Simulated rider has already requested this seat.');
+                }
               }}
             >
               <Text style={styles.buttonText}>Simulate Rider Request</Text>

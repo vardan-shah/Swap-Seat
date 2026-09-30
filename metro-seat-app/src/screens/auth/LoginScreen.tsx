@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useAppStore } from '../../store/mockStore';
 import { translations } from '../../i18n';
+import { notify } from '../../utils/dialog';
 
 export default function LoginScreen() {
   const [name, setName] = useState('');
@@ -15,24 +16,24 @@ export default function LoginScreen() {
   
   const t = translations[lang];
 
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     if (name.trim().length < 2) {
-      Alert.alert('Invalid Name', 'Please enter your full name.');
+      await notify('Invalid Name', 'Please enter your full name.');
       return;
     }
     if (phone.length !== 10) {
-      Alert.alert('Invalid Phone', 'Please enter a valid 10-digit phone number.');
+      await notify('Invalid Phone', 'Please enter a valid 10-digit phone number.');
       return;
     }
     setOtpSent(true);
-    Alert.alert('OTP Sent', 'For this demo, please enter 1234 as your OTP.');
+    await notify('OTP Sent', 'For this demo, please enter 1234 as your OTP.');
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     if (otp === '1234') {
       login(name.trim());
     } else {
-      Alert.alert('Invalid OTP', 'Please enter the correct OTP (1234).');
+      await notify('Invalid OTP', 'Please enter the correct OTP (1234).');
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { STATIONS, isStationAfter } from '../data/stations';
@@ -20,14 +21,14 @@ export default function FindSeatScreen({ navigation }: Props) {
   const lang = useAppStore(state => state.language);
   const t = translations[lang];
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!currentStationId || !destinationStationId) {
-      Alert.alert('Error', 'Please select both stations.');
+      await notify('Error', 'Please select both stations.');
       return;
     }
 
     if (!isStationAfter(destinationStationId, currentStationId, direction)) {
-      Alert.alert('Error', 'Destination must be AFTER your current station in the chosen direction.');
+      await notify('Error', 'Destination must be AFTER your current station in the chosen direction.');
       return;
     }
 
