@@ -17,6 +17,8 @@ interface AppState {
   currentUser: User;
   upiId: string | null;
   setUpiId: (id: string | null) => void;
+  upiQrUri: string | null;
+  setUpiQrUri: (uri: string | null) => void;
   
   // App Data
   opportunities: SeatOpportunity[];
@@ -60,6 +62,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentUser: MOCK_USER,
   upiId: null,
   setUpiId: (id) => set({ upiId: id }),
+  upiQrUri: null,
+  setUpiQrUri: (uri) => set({ upiQrUri: uri }),
   
   // App Data
   opportunities: [],
