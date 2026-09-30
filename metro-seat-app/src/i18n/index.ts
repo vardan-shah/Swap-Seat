@@ -27,6 +27,7 @@ export const translations = {
     noMatches: 'No active matches.',
     trustScore: 'Trust Score',
     requestHandoff: 'Request Handoff',
+    timetable: 'Official Timetable',
   },
   hi: {
     welcome: 'स्वैप सीट में आपका स्वागत है',
@@ -54,6 +55,7 @@ export const translations = {
     noMatches: 'कोई सक्रिय मैच नहीं.',
     trustScore: 'ट्रस्ट स्कोर',
     requestHandoff: 'हैंडऑफ का अनुरोध करें',
+    timetable: 'आधिकारिक समय सारिणी',
   },
   gu: {
     welcome: 'સ્વેપ સીટમાં તમારું સ્વાગત છે',
@@ -81,5 +83,6 @@ export const translations = {
     noMatches: 'કોઈ સક્રિય મેચ નથી.',
     trustScore: 'ટ્રસ્ટ સ્કોર',
     requestHandoff: 'હેન્ડઓફની વિનંતી કરો',
+    timetable: 'અધિકૃત સમયપત્રક',
   }
 };

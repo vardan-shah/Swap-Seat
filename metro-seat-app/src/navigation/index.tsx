@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAppStore } from '../store/mockStore';
+import { translations } from '../i18n';
 
 // Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -12,6 +13,7 @@ import FindSeatScreen from '../screens/FindSeatScreen';
 import OpportunityListScreen from '../screens/OpportunityListScreen';
 import ActiveMatchScreen from '../screens/ActiveMatchScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import TimetableScreen from '../screens/timetable/TimetableScreen';
 import { Direction } from '../types';
 
 export type RootStackParamList = {
@@ -28,6 +30,7 @@ export type AuthStackParamList = {
 
 export type TabParamList = {
   Home: undefined;
+  Timetable: undefined;
   Profile: undefined;
 };
 
@@ -36,17 +39,25 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 function TabNavigator() {
+  const lang = useAppStore(state => state.language);
+  const t = translations[lang];
+
   return (
     <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#FF8200' }}>
       <Tab.Screen 
         name="Home" 
         component={HomeScreen} 
-        options={{ tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
+        options={{ tabBarLabel: t.home, tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
+      />
+      <Tab.Screen 
+        name="Timetable" 
+        component={TimetableScreen} 
+        options={{ tabBarLabel: t.timetable, tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
       />
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen} 
-        options={{ tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
+        options={{ tabBarLabel: t.profile, tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
       />
     </Tab.Navigator>
   );
