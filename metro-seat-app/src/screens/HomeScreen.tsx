@@ -3,13 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Ale
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
+import { translations } from '../i18n';
 
 type Props = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Tabs'>;
 };
 
 export default function HomeScreen({ navigation }: Props) {
-  const { currentUser, getActiveMatchForUser, getMyOpportunity } = useAppStore();
+  const { currentUser, getActiveMatchForUser, getMyOpportunity, language } = useAppStore();
+  const t = translations[language];
+  
   const activeMatch = getActiveMatchForUser(currentUser.id);
   const myOpportunity = getMyOpportunity(currentUser.id);
 
@@ -50,22 +53,18 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         ) : (
           <View style={styles.actionContainer}>
-            <Text style={styles.sectionTitle}>What do you need?</Text>
-            
             <TouchableOpacity 
               style={styles.largeButton}
               onPress={() => navigation.navigate('FindSeat')}
             >
-              <Text style={styles.largeButtonTitle}>Find a Seat</Text>
-              <Text style={styles.largeButtonSub}>I'm standing and looking for a seat soon.</Text>
+              <Text style={styles.largeButtonTitle}>{t.findSeat}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.largeButton, styles.secondaryButton]}
               onPress={() => navigation.navigate('OfferSeat')}
             >
-              <Text style={styles.largeButtonTitle}>Offer My Seat</Text>
-              <Text style={styles.largeButtonSub}>I'm seated and getting off soon.</Text>
+              <Text style={styles.largeButtonTitle}>{t.offerSeat}</Text>
             </TouchableOpacity>
           </View>
         )}

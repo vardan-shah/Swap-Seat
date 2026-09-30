@@ -1,9 +1,24 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction } from '../types';
 import { STATIONS, isStationAfter, getStationById } from '../data/stations';
+import { Language } from '../i18n';
 
 interface AppState {
+  // Config
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  
+  // Auth
+  isAuthenticated: boolean;
+  login: (phone: string) => void;
+  logout: () => void;
+  
+  // User Profile
   currentUser: User;
+  upiQrUri: string | null;
+  setUpiQrUri: (uri: string | null) => void;
+  
+  // App Data
   opportunities: SeatOpportunity[];
   matches: Match[];
   
@@ -54,7 +69,24 @@ const SEED_OPPORTUNITIES: SeatOpportunity[] = [
 ];
 
 export const useAppStore = create<AppState>((set, get) => ({
+  // Config
+  language: 'en',
+  setLanguage: (lang) => set({ language: lang }),
+  
+  // Auth
+  isAuthenticated: false,
+  login: (phone) => set({ 
+    isAuthenticated: true, 
+    currentUser: { id: 'u_me', displayName: phone || 'Me', reputation: 5.0 } 
+  }),
+  logout: () => set({ isAuthenticated: false }),
+  
+  // User Profile
   currentUser: MOCK_USER,
+  upiQrUri: null,
+  setUpiQrUri: (uri) => set({ upiQrUri: uri }),
+  
+  // App Data
   opportunities: SEED_OPPORTUNITIES,
   matches: [],
   

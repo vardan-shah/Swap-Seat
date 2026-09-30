@@ -6,6 +6,7 @@ import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
 import { getStationById, ENABLE_PAYMENTS } from '../data/stations';
 import { getTrainLabel } from '../data/timetable';
+import { translations } from '../i18n';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'OpportunityList'>;
@@ -14,7 +15,8 @@ type Props = {
 
 export default function OpportunityListScreen({ navigation, route }: Props) {
   const { currentStationId, destinationStationId, direction } = route.params;
-  const { currentUser, getCompatibleOpportunities, requestSeat, getActiveMatchForUser } = useAppStore();
+  const { currentUser, getCompatibleOpportunities, requestSeat, getActiveMatchForUser, language } = useAppStore();
+  const t = translations[language];
   
   const opportunities = getCompatibleOpportunities(currentStationId, destinationStationId, direction);
 
@@ -41,16 +43,16 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
           <Text style={styles.timeText}>in ~{item.expectedTimeMins} mins</Text>
         </View>
         {item.trainId && (
-          <Text style={styles.trainText}>Train: {getTrainLabel(item.trainId)}</Text>
+          <Text style={styles.trainText}>{t.expectedTrain}: {getTrainLabel(item.trainId)}</Text>
         )}
-        <Text style={styles.giverText}>Trust Score: 4.8/5.0</Text>
+        <Text style={styles.giverText}>{t.trustScore}: 4.8/5.0</Text>
         
         {ENABLE_PAYMENTS && item.price !== undefined && (
-          <Text style={styles.priceText}>Amount: ₹{item.price}</Text>
+          <Text style={styles.priceText}>{t.amount.replace(' (₹)', '')}: ₹{item.price}</Text>
         )}
         
         <TouchableOpacity style={styles.requestBtn} onPress={() => handleRequest(item.id)}>
-          <Text style={styles.requestBtnText}>Request Handoff</Text>
+          <Text style={styles.requestBtnText}>{t.requestHandoff}</Text>
         </TouchableOpacity>
       </View>
     );

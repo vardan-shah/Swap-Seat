@@ -5,6 +5,8 @@ import { RootStackParamList } from '../navigation';
 import { STATIONS, isStationAfter } from '../data/stations';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
+import { useAppStore } from '../store/mockStore';
+import { translations } from '../i18n';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'FindSeat'>;
@@ -15,6 +17,9 @@ export default function FindSeatScreen({ navigation }: Props) {
   const [currentStationId, setCurrentStationId] = useState<string>('');
   const [destinationStationId, setDestinationStationId] = useState<string>('');
   
+  const lang = useAppStore(state => state.language);
+  const t = translations[lang];
+
   const handleSearch = () => {
     if (!currentStationId || !destinationStationId) {
       Alert.alert('Error', 'Please select both stations.');
@@ -48,7 +53,7 @@ export default function FindSeatScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.label}>1. Traveling Direction</Text>
+      <Text style={styles.label}>1. {t.travelingDir}</Text>
       <View style={styles.buttonRow}>
         <TouchableOpacity 
           style={[styles.toggleBtn, direction === 'Northbound' && styles.toggleBtnActive]}
@@ -68,23 +73,23 @@ export default function FindSeatScreen({ navigation }: Props) {
       </View>
 
       <SelectModal 
-        label="2. Where are you now?"
+        label={`2. ${t.whereAreYou}`}
         items={stationItems}
         selectedValue={currentStationId}
         onSelect={setCurrentStationId}
-        placeholder="Select current station..."
+        placeholder={t.whereAreYou}
       />
 
       <SelectModal 
-        label="3. What is your destination?"
+        label={`3. ${t.destStation}`}
         items={stationItems}
         selectedValue={destinationStationId}
         onSelect={setDestinationStationId}
-        placeholder="Select destination station..."
+        placeholder={t.destStation}
       />
 
       <TouchableOpacity style={styles.submitBtn} onPress={handleSearch}>
-        <Text style={styles.submitBtnText}>Find Available Seats</Text>
+        <Text style={styles.submitBtnText}>{t.findAvailable}</Text>
       </TouchableOpacity>
     </ScrollView>
   );

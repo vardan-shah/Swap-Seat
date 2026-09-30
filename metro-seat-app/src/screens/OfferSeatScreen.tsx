@@ -7,6 +7,7 @@ import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
 import { getTrainsByDirection } from '../data/timetable';
+import { translations } from '../i18n';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'OfferSeat'>;
@@ -20,6 +21,8 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const [price, setPrice] = useState<string>('');
   
   const offerSeat = useAppStore(state => state.offerSeat);
+  const lang = useAppStore(state => state.language);
+  const t = translations[lang];
 
   const handleSubmit = () => {
     if (!currentStationId || !handoffStationId || !trainId) {
@@ -63,7 +66,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.label}>1. Traveling Direction</Text>
+      <Text style={styles.label}>1. {t.travelingDir}</Text>
       <View style={styles.buttonRow}>
         <TouchableOpacity 
           style={[styles.toggleBtn, direction === 'Northbound' && styles.toggleBtnActive]}
@@ -83,32 +86,32 @@ export default function OfferSeatScreen({ navigation }: Props) {
       </View>
 
       <SelectModal 
-        label="2. Expected Train"
+        label={`2. ${t.expectedTrain}`}
         items={trainItems}
         selectedValue={trainId}
         onSelect={setTrainId}
-        placeholder="Select train time..."
+        placeholder={t.expectedTrain + "..."}
       />
 
       <SelectModal 
-        label="3. Where are you now?"
+        label={`3. ${t.whereAreYou}`}
         items={stationItems}
         selectedValue={currentStationId}
         onSelect={setCurrentStationId}
-        placeholder="Select current station..."
+        placeholder={t.whereAreYou}
       />
 
       <SelectModal 
-        label="4. Where will you vacate the seat?"
+        label={`4. ${t.whereVacate}`}
         items={stationItems}
         selectedValue={handoffStationId}
         onSelect={setHandoffStationId}
-        placeholder="Select handoff station..."
+        placeholder={t.whereVacate}
       />
 
       {ENABLE_PAYMENTS && (
         <View style={styles.priceContainer}>
-          <Text style={styles.label}>5. Requested Amount (₹)</Text>
+          <Text style={styles.label}>5. {t.amount}</Text>
           <TextInput 
             style={styles.input}
             keyboardType="number-pad"
@@ -120,7 +123,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
       )}
 
       <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-        <Text style={styles.submitBtnText}>Offer Seat Opportunity</Text>
+        <Text style={styles.submitBtnText}>{t.offerSeat}</Text>
       </TouchableOpacity>
       <View style={{height: 40}} />
     </ScrollView>

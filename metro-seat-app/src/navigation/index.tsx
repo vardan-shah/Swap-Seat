@@ -1,36 +1,78 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useAppStore } from '../store/mockStore';
 
+// Screens
+import LoginScreen from '../screens/auth/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import OfferSeatScreen from '../screens/OfferSeatScreen';
 import FindSeatScreen from '../screens/FindSeatScreen';
 import OpportunityListScreen from '../screens/OpportunityListScreen';
 import ActiveMatchScreen from '../screens/ActiveMatchScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import { Direction } from '../types';
 
 export type RootStackParamList = {
-  Home: undefined;
+  Tabs: undefined;
   OfferSeat: undefined;
   FindSeat: undefined;
-  OpportunityList: { currentStationId: string; destinationStationId: string; direction: 'Northbound' | 'Southbound' };
+  OpportunityList: { currentStationId: string; destinationStationId: string; direction: Direction };
   ActiveMatch: { matchId: string };
 };
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+export type AuthStackParamList = {
+  Login: undefined;
+};
 
-export default function AppNavigation() {
+export type TabParamList = {
+  Home: undefined;
+  Profile: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
+
+function TabNavigator() {
+  return (
+    <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#FF8200' }}>
+      <Tab.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        options={{ tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
+      />
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{ tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 16, paddingBottom: 10 } }} 
+      />
+    </Tab.Navigator>
+  );
+}
+
+export default function RootNavigator() {
+  const isAuthenticated = useAppStore(state => state.isAuthenticated);
+
+  if (!isAuthenticated) {
+    return (
+      <NavigationContainer>
+        <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+          <AuthStack.Screen name="Login" component={LoginScreen} />
+        </AuthStack.Navigator>
+      </NavigationContainer>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home" screenOptions={{
-        headerStyle: { backgroundColor: '#FF8200' }, // GMRC orange-ish
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}>
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Metro Seat Handoff' }} />
-        <Stack.Screen name="OfferSeat" component={OfferSeatScreen} options={{ title: 'Offer a Seat' }} />
-        <Stack.Screen name="FindSeat" component={FindSeatScreen} options={{ title: 'Find a Seat' }} />
-        <Stack.Screen name="OpportunityList" component={OpportunityListScreen} options={{ title: 'Available Seats' }} />
-        <Stack.Screen name="ActiveMatch" component={ActiveMatchScreen} options={{ title: 'Active Handoff', headerBackVisible: false }} />
+      <Stack.Navigator>
+        <Stack.Screen name="Tabs" component={TabNavigator} options={{ headerShown: false }} />
+      <Stack.Screen name="OfferSeat" component={OfferSeatScreen} options={{ title: 'Offer a Seat' }} />
+      <Stack.Screen name="FindSeat" component={FindSeatScreen} options={{ title: 'Find a Seat' }} />
+      <Stack.Screen name="OpportunityList" component={OpportunityListScreen} options={{ title: 'Available Seats' }} />
+      <Stack.Screen name="ActiveMatch" component={ActiveMatchScreen} options={{ title: 'Active Match' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
