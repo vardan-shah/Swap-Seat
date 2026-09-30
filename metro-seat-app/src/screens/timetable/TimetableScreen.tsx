@@ -24,6 +24,12 @@ export default function TimetableScreen() {
         showsVerticalScrollIndicator={true}
       >
         <Image 
+          source={require('../../../assets/Timetable2.png')} 
+          style={{ width: screenWidth, height: imageHeight }}
+          resizeMode="contain"
+        />
+        <View style={styles.divider} />
+        <Image 
           source={require('../../../assets/Timetable.png')} 
           style={{ width: screenWidth, height: imageHeight }}
           resizeMode="contain"
@@ -38,4 +44,5 @@ const styles = StyleSheet.create({
   header: { padding: 15, backgroundColor: '#FF8200', alignItems: 'center' },
   headerText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   scrollContent: { alignItems: 'center', justifyContent: 'center', paddingBottom: 50 },
+  divider: { height: 20, width: '100%', backgroundColor: '#f0f0f0' }
 });
