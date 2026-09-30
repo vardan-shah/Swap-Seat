@@ -59,6 +59,13 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
           )}
         </View>
 
+        {opp?.price !== undefined && opp?.price > 0 && (
+          <View style={styles.priceBox}>
+            <Text style={styles.priceLabel}>Requested Amount</Text>
+            <Text style={styles.priceValue}>₹{opp.price}</Text>
+          </View>
+        )}
+
         {match.status === 'PENDING' && isGiver && (
           <View style={styles.actionRow}>
             <TouchableOpacity style={[styles.btn, styles.acceptBtn]} onPress={() => acceptMatch(match.id)}>
@@ -97,6 +104,9 @@ const styles = StyleSheet.create({
   instructions: { backgroundColor: '#f1f8ff', padding: 15, borderRadius: 8, marginBottom: 30 },
   instructionTitle: { fontWeight: 'bold', marginBottom: 5 },
   instructionText: { color: '#444', lineHeight: 22 },
+  priceBox: { backgroundColor: '#fff3cd', padding: 15, borderRadius: 8, marginBottom: 30, alignItems: 'center', borderWidth: 1, borderColor: '#ffe69c' },
+  priceLabel: { fontSize: 14, color: '#664d03', marginBottom: 5 },
+  priceValue: { fontSize: 24, fontWeight: 'bold', color: '#664d03' },
   actionRow: { flexDirection: 'row', gap: 10 },
   btn: { flex: 1, padding: 15, borderRadius: 8, alignItems: 'center' },
   acceptBtn: { backgroundColor: '#28a745' },

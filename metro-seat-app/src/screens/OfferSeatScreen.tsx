@@ -42,6 +42,11 @@ export default function OfferSeatScreen({ navigation }: Props) {
       return;
     }
     
+    if (ENABLE_PAYMENTS && !price.trim()) {
+      showAlert('Error', 'Please enter a requested amount.');
+      return;
+    }
+    
     // Validate handoff is actually after current based on direction
     if (!isStationAfter(handoffStationId, currentStationId, direction)) {
       showAlert('Error', 'Handoff station must be AFTER your current station in the chosen direction.');
