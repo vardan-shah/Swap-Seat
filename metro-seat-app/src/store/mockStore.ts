@@ -111,7 +111,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       
       success = true;
       return {
-        opportunities: state.opportunities.map(o => o.id === opportunityId ? { ...o, status: 'CANCELLED' } : o)
+        opportunities: state.opportunities.map(o => o.id === opportunityId ? { ...o, status: 'CANCELLED' } : o),
+        matches: state.matches.map(m => 
+          (m.opportunityId === opportunityId && (m.status === 'PENDING' || m.status === 'ACCEPTED'))
+            ? { ...m, status: 'CANCELLED', cancelledBy: state.currentUser.id }
+            : m
+        )
       };
     });
     return success;
@@ -164,15 +169,16 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     set(s => ({
       matches: s.matches.map(x =>
-        x.id === matchId ? { ...x, status: to }
+        x.id === matchId ? { ...x, status: to, ...(to === 'CANCELLED' ? { cancelledBy: actorId } : {}) }
         : to === 'ACCEPTED' && x.opportunityId === m.opportunityId && x.status === 'PENDING'
           ? { ...x, status: 'REJECTED' } : x),
       opportunities: s.opportunities.map(o => {
         if (o.id !== m.opportunityId) return o;
         if (to === 'ACCEPTED')  return { ...o, status: 'MATCHED' };
         if (to === 'COMPLETED') return { ...o, status: 'COMPLETED' };
-        if (to === 'CANCELLED' && m.status === 'ACCEPTED')
-          return { ...o, status: 'ACTIVE' }; // reopen the seat
+        if (to === 'CANCELLED' && m.status === 'ACCEPTED') {
+          return { ...o, status: Date.now() > o.expiresAt ? 'EXPIRED' : 'ACTIVE' }; // reopen if not expired
+        }
         return o;
       }),
     }));
