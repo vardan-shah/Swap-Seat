@@ -48,7 +48,7 @@ describe('mockStore', () => {
 
     it('rejects ALREADY_OFFERING and leaves state unchanged', () => {
       useAppStore.setState({ currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 }, opportunities: [{ giverId: 'u1', status: 'MATCHED' } as SeatOpportunity] });
-      const res = useAppStore.getState().offerSeat('Northbound', 'motera-stadium', 'sabarmati-metro-station', undefined, 'train1');
+      const res = useAppStore.getState().offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'train1');
       expect(res.ok).toBe(false);
       expect(res.reason).toBe('ALREADY_OFFERING');
       expect(useAppStore.getState().opportunities).toHaveLength(1);
@@ -72,6 +72,12 @@ describe('mockStore', () => {
       useAppStore.setState({ opportunities: [{ id: 'opp1', giverId: 'u1', currentStationId: 'vadaj', handoffStationId: 'sabarmati', direction: 'Northbound', status: 'ACTIVE' } as SeatOpportunity] });
       const matches = useAppStore.getState().getCompatibleOpportunities('motera-stadium', 'koteshwar-road', 'Northbound');
       expect(matches).toHaveLength(0);
+    });
+
+    it('matches when handoff equals boarding station (boundary)', () => {
+      useAppStore.setState({ opportunities: [{ id: 'opp1', giverId: 'u1', currentStationId: 'vadaj', handoffStationId: 'sabarmati', direction: 'Northbound', status: 'ACTIVE' } as SeatOpportunity] });
+      const matches = useAppStore.getState().getCompatibleOpportunities('sabarmati', 'motera-stadium', 'Northbound');
+      expect(matches).toHaveLength(1);
     });
 
     it('no match when handoff equals destination', () => {
