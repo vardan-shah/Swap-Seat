@@ -33,7 +33,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "format": "npx prettier --write \"src/**/*.{ts,tsx}\" App.tsx"
   },
   "private": true
 }
