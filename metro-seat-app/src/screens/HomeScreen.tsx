@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={styles.subtitle}>Ahmedabad-Gandhinagar Metro Phase 2</Text>
         </View>
 
-        {activeMatches.length > 0 ? (
+        {activeMatches.length > 0 && (
           <View style={styles.activeCard}>
             <Text style={styles.activeCardTitle}>
               {activeMatches.length === 1 ? 'You have an active handoff!' : `You have ${activeMatches.length} active handoffs!`}
@@ -53,11 +53,15 @@ export default function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
             ))}
           </View>
-        ) : myOpportunity ? (
+        )}
+        
+        {myOpportunity && (
           <View style={styles.activeCard}>
             <Text style={styles.activeCardTitle}>You are offering a seat.</Text>
             <Text style={styles.statusText}>Status: {myOpportunity.status}</Text>
-            <Text style={styles.instructionText}>Waiting for someone to request it...</Text>
+            <Text style={styles.instructionText}>
+              {activeMatches.length > 0 ? 'You have pending requests to review.' : 'Waiting for someone to request it...'}
+            </Text>
             
             <TouchableOpacity 
               style={[styles.primaryButton, { marginTop: 10, backgroundColor: '#dc3545' }]}
@@ -71,7 +75,9 @@ export default function HomeScreen({ navigation }: Props) {
               <Text style={styles.buttonText}>Withdraw Offer</Text>
             </TouchableOpacity>
           </View>
-        ) : (
+        )}
+        
+        {!myOpportunity && activeMatches.length === 0 && (
           <View style={styles.actionContainer}>
             <TouchableOpacity 
               style={styles.largeButton}

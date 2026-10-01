@@ -45,7 +45,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
     navigation.popToTop();
   };
 
-    const renderItem = ({ item }: { item: any }) => {
+  const renderItem = ({ item }: { item: any }) => {
     const handoffStation = getStationById(item.handoffStationId);
     return (
       <View style={styles.card}>
@@ -55,7 +55,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
         {item.trainId && (
           <Text style={styles.trainText}>{t.expectedTrain}: {getTrainLabel(item.trainId)}</Text>
         )}
-        <Text style={styles.giverText}>{t.trustScore}: 4.8/5.0</Text>
+        <Text style={styles.giverText}>{t.trustScore}: {item.giverId === 'u1' ? '4.8/5.0' : 'New'}</Text>
         
         {ENABLE_PAYMENTS && item.price !== undefined && (
           <Text style={styles.priceText}>{t.amount.replace(' (₹)', '')}: ₹{item.price}</Text>

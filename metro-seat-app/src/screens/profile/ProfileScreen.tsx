@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert,
 import * as ImagePicker from 'expo-image-picker';
 import { useAppStore } from '../../store/mockStore';
 import { translations } from '../../i18n';
+import { ENABLE_PAYMENTS } from '../../config/flags';
 
 import { notify } from '../../utils/dialog';
 
@@ -45,40 +46,42 @@ export default function ProfileScreen() {
           <Text style={styles.avatarText}>{user.displayName.charAt(0)}</Text>
         </View>
         <Text style={styles.name}>{user.displayName}</Text>
-        <Text style={styles.reputation}>{t.trustScore}: {user.reputation}/5.0</Text>
+        <Text style={styles.reputation}>{t.trustScore}: {user.reputation === 0 ? 'New' : `${user.reputation}/5.0`}</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Receive Payments (UPI)</Text>
-        
-        <Text style={{marginBottom: 5, color: '#666', fontSize: 12}}>Enter UPI ID</Text>
-        <TextInput 
-          style={styles.input}
-          placeholder="e.g. name@upi"
-          value={tempUpiId}
-          onChangeText={setTempUpiId}
-          autoCapitalize="none"
-        />
-        <TouchableOpacity style={styles.btnPrimary} onPress={saveUpi}>
-          <Text style={styles.btnPrimaryText}>Save UPI ID</Text>
-        </TouchableOpacity>
-        
-        <View style={{height: 20}} />
-        <Text style={{marginBottom: 10, color: '#666', fontSize: 12, textAlign: 'center'}}>OR</Text>
-        
-        {upiQrUri ? (
-          <View style={styles.qrContainer}>
-            <Image source={{ uri: upiQrUri }} style={styles.qrImage} />
-            <TouchableOpacity style={styles.btnSecondary} onPress={pickImage}>
-              <Text style={styles.btnSecondaryText}>Change QR Code</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.btnSecondary} onPress={pickImage}>
-            <Text style={styles.btnSecondaryText}>Upload QR Code</Text>
+      {ENABLE_PAYMENTS && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Receive Payments (UPI)</Text>
+          
+          <Text style={{marginBottom: 5, color: '#666', fontSize: 12}}>Enter UPI ID</Text>
+          <TextInput 
+            style={styles.input}
+            placeholder="e.g. name@upi"
+            value={tempUpiId}
+            onChangeText={setTempUpiId}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity style={styles.btnPrimary} onPress={saveUpi}>
+            <Text style={styles.btnPrimaryText}>Save UPI ID</Text>
           </TouchableOpacity>
-        )}
-      </View>
+          
+          <View style={{height: 20}} />
+          <Text style={{marginBottom: 10, color: '#666', fontSize: 12, textAlign: 'center'}}>OR</Text>
+          
+          {upiQrUri ? (
+            <View style={styles.qrContainer}>
+              <Image source={{ uri: upiQrUri }} style={styles.qrImage} />
+              <TouchableOpacity style={styles.btnSecondary} onPress={pickImage}>
+                <Text style={styles.btnSecondaryText}>Change QR Code</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.btnSecondary} onPress={pickImage}>
+              <Text style={styles.btnSecondaryText}>Upload QR Code</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t.changeLang}</Text>

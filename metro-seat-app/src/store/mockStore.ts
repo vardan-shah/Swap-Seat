@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
 import { STATIONS, isStationAfter, getStationById } from '../data/stations';
 import { Language } from '../i18n';
+import * as crypto from 'expo-crypto';
 
 interface AppState {
   // Config
@@ -25,7 +26,7 @@ interface AppState {
   matches: Match[];
   
   // Actions
-  offerSeat: (direction: Direction, currentStationId: string, handoffStationId: string, price?: number, trainId?: string) => void;
+  offerSeat: (direction: Direction, currentStationId: string, handoffStationId: string, price: number | undefined, trainId: string) => { ok: boolean; reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' };
   cancelOpportunity: (opportunityId: string) => boolean;
   requestSeat: (opportunityId: string, seekerId: string) => { ok: boolean; reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND' };
   transition: (matchId: string, actorId: string, to: import('../types').MatchStatus) => boolean;
@@ -48,6 +49,16 @@ const MOCK_USER: User = {
   reputation: 4.8,
 };
 
+
+const INITIAL_DATA = {
+  isAuthenticated: false,
+  currentUser: MOCK_USER,
+  upiId: null,
+  upiQrUri: null,
+  opportunities: [],
+  matches: [],
+};
+
 const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
   PENDING:   ['ACCEPTED', 'REJECTED', 'CANCELLED'],
   ACCEPTED:  ['COMPLETED', 'CANCELLED'],
@@ -59,49 +70,50 @@ export const useAppStore = create<AppState>((set, get) => ({
   language: 'en',
   setLanguage: (lang) => set({ language: lang }),
   
-  // Auth
-  isAuthenticated: false,
+  ...INITIAL_DATA,
+
   login: (name: string) => set({ 
     isAuthenticated: true, 
     currentUser: { id: 'u_me', displayName: name, reputation: 0 } 
   }),
-  logout: () => set({ 
-    isAuthenticated: false,
-    currentUser: MOCK_USER,
-    upiId: null,
-    upiQrUri: null,
-    opportunities: [],
-    matches: []
-  }),
-  
+  logout: () => set(INITIAL_DATA),
   // User Profile
-  currentUser: MOCK_USER,
-  upiId: null,
   setUpiId: (id) => set({ upiId: id }),
-  upiQrUri: null,
   setUpiQrUri: (uri) => set({ upiQrUri: uri }),
+
   
-  // App Data
-  opportunities: [],
-  matches: [],
-  
-  offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => set((state) => {
-    const now = Date.now();
-    const newOpp: SeatOpportunity = {
-      id: Math.random().toString(36).substring(7),
-      giverId: state.currentUser.id,
-      direction,
-      currentStationId,
-      handoffStationId,
-      status: 'ACTIVE',
-      createdAt: now,
-      updatedAt: now,
-      expiresAt: now + 60 * 60 * 1000, // 1 hour expiry
-      price,
-      trainId: trainId || '',
-    };
-    return { opportunities: [...state.opportunities, newOpp] };
-  }),
+  offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => {
+    let result: { ok: boolean; reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' } = { ok: false };
+    set((state) => {
+      const existingOffer = state.opportunities.find(o => o.giverId === state.currentUser.id && o.status === 'ACTIVE');
+      if (existingOffer) {
+        result = { ok: false, reason: 'ALREADY_OFFERING' };
+        return state;
+      }
+      if (!isStationAfter(currentStationId, handoffStationId, direction)) {
+        result = { ok: false, reason: 'INVALID_STATIONS' };
+        return state;
+      }
+      
+      const now = Date.now();
+      const newOpp: SeatOpportunity = {
+        id: crypto.randomUUID(),
+        giverId: state.currentUser.id,
+        direction,
+        currentStationId,
+        handoffStationId,
+        status: 'ACTIVE',
+        createdAt: now,
+        updatedAt: now,
+        expiresAt: now + 60 * 60 * 1000, // 1 hour expiry
+        price,
+        trainId,
+      };
+      result = { ok: true };
+      return { opportunities: [...state.opportunities, newOpp] };
+    });
+    return result;
+  },
 
   cancelOpportunity: (opportunityId) => {
     let success = false;
@@ -138,7 +150,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       result = { ok: true };
       const newMatch: Match = {
-        id: Math.random().toString(36).substring(7),
+        id: crypto.randomUUID(),
         opportunityId,
         seekerId,
         giverId: opp.giverId,
@@ -177,7 +189,11 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (to === 'ACCEPTED')  return { ...o, status: 'MATCHED' };
         if (to === 'COMPLETED') return { ...o, status: 'COMPLETED' };
         if (to === 'CANCELLED' && m.status === 'ACCEPTED') {
-          return { ...o, status: Date.now() > o.expiresAt ? 'EXPIRED' : 'ACTIVE' }; // reopen if not expired
+          if (actorId === m.giverId) {
+            return { ...o, status: 'CANCELLED' };
+          } else {
+            return { ...o, status: Date.now() > o.expiresAt ? 'EXPIRED' : 'ACTIVE' };
+          }
         }
         return o;
       }),

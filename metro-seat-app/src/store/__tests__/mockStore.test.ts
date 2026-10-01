@@ -1,6 +1,6 @@
 import { useAppStore } from '../mockStore';
 import { SeatOpportunity, Match } from '../../types';
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 
 describe('mockStore', () => {
   const initialState = useAppStore.getState();
@@ -93,6 +93,28 @@ describe('mockStore', () => {
       expect(success).toBe(true);
       expect(useAppStore.getState().opportunities[0].status).toBe('CANCELLED');
     });
+
+    it('prevents withdrawing by non-owner', () => {
+      useAppStore.setState({
+        currentUser: { id: 'some_other_guy', displayName: 'Other', reputation: 5.0 },
+        opportunities: [{ id: 'opp1', giverId: 'giver1', status: 'ACTIVE' } as SeatOpportunity],
+        matches: []
+      });
+      const success = useAppStore.getState().cancelOpportunity('opp1');
+      expect(success).toBe(false);
+      expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE');
+    });
+
+    it('prevents withdrawing non-ACTIVE offer', () => {
+      useAppStore.setState({
+        currentUser: { id: 'giver1', displayName: 'Giver', reputation: 5.0 },
+        opportunities: [{ id: 'opp1', giverId: 'giver1', status: 'COMPLETED' } as SeatOpportunity],
+        matches: []
+      });
+      const success = useAppStore.getState().cancelOpportunity('opp1');
+      expect(success).toBe(false);
+      expect(useAppStore.getState().opportunities[0].status).toBe('COMPLETED');
+    });
   });
 
   describe('transition', () => {
@@ -135,15 +157,41 @@ describe('mockStore', () => {
       expect(useAppStore.getState().matches[0].status).toBe('PENDING'); // Unchanged
     });
 
-    it('reopens the seat when an ACCEPTED match is CANCELLED', () => {
+    it('reopens the seat when an ACCEPTED match is CANCELLED by seeker and seat is not expired', () => {
       useAppStore.setState({
-        currentUser: { id: 'giver1', displayName: 'Giver', reputation: 5.0 },
+        opportunities: [{ id: 'opp1', giverId: 'giver1', status: 'MATCHED', expiresAt: Date.now() + 10000 } as SeatOpportunity],
+        matches: [{ id: 'm1', opportunityId: 'opp1', giverId: 'giver1', seekerId: 's1', status: 'ACCEPTED' } as Match]
+      });
+      const success = useAppStore.getState().transition('m1', 's1', 'CANCELLED');
+      expect(success).toBe(true);
+      expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE');
+    });
+
+    it('expires the seat when an ACCEPTED match is CANCELLED by seeker and seat is expired', () => {
+      jest.useFakeTimers();
+      const now = Date.now();
+      
+      useAppStore.setState({
+        opportunities: [{ id: 'opp1', giverId: 'giver1', status: 'MATCHED', expiresAt: now - 10000 } as SeatOpportunity],
+        matches: [{ id: 'm1', opportunityId: 'opp1', giverId: 'giver1', seekerId: 's1', status: 'ACCEPTED' } as Match]
+      });
+      
+      jest.setSystemTime(now);
+      const success = useAppStore.getState().transition('m1', 's1', 'CANCELLED');
+      expect(success).toBe(true);
+      expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
+      
+      jest.useRealTimers();
+    });
+
+    it('cancels the seat when an ACCEPTED match is CANCELLED by giver', () => {
+      useAppStore.setState({
         opportunities: [{ id: 'opp1', giverId: 'giver1', status: 'MATCHED' } as SeatOpportunity],
         matches: [{ id: 'm1', opportunityId: 'opp1', giverId: 'giver1', seekerId: 's1', status: 'ACCEPTED' } as Match]
       });
-      const success = useAppStore.getState().cancelMatch('m1');
+      const success = useAppStore.getState().transition('m1', 'giver1', 'CANCELLED');
       expect(success).toBe(true);
-      expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE');
+      expect(useAppStore.getState().opportunities[0].status).toBe('CANCELLED');
     });
 
     it('prevents seeker from completing a match', () => {
