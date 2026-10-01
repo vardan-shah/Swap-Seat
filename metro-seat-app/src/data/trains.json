@@ -1,0 +1,590 @@
+[
+  {
+    "id": "NB-0620-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "06:20"
+  },
+  {
+    "id": "SB-0640-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "06:40"
+  },
+  {
+    "id": "NB-0645-RYVGIFT",
+    "direction": "Northbound",
+    "pattern": "RYV-GIFT",
+    "origin": "apmc",
+    "departure": "06:45"
+  },
+  {
+    "id": "SB-0733-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "07:33"
+  },
+  {
+    "id": "NB-0658-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "06:58"
+  },
+  {
+    "id": "SB-0748-RYVGIFT",
+    "direction": "Southbound",
+    "pattern": "RYV-GIFT",
+    "origin": "gift-city",
+    "departure": "07:48"
+  },
+  {
+    "id": "NB-0723-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "07:23"
+  },
+  {
+    "id": "SB-0800-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "08:00"
+  },
+  {
+    "id": "NB-0734-RYVGIFT",
+    "direction": "Northbound",
+    "pattern": "RYV-GIFT",
+    "origin": "apmc",
+    "departure": "07:34"
+  },
+  {
+    "id": "SB-0837-RYVGIFT",
+    "direction": "Southbound",
+    "pattern": "RYV-GIFT",
+    "origin": "gift-city",
+    "departure": "08:37"
+  },
+  {
+    "id": "NB-0747-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "07:47"
+  },
+  {
+    "id": "SB-0825-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "08:25"
+  },
+  {
+    "id": "NB-0803-RYVGIFT",
+    "direction": "Northbound",
+    "pattern": "RYV-GIFT",
+    "origin": "apmc",
+    "departure": "08:03"
+  },
+  {
+    "id": "SB-0901-RYVGIFT",
+    "direction": "Southbound",
+    "pattern": "RYV-GIFT",
+    "origin": "gift-city",
+    "departure": "09:01"
+  },
+  {
+    "id": "NB-0817-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "08:17"
+  },
+  {
+    "id": "SB-0849-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "08:49"
+  },
+  {
+    "id": "NB-0833-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "08:33"
+  },
+  {
+    "id": "SB-0913-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "09:13"
+  },
+  {
+    "id": "NB-0859-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "08:59"
+  },
+  {
+    "id": "SB-0937-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "09:37"
+  },
+  {
+    "id": "NB-0911-RYVGIFT",
+    "direction": "Northbound",
+    "pattern": "RYV-GIFT",
+    "origin": "apmc",
+    "departure": "09:11"
+  },
+  {
+    "id": "SB-1018-RYVGIFT",
+    "direction": "Southbound",
+    "pattern": "RYV-GIFT",
+    "origin": "gift-city",
+    "departure": "10:18"
+  },
+  {
+    "id": "NB-0919-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "09:19"
+  },
+  {
+    "id": "SB-1001-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "10:01"
+  },
+  {
+    "id": "NB-0948-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "09:48"
+  },
+  {
+    "id": "SB-1026-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "10:26"
+  },
+  {
+    "id": "NB-1012-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "10:12"
+  },
+  {
+    "id": "SB-1050-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "10:50"
+  },
+  {
+    "id": "NB-1036-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "10:36"
+  },
+  {
+    "id": "SB-1114-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "11:14"
+  },
+  {
+    "id": "NB-1059-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "10:59"
+  },
+  {
+    "id": "SB-1138-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "11:38"
+  },
+  {
+    "id": "NB-1125-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "11:25"
+  },
+  {
+    "id": "SB-1203-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "12:03"
+  },
+  {
+    "id": "NB-1149-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "11:49"
+  },
+  {
+    "id": "SB-1226-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "12:26"
+  },
+  {
+    "id": "NB-1213-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "12:13"
+  },
+  {
+    "id": "SB-1251-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "12:51"
+  },
+  {
+    "id": "NB-1237-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "12:37"
+  },
+  {
+    "id": "SB-1315-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "13:15"
+  },
+  {
+    "id": "NB-1302-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "13:02"
+  },
+  {
+    "id": "SB-1340-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "13:40"
+  },
+  {
+    "id": "NB-1327-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "13:27"
+  },
+  {
+    "id": "SB-1404-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "14:04"
+  },
+  {
+    "id": "NB-1350-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "13:50"
+  },
+  {
+    "id": "SB-1428-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "14:28"
+  },
+  {
+    "id": "NB-1415-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "14:15"
+  },
+  {
+    "id": "SB-1452-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "14:52"
+  },
+  {
+    "id": "NB-1440-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "14:40"
+  },
+  {
+    "id": "SB-1516-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "15:16"
+  },
+  {
+    "id": "NB-1504-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "15:04"
+  },
+  {
+    "id": "SB-1541-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "15:41"
+  },
+  {
+    "id": "NB-1516-RYVGIFT",
+    "direction": "Northbound",
+    "pattern": "RYV-GIFT",
+    "origin": "apmc",
+    "departure": "15:16"
+  },
+  {
+    "id": "SB-1617-RYVGIFT",
+    "direction": "Southbound",
+    "pattern": "RYV-GIFT",
+    "origin": "gift-city",
+    "departure": "16:17"
+  },
+  {
+    "id": "NB-1528-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "15:28"
+  },
+  {
+    "id": "SB-1606-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "16:06"
+  },
+  {
+    "id": "NB-1553-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "15:53"
+  },
+  {
+    "id": "SB-1630-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "16:30"
+  },
+  {
+    "id": "NB-1603-RYVGIFT",
+    "direction": "Northbound",
+    "pattern": "RYV-GIFT",
+    "origin": "apmc",
+    "departure": "16:03"
+  },
+  {
+    "id": "SB-1708-RYVGIFT",
+    "direction": "Southbound",
+    "pattern": "RYV-GIFT",
+    "origin": "gift-city",
+    "departure": "17:08"
+  },
+  {
+    "id": "NB-1617-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "16:17"
+  },
+  {
+    "id": "SB-1654-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "16:54"
+  },
+  {
+    "id": "NB-1640-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "16:40"
+  },
+  {
+    "id": "SB-1719-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "17:19"
+  },
+  {
+    "id": "NB-1706-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "17:06"
+  },
+  {
+    "id": "SB-1744-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "17:44"
+  },
+  {
+    "id": "NB-1716-RYVGIFT",
+    "direction": "Northbound",
+    "pattern": "RYV-GIFT",
+    "origin": "apmc",
+    "departure": "17:16"
+  },
+  {
+    "id": "SB-1821-RYVGIFT",
+    "direction": "Southbound",
+    "pattern": "RYV-GIFT",
+    "origin": "gift-city",
+    "departure": "18:21"
+  },
+  {
+    "id": "NB-1730-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "17:30"
+  },
+  {
+    "id": "SB-1808-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "18:08"
+  },
+  {
+    "id": "NB-1754-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "17:54"
+  },
+  {
+    "id": "SB-1832-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "18:32"
+  },
+  {
+    "id": "NB-1806-RYVGIFT",
+    "direction": "Northbound",
+    "pattern": "RYV-GIFT",
+    "origin": "apmc",
+    "departure": "18:06"
+  },
+  {
+    "id": "SB-1913-RYVGIFT",
+    "direction": "Southbound",
+    "pattern": "RYV-GIFT",
+    "origin": "gift-city",
+    "departure": "19:13"
+  },
+  {
+    "id": "NB-1818-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "18:18"
+  },
+  {
+    "id": "SB-1856-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "18:56"
+  },
+  {
+    "id": "NB-1843-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "18:43"
+  },
+  {
+    "id": "SB-1920-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "19:20"
+  },
+  {
+    "id": "NB-1908-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "19:08"
+  },
+  {
+    "id": "SB-1944-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "19:44"
+  },
+  {
+    "id": "NB-1942-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "19:42"
+  },
+  {
+    "id": "SB-2009-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "20:09"
+  },
+  {
+    "id": "NB-2045-RYMM",
+    "direction": "Northbound",
+    "pattern": "RY-MM",
+    "origin": "apmc",
+    "departure": "20:45"
+  },
+  {
+    "id": "SB-2100-RYMM",
+    "direction": "Southbound",
+    "pattern": "RY-MM",
+    "origin": "mahatma-mandir",
+    "departure": "21:00"
+  }
+]
