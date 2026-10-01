@@ -18,7 +18,7 @@ type Props = {
 
 export default function OpportunityListScreen({ navigation, route }: Props) {
   const { currentStationId, destinationStationId, direction } = route.params;
-  const { currentUser, getCompatibleOpportunities, requestSeat, getActiveMatchesForUser, language } = useAppStore();
+  const { currentUser, getCompatibleOpportunities, requestSeat, getActiveMatchesForUser, language, users } = useAppStore();
   const t = translations[language];
   
   const opportunities = getCompatibleOpportunities(currentStationId, destinationStationId, direction);
@@ -47,6 +47,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
 
   const renderItem = ({ item }: { item: any }) => {
     const handoffStation = getStationById(item.handoffStationId);
+    const giver = users[item.giverId];
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
@@ -55,7 +56,9 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
         {item.trainId && (
           <Text style={styles.trainText}>{t.expectedTrain}: {getTrainLabel(item.trainId)}</Text>
         )}
-        <Text style={styles.giverText}>{t.trustScore}: {item.giverId === 'u1' ? '4.8/5.0' : 'New'}</Text>
+        <Text style={styles.giverText}>
+          {t.trustScore}: {giver && giver.reputation > 0 ? `${giver.reputation}/5.0` : 'New'}
+        </Text>
         
         {ENABLE_PAYMENTS && item.price !== undefined && (
           <Text style={styles.priceText}>{t.amount.replace(' (₹)', '')}: ₹{item.price}</Text>

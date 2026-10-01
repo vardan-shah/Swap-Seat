@@ -25,6 +25,7 @@ interface AppState {
   // App Data
   opportunities: SeatOpportunity[];
   matches: Match[];
+  users: Record<string, User>;
   
   // Actions
   offerSeat: (direction: Direction, currentStationId: string, handoffStationId: string, price: number | undefined, trainId: string) => { ok: boolean; reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' };
@@ -58,6 +59,10 @@ const INITIAL_DATA = {
   upiQrUri: null,
   opportunities: [],
   matches: [],
+  users: {
+    u1: { id: 'u1', displayName: 'Mock Giver', reputation: 4.8 },
+    u_me: MOCK_USER
+  }
 };
 
 const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
