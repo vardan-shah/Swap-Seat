@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 
 import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
-import { STATIONS, isStationAfter } from '../data/stations';
+import { STATIONS, isLegValid } from '../data/stations';
 import { ENABLE_PAYMENTS } from '../config/flags';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
@@ -41,13 +41,19 @@ export default function OfferSeatScreen({ navigation }: Props) {
       return;
     }
     
-    if (!isStationAfter(handoffStationId, currentStationId, direction)) {
+    if (!isLegValid(handoffStationId, currentStationId, direction)) {
       await notify('Error', 'Handoff station must be AFTER your current station in the chosen direction.');
       return;
     }
     
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
-    offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
+    const res = offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
+    if (!res.ok) {
+      await notify('Error', res.reason === 'ALREADY_OFFERING'
+        ? 'You already have an active offer.'
+        : 'Handoff station must be after your current station.');
+      return;
+    }
     
     await notify('Success', 'Your seat opportunity is now active!');
     navigation.goBack();

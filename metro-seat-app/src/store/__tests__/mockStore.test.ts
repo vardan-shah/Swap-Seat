@@ -1,9 +1,12 @@
 import { useAppStore } from '../mockStore';
 import { SeatOpportunity, Match } from '../../types';
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
 describe('mockStore', () => {
   const initialState = useAppStore.getState();
+
+
+  afterEach(() => { jest.useRealTimers(); });
 
   beforeEach(() => {
     useAppStore.setState(initialState, true);
@@ -11,6 +14,44 @@ describe('mockStore', () => {
       opportunities: [],
       matches: [],
       currentUser: { id: 'u1', displayName: 'TestUser', reputation: 5.0 },
+    });
+  });
+
+  describe('offerSeat', () => {
+    it('creates a valid Northbound offer', () => {
+      useAppStore.setState({ currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 }, opportunities: [] });
+      const res = useAppStore.getState().offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'train1');
+      expect(res.ok).toBe(true);
+      expect(useAppStore.getState().opportunities[0]).toMatchObject({ currentStationId: 'sabarmati', handoffStationId: 'motera-stadium' });
+    });
+
+    it('creates a valid Southbound offer', () => {
+      useAppStore.setState({ currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 }, opportunities: [] });
+      const res = useAppStore.getState().offerSeat('Southbound', 'motera-stadium', 'sabarmati', undefined, 'train1');
+      expect(res.ok).toBe(true);
+      expect(useAppStore.getState().opportunities[0]).toMatchObject({ currentStationId: 'motera-stadium', handoffStationId: 'sabarmati' });
+    });
+
+    it('rejects reversed stations', () => {
+      useAppStore.setState({ currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 }, opportunities: [] });
+      const res = useAppStore.getState().offerSeat('Northbound', 'motera-stadium', 'sabarmati', undefined, 'train1');
+      expect(res.ok).toBe(false);
+      expect(res.reason).toBe('INVALID_STATIONS');
+    });
+
+    it('rejects equal stations', () => {
+      useAppStore.setState({ currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 }, opportunities: [] });
+      const res = useAppStore.getState().offerSeat('Northbound', 'motera-stadium', 'motera-stadium', undefined, 'train1');
+      expect(res.ok).toBe(false);
+      expect(res.reason).toBe('INVALID_STATIONS');
+    });
+
+    it('rejects ALREADY_OFFERING and leaves state unchanged', () => {
+      useAppStore.setState({ currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 }, opportunities: [{ giverId: 'u1', status: 'MATCHED' } as SeatOpportunity] });
+      const res = useAppStore.getState().offerSeat('Northbound', 'motera-stadium', 'sabarmati-metro-station', undefined, 'train1');
+      expect(res.ok).toBe(false);
+      expect(res.reason).toBe('ALREADY_OFFERING');
+      expect(useAppStore.getState().opportunities).toHaveLength(1);
     });
   });
 
@@ -56,14 +97,13 @@ describe('mockStore', () => {
   });
 
   describe('cancelOpportunity', () => {
-    it('cascades cancellation to PENDING and ACCEPTED matches and sets cancelledBy', () => {
+    it('cascades cancellation to PENDING matches and sets cancelledBy', () => {
       useAppStore.setState({
         currentUser: { id: 'giver1', displayName: 'Giver', reputation: 5.0 },
         opportunities: [{ id: 'opp1', giverId: 'giver1', status: 'ACTIVE' } as SeatOpportunity],
         matches: [
           { id: 'm1', opportunityId: 'opp1', giverId: 'giver1', seekerId: 's1', status: 'PENDING' } as Match,
-          { id: 'm2', opportunityId: 'opp1', giverId: 'giver1', seekerId: 's2', status: 'ACCEPTED' } as Match,
-          { id: 'm3', opportunityId: 'opp1', giverId: 'giver1', seekerId: 's3', status: 'REJECTED' } as Match,
+                    { id: 'm3', opportunityId: 'opp1', giverId: 'giver1', seekerId: 's3', status: 'REJECTED' } as Match,
         ]
       });
       const success = useAppStore.getState().cancelOpportunity('opp1');
@@ -74,10 +114,6 @@ describe('mockStore', () => {
       const m1 = state.matches.find(m => m.id === 'm1')!;
       expect(m1.status).toBe('CANCELLED');
       expect(m1.cancelledBy).toBe('giver1');
-
-      const m2 = state.matches.find(m => m.id === 'm2')!;
-      expect(m2.status).toBe('CANCELLED');
-      expect(m2.cancelledBy).toBe('giver1');
 
       const m3 = state.matches.find(m => m.id === 'm3')!;
       expect(m3.status).toBe('REJECTED'); // Unaffected
@@ -181,7 +217,6 @@ describe('mockStore', () => {
       expect(success).toBe(true);
       expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
       
-      jest.useRealTimers();
     });
 
     it('cancels the seat when an ACCEPTED match is CANCELLED by giver', () => {

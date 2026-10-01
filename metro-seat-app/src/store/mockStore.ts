@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
-import { STATIONS, isStationAfter, getStationById } from '../data/stations';
+import { STATIONS, isLegValid, getStationById } from '../data/stations';
 import { Language } from '../i18n';
-import * as crypto from 'expo-crypto';
+import { randomUUID } from 'expo-crypto';
 
 interface AppState {
   // Config
@@ -85,19 +85,19 @@ export const useAppStore = create<AppState>((set, get) => ({
   offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => {
     let result: { ok: boolean; reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' } = { ok: false };
     set((state) => {
-      const existingOffer = state.opportunities.find(o => o.giverId === state.currentUser.id && o.status === 'ACTIVE');
+      const existingOffer = state.opportunities.find(o => o.giverId === state.currentUser.id && (o.status === 'ACTIVE' || o.status === 'MATCHED'));
       if (existingOffer) {
         result = { ok: false, reason: 'ALREADY_OFFERING' };
         return state;
       }
-      if (!isStationAfter(currentStationId, handoffStationId, direction)) {
+      if (!isLegValid(currentStationId, handoffStationId, direction)) {
         result = { ok: false, reason: 'INVALID_STATIONS' };
         return state;
       }
       
       const now = Date.now();
       const newOpp: SeatOpportunity = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         giverId: state.currentUser.id,
         direction,
         currentStationId,
@@ -150,7 +150,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       result = { ok: true };
       const newMatch: Match = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         opportunityId,
         seekerId,
         giverId: opp.giverId,
@@ -220,11 +220,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       
       // Handoff station must be AFTER seeker's current station (or same)
       const handoffAfterCurrent = opp.handoffStationId === currentStationId || 
-        isStationAfter(opp.handoffStationId, currentStationId, direction);
+        isLegValid(opp.handoffStationId, currentStationId, direction);
       
       // Handoff station must be BEFORE or AT seeker's destination
       const handoffBeforeDest = opp.handoffStationId === destinationStationId || 
-        isStationAfter(destinationStationId, opp.handoffStationId, direction);
+        isLegValid(destinationStationId, opp.handoffStationId, direction);
 
       return handoffAfterCurrent && handoffBeforeDest;
     });

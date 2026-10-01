@@ -63,17 +63,21 @@ export default function HomeScreen({ navigation }: Props) {
               {activeMatches.length > 0 ? 'You have pending requests to review.' : 'Waiting for someone to request it...'}
             </Text>
             
-            <TouchableOpacity 
-              style={[styles.primaryButton, { marginTop: 10, backgroundColor: '#dc3545' }]}
-              onPress={async () => {
-                const success = useAppStore.getState().cancelOpportunity(myOpportunity.id);
-                if (success) {
-                  await notify('Cancelled', 'Your offer has been cancelled.');
-                }
-              }}
-            >
-              <Text style={styles.buttonText}>Withdraw Offer</Text>
-            </TouchableOpacity>
+            {myOpportunity.status === 'ACTIVE' && (
+              <TouchableOpacity 
+                style={[styles.primaryButton, { marginTop: 10, backgroundColor: '#dc3545' }]}
+                onPress={async () => {
+                  const success = useAppStore.getState().cancelOpportunity(myOpportunity.id);
+                  if (success) {
+                    await notify('Cancelled', 'Your offer has been cancelled.');
+                  } else {
+                    await notify('Error', 'Failed to cancel the offer. It may not be active.');
+                  }
+                }}
+              >
+                <Text style={styles.buttonText}>Withdraw Offer</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
         
@@ -95,7 +99,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         )}
 
-        {__DEV__ && (
+        {process.env.EXPO_PUBLIC_DEMO_MODE === '1' {__DEV__ && ({__DEV__ && ( (
           <View style={{ marginTop: 40, padding: 20, backgroundColor: '#ffeeba', borderRadius: 8 }}>
             <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>🛠 Dev Tools</Text>
             <TouchableOpacity 
@@ -103,13 +107,13 @@ export default function HomeScreen({ navigation }: Props) {
               onPress={() => {
                 const store = useAppStore.getState();
                 const isMe = store.currentUser.id === 'u_me';
-                store.currentUser = {
-                  id: isMe ? 'mock_seeker_2' : 'u_me',
-                  displayName: isMe ? 'Mock Seeker' : 'Me',
-                  reputation: 5.0
-                };
-                // force update
-                useAppStore.setState({ currentUser: { ...store.currentUser } });
+                useAppStore.setState({
+                  currentUser: {
+                    id: isMe ? 'mock_seeker_2' : 'u_me',
+                    displayName: isMe ? 'Mock Seeker' : 'Me',
+                    reputation: 5.0
+                  }
+                });
               }}
             >
               <Text style={styles.buttonText}>

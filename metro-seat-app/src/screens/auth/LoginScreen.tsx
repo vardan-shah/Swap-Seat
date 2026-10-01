@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+
+const DEMO_OTP = process.env.EXPO_PUBLIC_DEMO_MODE === '1' ? '1234' : undefined;
 import { useAppStore } from '../../store/mockStore';
 import { translations } from '../../i18n';
 import { notify } from '../../utils/dialog';
@@ -28,14 +30,12 @@ export default function LoginScreen() {
     }
     setOtpSent(true);
     
-    const DEMO_OTP = __DEV__ ? '1234' : undefined;
     if (DEMO_OTP) {
       await notify('OTP Sent', `For this demo, please enter ${DEMO_OTP} as your OTP.`);
     }
   };
 
   const handleVerifyOtp = async () => {
-    const DEMO_OTP = __DEV__ ? '1234' : undefined;
     if (DEMO_OTP && otp === DEMO_OTP) {
       login(name.trim());
     } else {
