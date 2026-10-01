@@ -26,19 +26,4 @@ export const STATIONS: Station[] = ryPattern.stops.map((stationId, index) => {
 
 export const getStationById = (id: string) => STATIONS.find(s => s.id === id);
 
-// Northbound goes towards Mahatma Mandir (sequence increases)
-// Southbound goes towards APMC (sequence decreases)
-export const isStationAfter = (station1Id: string, station2Id: string, direction: Direction) => {
-  const s1 = getStationById(station1Id);
-  const s2 = getStationById(station2Id);
-  if (!s1 || !s2) return false;
-  
-  if (direction === 'Northbound') {
-    return s1.sequence > s2.sequence;
-  } else {
-    return s1.sequence < s2.sequence;
-  }
-};
 
-export const isLegValid = (from: string, to: string, dir: Direction): boolean =>
-  isStationAfter(to, from, dir);

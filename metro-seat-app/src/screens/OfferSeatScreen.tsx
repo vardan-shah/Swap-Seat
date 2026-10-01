@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 
 import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
-import { STATIONS, isLegValid } from '../data/stations';
+import { STATIONS } from '../data/stations';
 import { ENABLE_PAYMENTS } from '../config/flags';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';

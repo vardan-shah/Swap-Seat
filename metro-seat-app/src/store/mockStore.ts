@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
-import { STATIONS, isLegValid, getStationById } from '../data/stations';
+import { STATIONS, getStationById } from '../data/stations';
+import { isLegValid } from '../domain/route';
 import { Language } from '../i18n';
 import { randomUUID } from 'expo-crypto';
 
