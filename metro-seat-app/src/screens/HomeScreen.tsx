@@ -59,23 +59,6 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.statusText}>Status: {myOpportunity.status}</Text>
             <Text style={styles.instructionText}>Waiting for someone to request it...</Text>
             
-            {__DEV__ && (
-              <TouchableOpacity 
-                style={[styles.primaryButton, { marginTop: 20, backgroundColor: '#0056b3' }]}
-                onPress={async () => {
-                  const fakeSeeker = `mock_seeker_${Date.now()}`;
-                  const result = useAppStore.getState().requestSeat(myOpportunity.id, fakeSeeker);
-                  if (result.ok) {
-                    await notify('Simulation', 'A rider just requested your seat!');
-                  } else {
-                    await notify('Error', `Simulated request failed: ${result.reason}`);
-                  }
-                }}
-              >
-                <Text style={styles.buttonText}>Simulate Rider Request</Text>
-              </TouchableOpacity>
-            )}
-
             <TouchableOpacity 
               style={[styles.primaryButton, { marginTop: 10, backgroundColor: '#dc3545' }]}
               onPress={async () => {
