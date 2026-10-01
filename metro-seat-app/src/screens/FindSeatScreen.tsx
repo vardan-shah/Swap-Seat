@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
-import { STATIONS, isStationAfter } from '../data/stations';
+import { STATIONS } from '../data/stations';
+import { isLegValid } from '../domain/route';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
 import { useAppStore } from '../store/mockStore';
@@ -27,7 +28,7 @@ export default function FindSeatScreen({ navigation }: Props) {
       return;
     }
 
-    if (!isStationAfter(destinationStationId, currentStationId, direction)) {
+    if (!isLegValid(destinationStationId, currentStationId, direction)) {
       await notify('Error', 'Destination must be AFTER your current station in the chosen direction.');
       return;
     }

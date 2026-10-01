@@ -41,11 +41,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
       return;
     }
     
-    if (!isLegValid(handoffStationId, currentStationId, direction)) {
-      await notify('Error', 'Handoff station must be AFTER your current station in the chosen direction.');
-      return;
-    }
-    
+        
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
     const res = offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
     if (!res.ok) {

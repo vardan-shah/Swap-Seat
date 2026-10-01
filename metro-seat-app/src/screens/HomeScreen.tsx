@@ -99,7 +99,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         )}
 
-        {process.env.EXPO_PUBLIC_DEMO_MODE === '1' {__DEV__ && ({__DEV__ && ( (
+        {process.env.EXPO_PUBLIC_DEMO_MODE === '1' && (
           <View style={{ marginTop: 40, padding: 20, backgroundColor: '#ffeeba', borderRadius: 8 }}>
             <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>🛠 Dev Tools</Text>
             <TouchableOpacity 

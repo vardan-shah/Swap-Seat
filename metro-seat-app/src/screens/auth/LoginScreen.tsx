@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView } from 'react-native';
 
 const DEMO_OTP = process.env.EXPO_PUBLIC_DEMO_MODE === '1' ? '1234' : undefined;
 import { useAppStore } from '../../store/mockStore';

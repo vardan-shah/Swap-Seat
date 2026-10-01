@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import AppNavigation from './src/navigation';
-import { isStationAfter } from './src/data/stations';
+import { isLegValid } from './src/domain/route';
 import { useAppStore } from './src/store/mockStore';
 
 export default function App() {
@@ -18,9 +18,9 @@ export default function App() {
       };
 
       try {
-        assert('Jivraj Park is after APMC (Northbound)', isStationAfter('jivraj-park', 'apmc', 'Northbound') === true);
-        assert('APMC is NOT after Jivraj Park (Northbound)', isStationAfter('apmc', 'jivraj-park', 'Northbound') === false);
-        assert('APMC is after Jivraj Park (Southbound)', isStationAfter('apmc', 'jivraj-park', 'Southbound') === true);
+        assert('Jivraj Park is after APMC (Northbound)', isLegValid('jivraj-park', 'apmc', 'Northbound') === true);
+        assert('APMC is NOT after Jivraj Park (Northbound)', isLegValid('apmc', 'jivraj-park', 'Northbound') === false);
+        assert('APMC is after Jivraj Park (Southbound)', isLegValid('apmc', 'jivraj-park', 'Southbound') === true);
 
         const store = useAppStore.getState();
         const oppsNorth = store.getCompatibleOpportunities('koteshwar-road', 'mahatma-mandir', 'Northbound');
