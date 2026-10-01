@@ -1,18 +1,32 @@
 import { Direction } from '../types';
 import { STATIONS } from '../data/stations';
 
-export function stationIndex(id: string): number {
-  const index = STATIONS.findIndex(s => s.id === id);
-  if (index === -1) throw new Error(`Unknown station: ${id}`);
-  return index;
+export function createRoute(stopIds: readonly string[]) {
+  const idx = (id: string) => { const i = stopIds.indexOf(id); return i < 0 ? null : i; };
+  return {
+    has: (id: string) => idx(id) !== null,
+    isLegValid(from: string, to: string, dir: Direction) {
+      const f = idx(from), t = idx(to);
+      if (f === null || t === null || f === t) return false;
+      return (dir === 'Northbound') === (f < t);
+    },
+    inferDirection(from: string, to: string): Direction | null {
+      const f = idx(from), t = idx(to);
+      if (f === null || t === null || f === t) return null;
+      return f < t ? 'Northbound' : 'Southbound';
+    },
+    stationIndex(id: string): number | null {
+      return idx(id);
+    }
+  };
 }
 
-export function inferDirection(from: string, to: string): Direction | null {
-  if (from === to) return null;
-  return stationIndex(from) < stationIndex(to) ? 'Northbound' : 'Southbound';
-}
+export const RY_MM = createRoute(STATIONS.map(s => s.id));
 
-export function isLegValid(from: string, to: string, dir: Direction): boolean {
-  if (from === to) return false;
-  return inferDirection(from, to) === dir;
-}
+export const isLegValid = RY_MM.isLegValid;
+export const inferDirection = RY_MM.inferDirection;
+export const stationIndex = (id: string) => {
+  const i = RY_MM.stationIndex(id);
+  if (i === null) throw new Error(`Unknown station: ${id}`);
+  return i;
+};

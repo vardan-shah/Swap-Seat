@@ -4,6 +4,7 @@ import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { STATIONS } from '../data/stations';
+import { stationIndex } from '../domain/route';
 import { ENABLE_PAYMENTS } from '../config/flags';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
@@ -58,7 +59,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const stationItems = useMemo(() => {
     // Show stations based on direction order
     const ordered = [...STATIONS].sort((a, b) => 
-      direction === 'Northbound' ? a.sequence - b.sequence : b.sequence - a.sequence
+      direction === 'Northbound' ? stationIndex(a.id) - stationIndex(b.id) : stationIndex(b.id) - stationIndex(a.id)
     );
     return ordered.map(s => ({ label: s.name, value: s.id }));
   }, [direction]);

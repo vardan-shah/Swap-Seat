@@ -1,57 +1,45 @@
 import { describe, it, expect } from '@jest/globals';
-import { stationIndex, inferDirection, isLegValid } from '../route';
+import { createRoute, RY_MM } from '../route';
 
 describe('route domain', () => {
-  describe('stationIndex', () => {
-    it('returns the index for a known operational station', () => {
-      expect(stationIndex('apmc')).toBe(0);
-      expect(stationIndex('mahatma-mandir')).toBeGreaterThan(0);
+  describe('createRoute', () => {
+    const route = createRoute(['a', 'b', 'd']); // gap: 'c' is missing
+
+    it('has() checks membership', () => {
+      expect(route.has('a')).toBe(true);
+      expect(route.has('c')).toBe(false);
     });
 
-    it('throws on unknown station id', () => {
-      expect(() => stationIndex('unknown-station')).toThrow('Unknown station: unknown-station');
+    it('stationIndex() returns index', () => {
+      expect(route.stationIndex('a')).toBe(0);
+      expect(route.stationIndex('d')).toBe(2);
+      expect(route.stationIndex('c')).toBeNull();
     });
 
-    it('handles the gap where an under-construction station was removed', () => {
-      // 'sabarmati' and 'motera-stadium' should be sequential despite 'sabarmati-river' being skipped
-      const sIdx = stationIndex('sabarmati');
-      const mIdx = stationIndex('motera-stadium');
-      expect(mIdx - sIdx).toBe(1);
+    it('handles gap correctly', () => {
+      expect(route.stationIndex('d')! - route.stationIndex('b')!).toBe(1);
+    });
+
+    it('inferDirection', () => {
+      expect(route.inferDirection('a', 'd')).toBe('Northbound');
+      expect(route.inferDirection('d', 'b')).toBe('Southbound');
+      expect(route.inferDirection('a', 'a')).toBeNull();
+      expect(route.inferDirection('a', 'x')).toBeNull();
+    });
+
+    it('isLegValid', () => {
+      expect(route.isLegValid('a', 'd', 'Northbound')).toBe(true);
+      expect(route.isLegValid('d', 'a', 'Southbound')).toBe(true);
+      expect(route.isLegValid('a', 'd', 'Southbound')).toBe(false);
+      expect(route.isLegValid('a', 'a', 'Northbound')).toBe(false);
+      expect(route.isLegValid('a', 'x', 'Northbound')).toBe(false);
     });
   });
 
-  describe('inferDirection', () => {
-    it('infers Northbound when going from lower to higher index', () => {
-      expect(inferDirection('apmc', 'motera-stadium')).toBe('Northbound');
-    });
-
-    it('infers Southbound when going from higher to lower index', () => {
-      expect(inferDirection('motera-stadium', 'apmc')).toBe('Southbound');
-    });
-
-    it('returns null when from and to are the same', () => {
-      expect(inferDirection('apmc', 'apmc')).toBeNull();
-    });
-    
-    it('throws on unknown stations', () => {
-      expect(() => inferDirection('apmc', 'unknown')).toThrow();
-    });
-  });
-
-  describe('isLegValid', () => {
-    it('returns true for strictly forward legs', () => {
-      expect(isLegValid('apmc', 'motera-stadium', 'Northbound')).toBe(true);
-      expect(isLegValid('motera-stadium', 'apmc', 'Southbound')).toBe(true);
-    });
-
-    it('returns false for backwards legs', () => {
-      expect(isLegValid('motera-stadium', 'apmc', 'Northbound')).toBe(false);
-      expect(isLegValid('apmc', 'motera-stadium', 'Southbound')).toBe(false);
-    });
-
-    it('returns false for same station', () => {
-      expect(isLegValid('apmc', 'apmc', 'Northbound')).toBe(false);
-      expect(isLegValid('apmc', 'apmc', 'Southbound')).toBe(false);
+  describe('RY_MM export', () => {
+    it('works for apmc to motera', () => {
+      expect(RY_MM.isLegValid('apmc', 'motera-stadium', 'Northbound')).toBe(true);
+      expect(RY_MM.inferDirection('motera-stadium', 'apmc')).toBe('Southbound');
     });
   });
 });

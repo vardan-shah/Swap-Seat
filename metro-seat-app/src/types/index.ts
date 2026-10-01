@@ -1,7 +1,6 @@
 export type Station = {
   id: string;
   name: string;
-  sequence: number; // mapped from service_pattern RY-MM
   status: 'operational' | 'under_construction' | 'planned';
 };
 

@@ -220,12 +220,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (opp.direction !== direction) return false;
       
       // Handoff station must be AFTER seeker's current station (or same)
-      const handoffAfterCurrent = opp.handoffStationId === currentStationId || 
-        isLegValid(opp.handoffStationId, currentStationId, direction);
+      const handoffAfterCurrent = opp.handoffStationId === currentStationId || isLegValid(currentStationId, opp.handoffStationId, direction);
       
       // Handoff station must be BEFORE or AT seeker's destination
-      const handoffBeforeDest = opp.handoffStationId === destinationStationId || 
-        isLegValid(destinationStationId, opp.handoffStationId, direction);
+      const handoffBeforeDest = isLegValid(opp.handoffStationId, destinationStationId, direction);
 
       return handoffAfterCurrent && handoffBeforeDest;
     });

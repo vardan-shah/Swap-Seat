@@ -19,7 +19,6 @@ export const STATIONS: Station[] = ryPattern.stops.map((stationId, index) => {
   return {
     id: stationId,
     name: stationData?.name || stationId,
-    sequence: index + 1, // 1 to N
     status: parseStatus(stationData?.status),
   };
 }).filter(s => s.status === 'operational');

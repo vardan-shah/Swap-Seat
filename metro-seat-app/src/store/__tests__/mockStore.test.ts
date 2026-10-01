@@ -55,6 +55,38 @@ describe('mockStore', () => {
     });
   });
 
+  describe('getCompatibleOpportunities', () => {
+    it('matches valid Northbound offer', () => {
+      useAppStore.setState({ opportunities: [{ id: 'opp1', giverId: 'u1', currentStationId: 'vadaj', handoffStationId: 'sabarmati', direction: 'Northbound', status: 'ACTIVE' } as SeatOpportunity] });
+      const matches = useAppStore.getState().getCompatibleOpportunities('ranip', 'motera-stadium', 'Northbound');
+      expect(matches).toHaveLength(1);
+    });
+    
+    it('no match when handoff is after destination', () => {
+      useAppStore.setState({ opportunities: [{ id: 'opp1', giverId: 'u1', currentStationId: 'vadaj', handoffStationId: 'sabarmati', direction: 'Northbound', status: 'ACTIVE' } as SeatOpportunity] });
+      const matches = useAppStore.getState().getCompatibleOpportunities('apmc', 'ranip', 'Northbound');
+      expect(matches).toHaveLength(0);
+    });
+
+    it('no match when handoff is before boarding', () => {
+      useAppStore.setState({ opportunities: [{ id: 'opp1', giverId: 'u1', currentStationId: 'vadaj', handoffStationId: 'sabarmati', direction: 'Northbound', status: 'ACTIVE' } as SeatOpportunity] });
+      const matches = useAppStore.getState().getCompatibleOpportunities('motera-stadium', 'koteshwar-road', 'Northbound');
+      expect(matches).toHaveLength(0);
+    });
+
+    it('no match when handoff equals destination', () => {
+      useAppStore.setState({ opportunities: [{ id: 'opp1', giverId: 'u1', currentStationId: 'vadaj', handoffStationId: 'sabarmati', direction: 'Northbound', status: 'ACTIVE' } as SeatOpportunity] });
+      const matches = useAppStore.getState().getCompatibleOpportunities('ranip', 'sabarmati', 'Northbound');
+      expect(matches).toHaveLength(0);
+    });
+
+    it('matches valid Southbound offer', () => {
+      useAppStore.setState({ opportunities: [{ id: 'opp1', giverId: 'u1', currentStationId: 'sabarmati', handoffStationId: 'vadaj', direction: 'Southbound', status: 'ACTIVE' } as SeatOpportunity] });
+      const matches = useAppStore.getState().getCompatibleOpportunities('aec', 'usmanpura', 'Southbound');
+      expect(matches).toHaveLength(1);
+    });
+  });
+
   describe('requestSeat', () => {
     it('creates a PENDING match when requesting an ACTIVE opportunity', () => {
       useAppStore.setState({ opportunities: [{ id: 'opp1', giverId: 'giver1', status: 'ACTIVE' } as SeatOpportunity] });

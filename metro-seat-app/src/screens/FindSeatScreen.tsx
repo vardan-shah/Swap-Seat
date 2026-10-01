@@ -4,7 +4,7 @@ import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { STATIONS } from '../data/stations';
-import { isLegValid } from '../domain/route';
+import { isLegValid, stationIndex } from '../domain/route';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
 import { useAppStore } from '../store/mockStore';
@@ -28,7 +28,7 @@ export default function FindSeatScreen({ navigation }: Props) {
       return;
     }
 
-    if (!isLegValid(destinationStationId, currentStationId, direction)) {
+    if (!isLegValid(currentStationId, destinationStationId, direction)) {
       await notify('Error', 'Destination must be AFTER your current station in the chosen direction.');
       return;
     }
@@ -42,7 +42,7 @@ export default function FindSeatScreen({ navigation }: Props) {
 
   const stationItems = useMemo(() => {
     const ordered = [...STATIONS].sort((a, b) => 
-      direction === 'Northbound' ? a.sequence - b.sequence : b.sequence - a.sequence
+      direction === 'Northbound' ? stationIndex(a.id) - stationIndex(b.id) : stationIndex(b.id) - stationIndex(a.id)
     );
     return ordered.map(s => ({ label: s.name, value: s.id }));
   }, [direction]);

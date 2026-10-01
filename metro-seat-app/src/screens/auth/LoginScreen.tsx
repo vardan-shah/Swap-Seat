@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView } from 'react-native';
-
-const DEMO_OTP = process.env.EXPO_PUBLIC_DEMO_MODE === '1' ? '1234' : undefined;
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useAppStore } from '../../store/mockStore';
 import { translations } from '../../i18n';
 import { notify } from '../../utils/dialog';
+
+const DEMO_OTP = process.env.EXPO_PUBLIC_DEMO_MODE === '1' ? '1234' : undefined;
 
 export default function LoginScreen() {
   const [name, setName] = useState('');
