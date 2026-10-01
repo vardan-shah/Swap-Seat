@@ -13,7 +13,7 @@ export const STATIONS: Station[] = ryPattern.stops.map((stationId, index) => {
     id: stationId,
     name: stationData?.name || stationId,
     sequence: index + 1, // 1 to N
-    status: stationData?.status || 'operational',
+    status: (stationData?.status as 'operational' | 'under-construction' | 'planned') || 'operational',
   };
 }).filter(s => s.status === 'operational');
 
@@ -33,4 +33,4 @@ export const isStationAfter = (station1Id: string, station2Id: string, direction
   }
 };
 
-export const ENABLE_PAYMENTS = true; // Feature flag requested by user
+export const ENABLE_PAYMENTS = false; // Feature flag requested by user

@@ -26,7 +26,8 @@ interface AppState {
   
   // Actions
   offerSeat: (direction: Direction, currentStationId: string, handoffStationId: string, price?: number, trainId?: string) => void;
-  requestSeat: (opportunityId: string, seekerId: string) => boolean;
+  cancelOpportunity: (opportunityId: string) => boolean;
+  requestSeat: (opportunityId: string, seekerId: string) => { ok: boolean; reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND' };
   transition: (matchId: string, actorId: string, to: import('../types').MatchStatus) => boolean;
   acceptMatch: (matchId: string) => boolean;
   rejectMatch: (matchId: string) => boolean;
@@ -85,6 +86,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   matches: [],
   
   offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => set((state) => {
+    const now = Date.now();
     const newOpp: SeatOpportunity = {
       id: Math.random().toString(36).substring(7),
       giverId: state.currentUser.id,
@@ -92,26 +94,44 @@ export const useAppStore = create<AppState>((set, get) => ({
       currentStationId,
       handoffStationId,
       status: 'ACTIVE',
-      createdAt: Date.now(),
-      expectedTimeMins: Math.floor(Math.random() * 15) + 5, // Mock timing
+      createdAt: now,
+      updatedAt: now,
+      expiresAt: now + 60 * 60 * 1000, // 1 hour expiry
       price,
-      trainId,
+      trainId: trainId || '',
     };
     return { opportunities: [...state.opportunities, newOpp] };
   }),
 
-  requestSeat: (opportunityId, seekerId) => {
+  cancelOpportunity: (opportunityId) => {
     let success = false;
     set((state) => {
       const opp = state.opportunities.find(o => o.id === opportunityId);
-      if (!opp || opp.status !== 'ACTIVE' || opp.giverId === seekerId) return state;
+      if (!opp || opp.giverId !== state.currentUser.id || opp.status !== 'ACTIVE') return state;
+      
+      success = true;
+      return {
+        opportunities: state.opportunities.map(o => o.id === opportunityId ? { ...o, status: 'CANCELLED' } : o)
+      };
+    });
+    return success;
+  },
+
+  requestSeat: (opportunityId, seekerId) => {
+    let result: { ok: boolean; reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND' } = { ok: false, reason: 'NOT_FOUND' };
+    
+    set((state) => {
+      const opp = state.opportunities.find(o => o.id === opportunityId);
+      if (!opp) { result = { ok: false, reason: 'NOT_FOUND' }; return state; }
+      if (opp.status !== 'ACTIVE') { result = { ok: false, reason: 'NOT_ACTIVE' }; return state; }
+      if (opp.giverId === seekerId) { result = { ok: false, reason: 'OWN_OFFER' }; return state; }
       
       const existingPending = state.matches.find(m => 
         m.opportunityId === opportunityId && m.seekerId === seekerId && m.status === 'PENDING'
       );
-      if (existingPending) return state;
+      if (existingPending) { result = { ok: false, reason: 'DUPLICATE' }; return state; }
 
-      success = true;
+      result = { ok: true };
       const newMatch: Match = {
         id: Math.random().toString(36).substring(7),
         opportunityId,
@@ -123,7 +143,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       
       return { matches: [...state.matches, newMatch] };
     });
-    return success;
+    return result;
   },
 
   transition: (matchId: string, actorId: string, to: MatchStatus): boolean => {

@@ -2,7 +2,7 @@ export type Station = {
   id: string;
   name: string;
   sequence: number; // mapped from service_pattern RY-MM
-  status: string;
+  status: 'operational' | 'under-construction' | 'planned';
 };
 
 export type Direction = 'Northbound' | 'Southbound';
@@ -18,9 +18,10 @@ export type SeatOpportunity = {
   handoffStationId: string;
   status: OpportunityStatus;
   createdAt: number;
-  expectedTimeMins?: number; // Estimated minutes until handoff
+  updatedAt: number;
+  expiresAt: number;
   price?: number; // Optional price if monetization is enabled
-  trainId?: string; // ID of the selected train from the timetable
+  trainId: string;
 };
 
 export type Match = {
@@ -30,10 +31,12 @@ export type Match = {
   giverId: string;
   status: MatchStatus;
   createdAt: number;
+  cancelledBy?: string;
 };
 
 export type User = {
   id: string;
   displayName: string;
   reputation: number;
+  upiId?: string;
 };

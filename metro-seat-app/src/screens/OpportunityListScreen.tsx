@@ -30,9 +30,13 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
       return;
     }
 
-    const success = requestSeat(oppId, currentUser.id);
-    if (!success) {
-      await notify('Error', 'Could not request this seat. It might be taken or expired.');
+    const result = requestSeat(oppId, currentUser.id);
+    if (!result.ok) {
+      const msg = result.reason === 'DUPLICATE' ? 'You already have an active request.'
+        : result.reason === 'OWN_OFFER' ? 'You cannot request your own offer.'
+        : result.reason === 'NOT_ACTIVE' ? 'This seat is no longer available.'
+        : 'Could not request this seat. It might be taken or expired.';
+      await notify('Error', msg);
       return;
     }
     
@@ -40,13 +44,12 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
     navigation.popToTop();
   };
 
-  const renderItem = ({ item }: { item: any }) => {
+    const renderItem = ({ item }: { item: any }) => {
     const handoffStation = getStationById(item.handoffStationId);
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.stationText}>Becomes available at: {handoffStation?.name}</Text>
-          <Text style={styles.timeText}>in ~{item.expectedTimeMins} mins</Text>
         </View>
         {item.trainId && (
           <Text style={styles.trainText}>{t.expectedTrain}: {getTrainLabel(item.trainId)}</Text>

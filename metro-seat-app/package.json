@@ -21,11 +21,11 @@
   },
   "devDependencies": {
     "@react-native/jest-preset": "^0.87.1",
-    "@testing-library/jest-native": "^5.4.3",
-    "@testing-library/react-native": "^14.0.1",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
     "jest": "^30.5.2",
     "jest-expo": "^57.0.5",
+    "ts-jest": "^29.4.14",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -35,8 +35,5 @@
     "web": "expo start --web",
     "test": "jest"
   },
-  "private": true,
-  "jest": {
-    "preset": "jest-expo"
-  }
+  "private": true
 }

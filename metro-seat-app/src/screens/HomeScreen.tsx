@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
 import { translations } from '../i18n';
+import { notify } from '../utils/dialog';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Tabs'>;
@@ -58,19 +59,33 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.statusText}>Status: {myOpportunity.status}</Text>
             <Text style={styles.instructionText}>Waiting for someone to request it...</Text>
             
+            {__DEV__ && (
+              <TouchableOpacity 
+                style={[styles.primaryButton, { marginTop: 20, backgroundColor: '#0056b3' }]}
+                onPress={async () => {
+                  const fakeSeeker = `mock_seeker_${Date.now()}`;
+                  const result = useAppStore.getState().requestSeat(myOpportunity.id, fakeSeeker);
+                  if (result.ok) {
+                    await notify('Simulation', 'A rider just requested your seat!');
+                  } else {
+                    await notify('Error', `Simulated request failed: ${result.reason}`);
+                  }
+                }}
+              >
+                <Text style={styles.buttonText}>Simulate Rider Request</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity 
-              style={[styles.primaryButton, { marginTop: 20, backgroundColor: '#0056b3' }]}
+              style={[styles.primaryButton, { marginTop: 10, backgroundColor: '#dc3545' }]}
               onPress={async () => {
-                const success = useAppStore.getState().requestSeat(myOpportunity.id, 'mock_seeker_1');
-                const { notify } = require('../utils/dialog');
+                const success = useAppStore.getState().cancelOpportunity(myOpportunity.id);
                 if (success) {
-                  await notify('Simulation', 'A rider just requested your seat!');
-                } else {
-                  await notify('Error', 'Simulated rider has already requested this seat.');
+                  await notify('Cancelled', 'Your offer has been cancelled.');
                 }
               }}
             >
-              <Text style={styles.buttonText}>Simulate Rider Request</Text>
+              <Text style={styles.buttonText}>Withdraw Offer</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -87,6 +102,30 @@ export default function HomeScreen({ navigation }: Props) {
               onPress={() => navigation.navigate('OfferSeat')}
             >
               <Text style={styles.largeButtonTitle}>{t.offerSeat}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {__DEV__ && (
+          <View style={{ marginTop: 40, padding: 20, backgroundColor: '#ffeeba', borderRadius: 8 }}>
+            <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>🛠 Dev Tools</Text>
+            <TouchableOpacity 
+              style={[styles.primaryButton, { backgroundColor: '#6c757d' }]}
+              onPress={() => {
+                const store = useAppStore.getState();
+                const isMe = store.currentUser.id === 'u_me';
+                store.currentUser = {
+                  id: isMe ? 'mock_seeker_2' : 'u_me',
+                  displayName: isMe ? 'Mock Seeker' : 'Me',
+                  reputation: 5.0
+                };
+                // force update
+                useAppStore.setState({ currentUser: { ...store.currentUser } });
+              }}
+            >
+              <Text style={styles.buttonText}>
+                Toggle Role (Currently: {currentUser.displayName})
+              </Text>
             </TouchableOpacity>
           </View>
         )}

@@ -21,11 +21,13 @@ export default function LoginScreen() {
       await notify('Invalid Name', 'Please enter your full name.');
       return;
     }
-    if (phone.length !== 10) {
-      await notify('Invalid Phone', 'Please enter a valid 10-digit phone number.');
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      await notify('Invalid Phone', 'Please enter a valid 10-digit Indian phone number.');
       return;
     }
     setOtpSent(true);
+    // TODO(release-blocker): Replace hardcoded OTP check with real SMS verification.
     await notify('OTP Sent', 'For this demo, please enter 1234 as your OTP.');
   };
 
