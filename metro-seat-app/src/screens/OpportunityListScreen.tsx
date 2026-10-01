@@ -4,7 +4,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
-import { getStationById, ENABLE_PAYMENTS } from '../data/stations';
+import { getStationById } from '../data/stations';
+import { ENABLE_PAYMENTS } from '../config/flags';
 import { getTrainLabel } from '../data/timetable';
 import { translations } from '../i18n';
 

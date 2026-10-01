@@ -33,4 +33,3 @@ export const isStationAfter = (station1Id: string, station2Id: string, direction
   }
 };
 
-export const ENABLE_PAYMENTS = false; // Feature flag requested by user

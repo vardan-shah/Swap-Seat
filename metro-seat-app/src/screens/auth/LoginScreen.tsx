@@ -27,15 +27,19 @@ export default function LoginScreen() {
       return;
     }
     setOtpSent(true);
-    // TODO(release-blocker): Replace hardcoded OTP check with real SMS verification.
-    await notify('OTP Sent', 'For this demo, please enter 1234 as your OTP.');
+    
+    const DEMO_OTP = __DEV__ ? '1234' : undefined;
+    if (DEMO_OTP) {
+      await notify('OTP Sent', `For this demo, please enter ${DEMO_OTP} as your OTP.`);
+    }
   };
 
   const handleVerifyOtp = async () => {
-    if (otp === '1234') {
+    const DEMO_OTP = __DEV__ ? '1234' : undefined;
+    if (DEMO_OTP && otp === DEMO_OTP) {
       login(name.trim());
     } else {
-      await notify('Invalid OTP', 'Please enter the correct OTP (1234).');
+      await notify('Invalid OTP', 'Please enter the correct OTP.');
     }
   };
 
