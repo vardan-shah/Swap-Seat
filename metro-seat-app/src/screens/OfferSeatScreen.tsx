@@ -9,7 +9,7 @@ import { ENABLE_PAYMENTS } from '../config/flags';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
-import { getTrainsByDirection, Train } from '../domain/trains';
+import { trainsRunningNow, Train } from '../domain/trains';
 import trains from '../data/trains.json';
 import { translations } from '../i18n';
 
@@ -46,12 +46,12 @@ export default function OfferSeatScreen({ navigation }: Props) {
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
     const res = offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
     if (!res.ok) {
-      await notify(
-        'Error',
-        res.reason === 'ALREADY_OFFERING'
-          ? 'You already have an active offer.'
-          : 'Handoff station must be after your current station.',
-      );
+      const msg = res.reason === 'ALREADY_OFFERING' ? 'You already have an active offer.' :
+                  res.reason === 'INVALID_STATIONS' ? 'Handoff station must be after your current station.' :
+                  res.reason === 'UNKNOWN_TRAIN' ? 'Unknown train selected.' :
+                  res.reason === 'TRAIN_NOT_ON_LEG' ? 'Selected train does not serve this leg.' :
+                  'Selected train has already passed.';
+      await notify('Error', msg);
       return;
     }
 
@@ -69,7 +69,30 @@ export default function OfferSeatScreen({ navigation }: Props) {
     return ordered.map((s) => ({ label: s.name, value: s.id }));
   }, [direction]);
 
-  const trainItems = useMemo(() => getTrainsByDirection(direction, trains as unknown as Train[]), [direction]);
+  const trainItems = useMemo(() => {
+    if (!currentStationId || !handoffStationId) return [];
+    
+    // Ensure leg is valid in this direction
+    const ordered = [...STATIONS].sort((a, b) =>
+      direction === 'Northbound'
+        ? stationIndex(a.id) - stationIndex(b.id)
+        : stationIndex(b.id) - stationIndex(a.id),
+    );
+    const currIdx = ordered.findIndex(s => s.id === currentStationId);
+    const handoffIdx = ordered.findIndex(s => s.id === handoffStationId);
+    if (currIdx < 0 || handoffIdx < 0 || handoffIdx <= currIdx) return [];
+
+    const activeTrains = trainsRunningNow(direction, currentStationId, handoffStationId, Date.now(), trains as unknown as Train[]);
+    
+    return activeTrains.map(t => {
+      // Find origin name from pattern
+      const origin = direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
+      const gift = t.pattern === 'RYV-GIFT' ? ' (GIFT)' : '';
+      const firstStop = Object.keys(t.times)[0];
+      const firstTime = t.times[firstStop];
+      return { label: `Train starting from ${origin} at ${firstTime}${gift}`, value: t.id };
+    });
+  }, [direction, currentStationId, handoffStationId]);
 
   const handleDirectionChange = (newDir: Direction) => {
     setDirection(newDir);
@@ -103,16 +126,10 @@ export default function OfferSeatScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      <SelectModal
-        label={`2. ${t.expectedTrain}`}
-        items={trainItems}
-        selectedValue={trainId}
-        onSelect={setTrainId}
-        placeholder={t.expectedTrain + '...'}
-      />
+      
 
       <SelectModal
-        label={`3. ${t.whereAreYou}`}
+        label={`2. ${t.whereAreYou}`}
         items={stationItems}
         selectedValue={currentStationId}
         onSelect={setCurrentStationId}
@@ -120,11 +137,19 @@ export default function OfferSeatScreen({ navigation }: Props) {
       />
 
       <SelectModal
-        label={`4. ${t.whereVacate}`}
+        label={`3. ${t.whereVacate}`}
         items={stationItems}
         selectedValue={handoffStationId}
         onSelect={setHandoffStationId}
         placeholder={t.whereVacate}
+      />
+
+      <SelectModal
+        label={`4. ${t.expectedTrain}`}
+        items={trainItems}
+        selectedValue={trainId}
+        onSelect={setTrainId}
+        placeholder={t.expectedTrain + '...'}
       />
 
       {ENABLE_PAYMENTS && (

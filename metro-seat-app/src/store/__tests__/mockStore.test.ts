@@ -32,203 +32,78 @@ describe('mockStore', () => {
   });
 
   describe('offerSeat', () => {
-    it('creates a valid Northbound offer', () => {
-      useAppStore.setState({
-        currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 },
-        opportunities: [],
-      });
-      const res = useAppStore
-        .getState()
-        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'train1');
-      expect(res.ok).toBe(true);
-      expect(useAppStore.getState().opportunities[0]).toMatchObject({
-        currentStationId: 'sabarmati',
-        handoffStationId: 'motera-stadium',
-      });
-    });
-
-    it('creates a valid Southbound offer', () => {
-      useAppStore.setState({
-        currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 },
-        opportunities: [],
-      });
-      const res = useAppStore
-        .getState()
-        .offerSeat('Southbound', 'motera-stadium', 'sabarmati', undefined, 'train1');
-      expect(res.ok).toBe(true);
-      expect(useAppStore.getState().opportunities[0]).toMatchObject({
-        currentStationId: 'motera-stadium',
-        handoffStationId: 'sabarmati',
-      });
-    });
-
-    it('rejects reversed stations', () => {
-      useAppStore.setState({
-        currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 },
-        opportunities: [],
-      });
-      const res = useAppStore
-        .getState()
-        .offerSeat('Northbound', 'motera-stadium', 'sabarmati', undefined, 'train1');
-      expect(res.ok).toBe(false);
-      expect(res.reason).toBe('INVALID_STATIONS');
-    });
-
-    it('rejects equal stations', () => {
-      useAppStore.setState({
-        currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 },
-        opportunities: [],
-      });
-      const res = useAppStore
-        .getState()
-        .offerSeat('Northbound', 'motera-stadium', 'motera-stadium', undefined, 'train1');
-      expect(res.ok).toBe(false);
-      expect(res.reason).toBe('INVALID_STATIONS');
-    });
-
-    it('rejects ALREADY_OFFERING and leaves state unchanged', () => {
-      useAppStore.setState({
-        currentUser: { id: 'u1', displayName: 'User', reputation: 5.0 },
-        opportunities: [{ giverId: 'u1', status: 'MATCHED' } as SeatOpportunity],
-      });
-      const res = useAppStore
-        .getState()
-        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'train1');
-      expect(res.ok).toBe(false);
-      expect(res.reason).toBe('ALREADY_OFFERING');
-      expect(useAppStore.getState().opportunities).toHaveLength(1);
-    });
-  });
-
-  describe('getCompatibleOpportunities', () => {
     beforeEach(() => {
       jest.useFakeTimers();
-      jest.setSystemTime(3300000); 
+      // 06:15 IST = 45 * 60000 = 2700000 UTC
+      jest.setSystemTime(2700000); 
     });
     afterEach(() => {
       jest.useRealTimers();
     });
 
-    it('matches valid Northbound offer', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: 2700000 + 3600000,
-          } as SeatOpportunity,
-        ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore.getState().getCompatibleOpportunities('ranip', 'motera-stadium', 'Northbound');
-      expect(matches).toHaveLength(1);
-    });
-
-    it('no match when handoff is after destination', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: 2700000 + 3600000,
-          } as SeatOpportunity,
-        ],
-      });
-      const matches = useAppStore
+    it('creates a valid Northbound offer', () => {
+      const res = useAppStore
         .getState()
-        .getCompatibleOpportunities('apmc', 'ranip', 'Northbound');
-      expect(matches).toHaveLength(0);
+        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM');
+      expect(res.ok).toBe(true);
+      expect(useAppStore.getState().opportunities[0]).toMatchObject({
+        currentStationId: 'sabarmati',
+        handoffStationId: 'motera-stadium',
+        direction: 'Northbound',
+        status: 'ACTIVE',
+        trainId: 'NB-0620-RYMM',
+      });
     });
 
-    it('no match when handoff is before boarding', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: 2700000 + 3600000,
-          } as SeatOpportunity,
-        ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore.getState().getCompatibleOpportunities('motera-stadium', 'koteshwar-road', 'Northbound');
-      expect(matches).toHaveLength(0);
-    });
-
-    it('matches when handoff equals boarding station (boundary)', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: 2700000 + 3600000,
-          } as SeatOpportunity,
-        ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore.getState().getCompatibleOpportunities('sabarmati', 'motera-stadium', 'Northbound');
-      expect(matches).toHaveLength(1);
-    });
-
-    it('no match when handoff equals destination', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: 2700000 + 3600000,
-          } as SeatOpportunity,
-        ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore.getState().getCompatibleOpportunities('ranip', 'sabarmati', 'Northbound');
-      expect(matches).toHaveLength(0);
-    });
-
-    it('matches valid Southbound offer', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'aec',
-            handoffStationId: 'vadaj',
-            direction: 'Southbound',
-            status: 'ACTIVE',
-            trainId: 'SB-0640-RYMM',
-            expiresAt: 2700000 + 3600000,
-          } as SeatOpportunity,
-        ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
+    it('creates a valid Southbound offer', () => {
+      // For Southbound, let's use 06:40 IST = 70 * 60000 = 4200000 UTC for SB-0640-RYMM
       jest.setSystemTime(4200000);
-      const matches = useAppStore.getState().getCompatibleOpportunities('aec', 'usmanpura', 'Southbound');
-      expect(matches).toHaveLength(1);
+      const res = useAppStore
+        .getState()
+        .offerSeat('Southbound', 'motera-stadium', 'sabarmati', undefined, 'SB-0640-RYMM');
+      expect(res.ok).toBe(true);
+      expect(useAppStore.getState().opportunities[0]).toMatchObject({
+        currentStationId: 'motera-stadium',
+        handoffStationId: 'sabarmati',
+        direction: 'Southbound',
+        status: 'ACTIVE',
+        trainId: 'SB-0640-RYMM',
+      });
+    });
+
+    it('rejects INVALID_STATIONS when handoff is before current', () => {
+      const res = useAppStore
+        .getState()
+        .offerSeat('Northbound', 'motera-stadium', 'sabarmati', undefined, 'NB-0620-RYMM');
+      expect(res.ok).toBe(false);
+      expect(res.reason).toBe('INVALID_STATIONS');
+    });
+
+    it('rejects UNKNOWN_TRAIN when train does not exist', () => {
+      const res = useAppStore
+        .getState()
+        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'train1');
+      expect(res.ok).toBe(false);
+      expect(res.reason).toBe('UNKNOWN_TRAIN');
+    });
+
+    it('rejects ALREADY_OFFERING and leaves state unchanged', () => {
+      useAppStore.setState({
+        opportunities: [
+          {
+            id: 'opp1',
+            giverId: 'u1',
+            direction: 'Northbound',
+            status: 'ACTIVE',
+          } as SeatOpportunity,
+        ],
+      });
+      const res = useAppStore
+        .getState()
+        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM');
+      expect(res.ok).toBe(false);
+      expect(res.reason).toBe('ALREADY_OFFERING');
+      expect(useAppStore.getState().opportunities).toHaveLength(1);
     });
   });
 

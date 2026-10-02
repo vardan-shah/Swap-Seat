@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { timeAt, servesLeg, isRunning, handoffExpiry, trainsRunningNow } from '../trains';
+import { timeAt, servesLeg, isRunning, handoffExpiry, trainsRunningNow, checkOffer } from '../trains';
 import trains from '../../data/trains.json';
 import { Train } from '../trains';
 
@@ -50,6 +50,35 @@ describe('trains domain', () => {
     it('returns null for unknown station', () => {
       const nb = allTrains.find(t => t.id === 'NB-0620-RYMM')!;
       expect(handoffExpiry(nb, 'unknown-station', at(390))).toBeNull();
+    });
+  });
+
+  
+  describe('checkOffer', () => {
+    it('returns ok and expiry for a valid train that serves the leg and is running', () => {
+      // NB-0620-RYMM reaches old-high-court (handoff) at 06:34 (394)
+      const nowMs = at(380); // 06:20 IST
+      const res = checkOffer('NB-0620-RYMM', 'Northbound', 'apmc', 'old-high-court', nowMs, allTrains);
+      expect(res.ok).toBe(true);
+      if (res.ok) {
+        expect(res.expiresAt).toBe(at(396)); // 394 + 2 grace
+      }
+    });
+
+    it('returns UNKNOWN_TRAIN for a train that does not exist', () => {
+      const res = checkOffer('NB-UNKNOWN', 'Northbound', 'apmc', 'old-high-court', at(380), allTrains);
+      expect(res).toEqual({ ok: false, reason: 'UNKNOWN_TRAIN' });
+    });
+
+    it('returns TRAIN_NOT_ON_LEG if a GIFT train is offered for a mahatma-mandir leg', () => {
+      const res = checkOffer('NB-0645-RYVGIFT', 'Northbound', 'apmc', 'mahatma-mandir', at(380), allTrains);
+      expect(res).toEqual({ ok: false, reason: 'TRAIN_NOT_ON_LEG' });
+    });
+
+    it('returns TRAIN_NOT_RUNNING if the train has already passed the handoff station hours ago', () => {
+      const nowMs = at(500); // 08:20 IST, long after 06:34
+      const res = checkOffer('NB-0620-RYMM', 'Northbound', 'apmc', 'old-high-court', nowMs, allTrains);
+      expect(res).toEqual({ ok: false, reason: 'TRAIN_NOT_RUNNING' });
     });
   });
 

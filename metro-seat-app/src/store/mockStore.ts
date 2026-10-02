@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
 import { isLegValid } from '../domain/route';
-import { handoffExpiry, trainsRunningNow, Train } from '../domain/trains';
+import { trainsRunningNow, Train, checkOffer } from '../domain/trains';
 import trainsData from '../data/trains.json';
 import { Language } from '../i18n';
 import { randomUUID } from 'expo-crypto';
@@ -35,7 +35,7 @@ interface AppState {
     handoffStationId: string,
     price: number | undefined,
     trainId: string,
-  ) => { ok: boolean; reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' };
+  ) => { ok: boolean; reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' | 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING' };
   cancelOpportunity: (opportunityId: string) => boolean;
   requestSeat: (
     opportunityId: string,
@@ -113,7 +113,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => {
     let result: {
       ok: boolean;
-      reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS';
+      reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' | 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING';
     } = { ok: false };
     set((state) => {
       const existingOffer = state.opportunities.find(
@@ -131,8 +131,12 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       const now = Date.now();
       const allTrains = trainsData as unknown as Train[];
-      const train = allTrains.find(t => t.id === trainId);
-      const expiry = train ? handoffExpiry(train, handoffStationId, now) : (now + 3600000);
+      
+      const validation = checkOffer(trainId, direction, currentStationId, handoffStationId, now, allTrains);
+      if (!validation.ok) {
+        result = { ok: false, reason: validation.reason };
+        return state;
+      }
       
       const newOpp: SeatOpportunity = {
         id: randomUUID(),
@@ -143,7 +147,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         status: 'ACTIVE',
         createdAt: now,
         updatedAt: now,
-        expiresAt: expiry || (now + 3600000),
+        expiresAt: validation.expiresAt,
         price,
         trainId,
       };

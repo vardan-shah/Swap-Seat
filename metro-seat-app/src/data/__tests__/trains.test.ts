@@ -72,8 +72,8 @@ describe('trains.json data integrity', () => {
       return false;
     };
 
-    const getTimingBounds = (from: string, to: string) => {
-      for (const seg of gmrcData.timing.segments) {
+    const getTimingBounds = (from: string, to: string, direction: "Northbound" | "Southbound") => {
+      for (const seg of gmrcData.timing.directional_segments[direction]) {
         if (seg.from === from && seg.to === to) return seg;
       }
       return null;
@@ -90,7 +90,7 @@ describe('trains.json data integrity', () => {
         expect(t2).toBeGreaterThan(t1); // Strictly increasing
 
         const diff = t2 - t1;
-        const bounds = getTimingBounds(from, to);
+        const bounds = getTimingBounds(from, to, train.direction as "Northbound" | "Southbound");
         if (bounds) {
           if (diff < bounds.min || diff > bounds.max) {
             if (!isException(train.id, from, to, diff)) {

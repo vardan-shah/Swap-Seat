@@ -132,3 +132,38 @@ export function getTrainLabel(trainId: string, allTrains: Train[]): string {
   const gift = t.pattern === 'RYV-GIFT' ? ' (GIFT)' : '';
   return `Train starting from ${origin} at ${firstTime}${gift}`;
 }
+
+export type OfferValidation =
+  | { ok: true; expiresAt: number }
+  | { ok: false; reason: 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING' };
+
+export function checkOffer(
+  trainId: string,
+  direction: Direction,
+  currentStationId: string,
+  handoffStationId: string,
+  nowMs: number,
+  allTrains: Train[]
+): OfferValidation {
+  const train = allTrains.find((t) => t.id === trainId);
+  if (!train || train.direction !== direction) return { ok: false, reason: 'UNKNOWN_TRAIN' };
+
+  if (!servesLeg(train, currentStationId, handoffStationId)) {
+    return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
+  }
+
+  // The train must be running now (or soon) and hasn't passed the handoff station yet
+  // isRunning check? If user is offering, train could be running right now.
+  const tAt = timeAt(train, handoffStationId);
+  if (!tAt) return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
+
+  if (tAt.max < getISTMinutes(nowMs)) {
+    return { ok: false, reason: 'TRAIN_NOT_RUNNING' }; // Already passed the handoff station!
+  }
+
+  // If it's valid, generate expiry
+  const expires = handoffExpiry(train, handoffStationId, nowMs);
+  if (!expires) return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
+
+  return { ok: true, expiresAt: expires };
+}
