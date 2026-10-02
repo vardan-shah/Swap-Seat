@@ -35,7 +35,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "format": "npx prettier --write \"src/**/*.{ts,tsx}\" App.tsx"
+    "format": "npx prettier --write \"src/**/*.{ts,tsx}\" App.tsx",
+    "validate:data": "jest src/data"
   },
   "private": true
 }

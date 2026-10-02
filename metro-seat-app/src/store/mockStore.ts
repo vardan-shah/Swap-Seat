@@ -288,7 +288,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         opp.handoffStationId === currentStationId ||
         isLegValid(currentStationId, opp.handoffStationId, direction);
 
-      // Handoff station must be BEFORE or AT seeker's destination
+      // Handoff station must be strictly BEFORE seeker's destination
       const handoffBeforeDest = isLegValid(opp.handoffStationId, destinationStationId, direction);
 
       return handoffAfterCurrent && handoffBeforeDest;

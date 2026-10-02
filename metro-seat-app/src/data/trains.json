@@ -3,588 +3,1228 @@
     "id": "NB-0620-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "06:20"
+    "times": {
+      "apmc": "06:20",
+      "old-high-court": "06:34",
+      "motera-stadium": "06:52",
+      "koteshwar-road": "06:55",
+      "gnlu": "07:10",
+      "infocity": "07:19",
+      "sachivalaya": "07:27",
+      "mahatma-mandir": "07:38"
+    }
   },
   {
     "id": "SB-0640-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "06:40"
+    "times": {
+      "mahatma-mandir": "06:40",
+      "sachivalaya": "06:51",
+      "infocity": "06:59",
+      "gnlu": "07:09",
+      "koteshwar-road": "07:25",
+      "motera-stadium": "07:28",
+      "old-high-court": "07:46",
+      "apmc": "07:59"
+    }
   },
   {
     "id": "NB-0645-RYVGIFT",
     "direction": "Northbound",
     "pattern": "RYV-GIFT",
-    "origin": "apmc",
-    "departure": "06:45"
+    "times": {
+      "apmc": "06:45",
+      "old-high-court": "07:00",
+      "motera-stadium": "07:18",
+      "koteshwar-road": "07:21",
+      "gnlu": "07:36",
+      "gift-city": "07:42"
+    }
   },
   {
     "id": "SB-0733-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "07:33"
+    "times": {
+      "mahatma-mandir": "07:33",
+      "sachivalaya": "07:45",
+      "infocity": "07:53",
+      "gnlu": "08:05",
+      "koteshwar-road": "08:21",
+      "motera-stadium": "08:24",
+      "old-high-court": "08:42",
+      "apmc": "08:56"
+    }
   },
   {
     "id": "NB-0658-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "06:58"
+    "times": {
+      "apmc": "06:58",
+      "old-high-court": "07:12",
+      "motera-stadium": "07:30",
+      "koteshwar-road": "07:33",
+      "gnlu": "07:48",
+      "infocity": "07:57",
+      "sachivalaya": "08:05",
+      "mahatma-mandir": "08:16"
+    }
   },
   {
     "id": "SB-0748-RYVGIFT",
     "direction": "Southbound",
     "pattern": "RYV-GIFT",
-    "origin": "gift-city",
-    "departure": "07:48"
+    "times": {
+      "gift-city": "07:48",
+      "gnlu": "07:55",
+      "koteshwar-road": "08:09",
+      "motera-stadium": "08:12",
+      "old-high-court": "08:30",
+      "apmc": "08:44"
+    }
   },
   {
     "id": "NB-0723-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "07:23"
+    "times": {
+      "apmc": "07:23",
+      "old-high-court": "07:37",
+      "motera-stadium": "07:55",
+      "koteshwar-road": "07:58",
+      "gnlu": "08:13",
+      "infocity": "08:22",
+      "sachivalaya": "08:30",
+      "mahatma-mandir": "08:41"
+    }
   },
   {
     "id": "SB-0800-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "08:00"
+    "times": {
+      "mahatma-mandir": "08:00",
+      "sachivalaya": "08:12",
+      "infocity": "08:19",
+      "gnlu": "08:30",
+      "koteshwar-road": "08:46",
+      "motera-stadium": "08:49",
+      "old-high-court": "09:07",
+      "apmc": "09:21"
+    }
   },
   {
     "id": "NB-0734-RYVGIFT",
     "direction": "Northbound",
     "pattern": "RYV-GIFT",
-    "origin": "apmc",
-    "departure": "07:34"
+    "times": {
+      "apmc": "07:34",
+      "old-high-court": "07:47",
+      "motera-stadium": "08:06",
+      "koteshwar-road": "08:09",
+      "gnlu": "08:24",
+      "gift-city": "08:30"
+    }
   },
   {
     "id": "SB-0837-RYVGIFT",
     "direction": "Southbound",
     "pattern": "RYV-GIFT",
-    "origin": "gift-city",
-    "departure": "08:37"
+    "times": {
+      "gift-city": "08:37",
+      "gnlu": "08:44",
+      "koteshwar-road": "08:58",
+      "motera-stadium": "09:01",
+      "old-high-court": "09:19",
+      "apmc": "09:33"
+    }
   },
   {
     "id": "NB-0747-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "07:47"
+    "times": {
+      "apmc": "07:47",
+      "old-high-court": "08:01",
+      "motera-stadium": "08:19",
+      "koteshwar-road": "08:22",
+      "gnlu": "08:37",
+      "infocity": "08:46",
+      "sachivalaya": "08:54",
+      "mahatma-mandir": "09:05"
+    }
   },
   {
     "id": "SB-0825-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "08:25"
+    "times": {
+      "mahatma-mandir": "08:25",
+      "sachivalaya": "08:36",
+      "infocity": "08:44",
+      "gnlu": "08:54",
+      "koteshwar-road": "09:10",
+      "motera-stadium": "09:13",
+      "old-high-court": "09:32",
+      "apmc": "09:45"
+    }
   },
   {
     "id": "NB-0803-RYVGIFT",
     "direction": "Northbound",
     "pattern": "RYV-GIFT",
-    "origin": "apmc",
-    "departure": "08:03"
+    "times": {
+      "apmc": "08:03",
+      "old-high-court": "08:17",
+      "motera-stadium": "08:35",
+      "koteshwar-road": "08:38",
+      "gnlu": "08:54",
+      "gift-city": "09:01"
+    }
   },
   {
     "id": "SB-0901-RYVGIFT",
     "direction": "Southbound",
     "pattern": "RYV-GIFT",
-    "origin": "gift-city",
-    "departure": "09:01"
+    "times": {
+      "gift-city": "09:01",
+      "gnlu": "09:08",
+      "koteshwar-road": "09:23",
+      "motera-stadium": "09:26",
+      "old-high-court": "09:44",
+      "apmc": "09:58"
+    }
   },
   {
     "id": "NB-0817-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "08:17"
+    "times": {
+      "apmc": "08:17",
+      "old-high-court": "08:31",
+      "motera-stadium": "08:49",
+      "koteshwar-road": "08:52",
+      "gnlu": "09:07",
+      "infocity": "09:16",
+      "sachivalaya": "09:24",
+      "mahatma-mandir": "09:35"
+    }
   },
   {
     "id": "SB-0849-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "08:49"
+    "times": {
+      "mahatma-mandir": "08:49",
+      "sachivalaya": "09:00",
+      "infocity": "09:08",
+      "gnlu": "09:18",
+      "koteshwar-road": "09:34",
+      "motera-stadium": "09:37",
+      "old-high-court": "09:55",
+      "apmc": "10:09"
+    }
   },
   {
     "id": "NB-0833-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "08:33"
+    "times": {
+      "apmc": "08:33",
+      "old-high-court": "08:47",
+      "motera-stadium": "09:05",
+      "koteshwar-road": "09:08",
+      "gnlu": "09:23",
+      "infocity": "09:32",
+      "sachivalaya": "09:40",
+      "mahatma-mandir": "09:51"
+    }
   },
   {
     "id": "SB-0913-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "09:13"
+    "times": {
+      "mahatma-mandir": "09:13",
+      "sachivalaya": "09:25",
+      "infocity": "09:32",
+      "gnlu": "09:43",
+      "koteshwar-road": "09:58",
+      "motera-stadium": "10:01",
+      "old-high-court": "10:19",
+      "apmc": "10:33"
+    }
   },
   {
     "id": "NB-0859-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "08:59"
+    "times": {
+      "apmc": "08:59",
+      "old-high-court": "09:13",
+      "motera-stadium": "09:31",
+      "koteshwar-road": "09:34",
+      "gnlu": "09:49",
+      "infocity": "09:58",
+      "sachivalaya": "10:06",
+      "mahatma-mandir": "10:17"
+    }
   },
   {
     "id": "SB-0937-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "09:37"
+    "times": {
+      "mahatma-mandir": "09:37",
+      "sachivalaya": "09:49",
+      "infocity": "09:56",
+      "gnlu": "10:07",
+      "koteshwar-road": "10:23",
+      "motera-stadium": "10:26",
+      "old-high-court": "10:44",
+      "apmc": "10:58"
+    }
   },
   {
     "id": "NB-0911-RYVGIFT",
     "direction": "Northbound",
     "pattern": "RYV-GIFT",
-    "origin": "apmc",
-    "departure": "09:11"
+    "times": {
+      "apmc": "09:11",
+      "old-high-court": "09:25",
+      "motera-stadium": "09:43",
+      "koteshwar-road": "09:46",
+      "gnlu": "10:01",
+      "gift-city": "10:07"
+    }
   },
   {
     "id": "SB-1018-RYVGIFT",
     "direction": "Southbound",
     "pattern": "RYV-GIFT",
-    "origin": "gift-city",
-    "departure": "10:18"
+    "times": {
+      "gift-city": "10:18",
+      "gnlu": "10:25",
+      "koteshwar-road": "10:39",
+      "motera-stadium": "10:42",
+      "old-high-court": "11:00",
+      "apmc": "11:14"
+    }
   },
   {
     "id": "NB-0919-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "09:19"
+    "times": {
+      "apmc": "09:19",
+      "old-high-court": "09:33",
+      "motera-stadium": "09:51",
+      "koteshwar-road": "09:54",
+      "gnlu": "10:09",
+      "infocity": "10:18",
+      "sachivalaya": "10:26",
+      "mahatma-mandir": "10:37"
+    }
   },
   {
     "id": "SB-1001-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "10:01"
+    "times": {
+      "mahatma-mandir": "10:01",
+      "sachivalaya": "10:13",
+      "infocity": "10:20",
+      "gnlu": "10:31",
+      "koteshwar-road": "10:47",
+      "motera-stadium": "10:50",
+      "old-high-court": "11:08",
+      "apmc": "11:22"
+    }
   },
   {
     "id": "NB-0948-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "09:48"
+    "times": {
+      "apmc": "09:48",
+      "old-high-court": "10:02",
+      "motera-stadium": "10:20",
+      "koteshwar-road": "10:23",
+      "gnlu": "10:38",
+      "infocity": "10:47",
+      "sachivalaya": "10:55",
+      "mahatma-mandir": "11:06"
+    }
   },
   {
     "id": "SB-1026-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "10:26"
+    "times": {
+      "mahatma-mandir": "10:26",
+      "sachivalaya": "10:38",
+      "infocity": "10:45",
+      "gnlu": "10:56",
+      "koteshwar-road": "11:12",
+      "motera-stadium": "11:15",
+      "old-high-court": "11:33",
+      "apmc": "11:47"
+    }
   },
   {
     "id": "NB-1012-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "10:12"
+    "times": {
+      "apmc": "10:12",
+      "old-high-court": "10:26",
+      "motera-stadium": "10:44",
+      "koteshwar-road": "10:47",
+      "gnlu": "11:02",
+      "infocity": "11:11",
+      "sachivalaya": "11:19",
+      "mahatma-mandir": "11:30"
+    }
   },
   {
     "id": "SB-1050-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "10:50"
+    "times": {
+      "mahatma-mandir": "10:50",
+      "sachivalaya": "11:02",
+      "infocity": "11:09",
+      "gnlu": "11:20",
+      "koteshwar-road": "11:36",
+      "motera-stadium": "11:39",
+      "old-high-court": "11:57",
+      "apmc": "12:11"
+    }
   },
   {
     "id": "NB-1036-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "10:36"
+    "times": {
+      "apmc": "10:36",
+      "old-high-court": "10:50",
+      "motera-stadium": "11:08",
+      "koteshwar-road": "11:11",
+      "gnlu": "11:26",
+      "infocity": "11:35",
+      "sachivalaya": "11:43",
+      "mahatma-mandir": "11:54"
+    }
   },
   {
     "id": "SB-1114-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "11:14"
+    "times": {
+      "mahatma-mandir": "11:14",
+      "sachivalaya": "11:26",
+      "infocity": "11:33",
+      "gnlu": "11:44",
+      "koteshwar-road": "12:00",
+      "motera-stadium": "12:03",
+      "old-high-court": "12:21",
+      "apmc": "12:35"
+    }
   },
   {
     "id": "NB-1059-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "10:59"
+    "times": {
+      "apmc": "10:59",
+      "old-high-court": "11:13",
+      "motera-stadium": "11:32",
+      "koteshwar-road": "11:35",
+      "gnlu": "11:50",
+      "infocity": "11:59",
+      "sachivalaya": "12:07",
+      "mahatma-mandir": "12:18"
+    }
   },
   {
     "id": "SB-1138-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "11:38"
+    "times": {
+      "mahatma-mandir": "11:38",
+      "sachivalaya": "11:50",
+      "infocity": "11:57",
+      "gnlu": "12:08",
+      "koteshwar-road": "12:24",
+      "motera-stadium": "12:27",
+      "old-high-court": "12:45",
+      "apmc": "12:59"
+    }
   },
   {
     "id": "NB-1125-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "11:25"
+    "times": {
+      "apmc": "11:25",
+      "old-high-court": "11:39",
+      "motera-stadium": "11:57",
+      "koteshwar-road": "12:00",
+      "gnlu": "12:15",
+      "infocity": "12:24",
+      "sachivalaya": "12:32",
+      "mahatma-mandir": "12:43"
+    }
   },
   {
     "id": "SB-1203-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "12:03"
+    "times": {
+      "mahatma-mandir": "12:03",
+      "sachivalaya": "12:15",
+      "infocity": "12:22",
+      "gnlu": "12:33",
+      "koteshwar-road": "12:49",
+      "motera-stadium": "12:52",
+      "old-high-court": "13:10",
+      "apmc": "13:24"
+    }
   },
   {
     "id": "NB-1149-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "11:49"
+    "times": {
+      "apmc": "11:49",
+      "old-high-court": "12:03",
+      "motera-stadium": "12:21",
+      "koteshwar-road": "12:24",
+      "gnlu": "12:39",
+      "infocity": "12:48",
+      "sachivalaya": "12:56",
+      "mahatma-mandir": "13:07"
+    }
   },
   {
     "id": "SB-1226-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "12:26"
+    "times": {
+      "mahatma-mandir": "12:26",
+      "sachivalaya": "12:38",
+      "infocity": "12:45",
+      "gnlu": "12:56",
+      "koteshwar-road": "13:12",
+      "motera-stadium": "13:15",
+      "old-high-court": "13:33",
+      "apmc": "13:47"
+    }
   },
   {
     "id": "NB-1213-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "12:13"
+    "times": {
+      "apmc": "12:13",
+      "old-high-court": "12:27",
+      "motera-stadium": "12:45",
+      "koteshwar-road": "12:48",
+      "gnlu": "13:03",
+      "infocity": "13:12",
+      "sachivalaya": "13:20",
+      "mahatma-mandir": "13:31"
+    }
   },
   {
     "id": "SB-1251-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "12:51"
+    "times": {
+      "mahatma-mandir": "12:51",
+      "sachivalaya": "13:03",
+      "infocity": "13:10",
+      "gnlu": "13:21",
+      "koteshwar-road": "13:38",
+      "motera-stadium": "13:41",
+      "old-high-court": "13:59",
+      "apmc": "14:13"
+    }
   },
   {
     "id": "NB-1237-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "12:37"
+    "times": {
+      "apmc": "12:37",
+      "old-high-court": "12:51",
+      "motera-stadium": "13:09",
+      "koteshwar-road": "13:12",
+      "gnlu": "13:27",
+      "infocity": "13:36",
+      "sachivalaya": "13:44",
+      "mahatma-mandir": "13:55"
+    }
   },
   {
     "id": "SB-1315-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "13:15"
+    "times": {
+      "mahatma-mandir": "13:15",
+      "sachivalaya": "13:27",
+      "infocity": "13:34",
+      "gnlu": "13:45",
+      "koteshwar-road": "14:02",
+      "motera-stadium": "14:05",
+      "old-high-court": "14:23",
+      "apmc": "14:37"
+    }
   },
   {
     "id": "NB-1302-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "13:02"
+    "times": {
+      "apmc": "13:02",
+      "old-high-court": "13:16",
+      "motera-stadium": "13:34",
+      "koteshwar-road": "13:37",
+      "gnlu": "13:52",
+      "infocity": "14:01",
+      "sachivalaya": "14:09",
+      "mahatma-mandir": "14:20"
+    }
   },
   {
     "id": "SB-1340-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "13:40"
+    "times": {
+      "mahatma-mandir": "13:40",
+      "sachivalaya": "13:52",
+      "infocity": "13:59",
+      "gnlu": "14:10",
+      "koteshwar-road": "14:27",
+      "motera-stadium": "14:30",
+      "old-high-court": "14:48",
+      "apmc": "15:02"
+    }
   },
   {
     "id": "NB-1327-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "13:27"
+    "times": {
+      "apmc": "13:27",
+      "old-high-court": "13:41",
+      "motera-stadium": "13:59",
+      "koteshwar-road": "14:02",
+      "gnlu": "14:17",
+      "infocity": "14:26",
+      "sachivalaya": "14:34",
+      "mahatma-mandir": "14:45"
+    }
   },
   {
     "id": "SB-1404-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "14:04"
+    "times": {
+      "mahatma-mandir": "14:04",
+      "sachivalaya": "14:16",
+      "infocity": "14:23",
+      "gnlu": "14:34",
+      "koteshwar-road": "14:51",
+      "motera-stadium": "14:54",
+      "old-high-court": "15:12",
+      "apmc": "15:26"
+    }
   },
   {
     "id": "NB-1350-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "13:50"
+    "times": {
+      "apmc": "13:50",
+      "old-high-court": "14:04",
+      "motera-stadium": "14:22",
+      "koteshwar-road": "14:25",
+      "gnlu": "14:40",
+      "infocity": "14:49",
+      "sachivalaya": "14:57",
+      "mahatma-mandir": "15:08"
+    }
   },
   {
     "id": "SB-1428-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "14:28"
+    "times": {
+      "mahatma-mandir": "14:28",
+      "sachivalaya": "14:40",
+      "infocity": "14:47",
+      "gnlu": "14:58",
+      "koteshwar-road": "15:15",
+      "motera-stadium": "15:18",
+      "old-high-court": "15:36",
+      "apmc": "15:50"
+    }
   },
   {
     "id": "NB-1415-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "14:15"
+    "times": {
+      "apmc": "14:15",
+      "old-high-court": "14:29",
+      "motera-stadium": "14:47",
+      "koteshwar-road": "14:50",
+      "gnlu": "15:05",
+      "infocity": "15:14",
+      "sachivalaya": "15:22",
+      "mahatma-mandir": "15:33"
+    }
   },
   {
     "id": "SB-1452-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "14:52"
+    "times": {
+      "mahatma-mandir": "14:52",
+      "sachivalaya": "15:04",
+      "infocity": "15:11",
+      "gnlu": "15:22",
+      "koteshwar-road": "15:39",
+      "motera-stadium": "15:42",
+      "old-high-court": "16:00",
+      "apmc": "16:14"
+    }
   },
   {
     "id": "NB-1440-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "14:40"
+    "times": {
+      "apmc": "14:40",
+      "old-high-court": "14:54",
+      "motera-stadium": "15:12",
+      "koteshwar-road": "15:15",
+      "gnlu": "15:30",
+      "infocity": "15:39",
+      "sachivalaya": "15:47",
+      "mahatma-mandir": "15:58"
+    }
   },
   {
     "id": "SB-1516-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "15:16"
+    "times": {
+      "mahatma-mandir": "15:16",
+      "sachivalaya": "15:28",
+      "infocity": "15:35",
+      "gnlu": "15:46",
+      "koteshwar-road": "16:02",
+      "motera-stadium": "16:05",
+      "old-high-court": "16:23",
+      "apmc": "16:37"
+    }
   },
   {
     "id": "NB-1504-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "15:04"
+    "times": {
+      "apmc": "15:04",
+      "old-high-court": "15:18",
+      "motera-stadium": "15:36",
+      "koteshwar-road": "15:39",
+      "gnlu": "15:54",
+      "infocity": "16:03",
+      "sachivalaya": "16:11",
+      "mahatma-mandir": "16:22"
+    }
   },
   {
     "id": "SB-1541-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "15:41"
+    "times": {
+      "mahatma-mandir": "15:41",
+      "sachivalaya": "15:53",
+      "infocity": "16:00",
+      "gnlu": "16:11",
+      "koteshwar-road": "16:27",
+      "motera-stadium": "16:30",
+      "old-high-court": "16:48",
+      "apmc": "17:02"
+    }
   },
   {
     "id": "NB-1516-RYVGIFT",
     "direction": "Northbound",
     "pattern": "RYV-GIFT",
-    "origin": "apmc",
-    "departure": "15:16"
+    "times": {
+      "apmc": "15:16",
+      "old-high-court": "15:30",
+      "motera-stadium": "15:48",
+      "koteshwar-road": "15:51",
+      "gnlu": "16:06",
+      "gift-city": "16:12"
+    }
   },
   {
     "id": "SB-1617-RYVGIFT",
     "direction": "Southbound",
     "pattern": "RYV-GIFT",
-    "origin": "gift-city",
-    "departure": "16:17"
+    "times": {
+      "gift-city": "16:17",
+      "gnlu": "16:24",
+      "koteshwar-road": "16:39",
+      "motera-stadium": "16:42",
+      "old-high-court": "17:00",
+      "apmc": "17:14"
+    }
   },
   {
     "id": "NB-1528-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "15:28"
+    "times": {
+      "apmc": "15:28",
+      "old-high-court": "15:42",
+      "motera-stadium": "16:00",
+      "koteshwar-road": "16:03",
+      "gnlu": "16:18",
+      "infocity": "16:27",
+      "sachivalaya": "16:35",
+      "mahatma-mandir": "16:46"
+    }
   },
   {
     "id": "SB-1606-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "16:06"
+    "times": {
+      "mahatma-mandir": "16:06",
+      "sachivalaya": "16:18",
+      "infocity": "16:25",
+      "gnlu": "16:36",
+      "koteshwar-road": "16:52",
+      "motera-stadium": "16:55",
+      "old-high-court": "17:13",
+      "apmc": "17:27"
+    }
   },
   {
     "id": "NB-1553-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "15:53"
+    "times": {
+      "apmc": "15:53",
+      "old-high-court": "16:07",
+      "motera-stadium": "16:25",
+      "koteshwar-road": "16:28",
+      "gnlu": "16:43",
+      "infocity": "16:52",
+      "sachivalaya": "17:00",
+      "mahatma-mandir": "17:11"
+    }
   },
   {
     "id": "SB-1630-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "16:30"
+    "times": {
+      "mahatma-mandir": "16:30",
+      "sachivalaya": "16:42",
+      "infocity": "16:49",
+      "gnlu": "17:00",
+      "koteshwar-road": "17:17",
+      "motera-stadium": "17:20",
+      "old-high-court": "17:38",
+      "apmc": "17:52"
+    }
   },
   {
     "id": "NB-1603-RYVGIFT",
     "direction": "Northbound",
     "pattern": "RYV-GIFT",
-    "origin": "apmc",
-    "departure": "16:03"
+    "times": {
+      "apmc": "16:03",
+      "old-high-court": "16:17",
+      "motera-stadium": "16:35",
+      "koteshwar-road": "16:38",
+      "gnlu": "16:53",
+      "gift-city": "16:59"
+    }
   },
   {
     "id": "SB-1708-RYVGIFT",
     "direction": "Southbound",
     "pattern": "RYV-GIFT",
-    "origin": "gift-city",
-    "departure": "17:08"
+    "times": {
+      "gift-city": "17:08",
+      "gnlu": "17:15",
+      "koteshwar-road": "17:30",
+      "motera-stadium": "17:33",
+      "old-high-court": "17:51",
+      "apmc": "18:05"
+    }
   },
   {
     "id": "NB-1617-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "16:17"
+    "times": {
+      "apmc": "16:17",
+      "old-high-court": "16:31",
+      "motera-stadium": "16:49",
+      "koteshwar-road": "16:52",
+      "gnlu": "17:07",
+      "infocity": "17:16",
+      "sachivalaya": "17:24",
+      "mahatma-mandir": "17:35"
+    }
   },
   {
     "id": "SB-1654-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "16:54"
+    "times": {
+      "mahatma-mandir": "16:54",
+      "sachivalaya": "17:06",
+      "infocity": "17:13",
+      "gnlu": "17:24",
+      "koteshwar-road": "17:41",
+      "motera-stadium": "17:44",
+      "old-high-court": "18:02",
+      "apmc": "18:16"
+    }
   },
   {
     "id": "NB-1640-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "16:40"
+    "times": {
+      "apmc": "16:40",
+      "old-high-court": "16:54",
+      "motera-stadium": "17:13",
+      "koteshwar-road": "17:16",
+      "gnlu": "17:31",
+      "infocity": "17:40",
+      "sachivalaya": "17:48",
+      "mahatma-mandir": "17:59"
+    }
   },
   {
     "id": "SB-1719-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "17:19"
+    "times": {
+      "mahatma-mandir": "17:19",
+      "sachivalaya": "17:31",
+      "infocity": "17:38",
+      "gnlu": "17:49",
+      "koteshwar-road": "18:06",
+      "motera-stadium": "18:09",
+      "old-high-court": "18:27",
+      "apmc": "18:41"
+    }
   },
   {
     "id": "NB-1706-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "17:06"
+    "times": {
+      "apmc": "17:06",
+      "old-high-court": "17:20",
+      "motera-stadium": "17:38",
+      "koteshwar-road": "17:41",
+      "gnlu": "17:56",
+      "infocity": "18:05",
+      "sachivalaya": "18:13",
+      "mahatma-mandir": "18:24"
+    }
   },
   {
     "id": "SB-1744-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "17:44"
+    "times": {
+      "mahatma-mandir": "17:44",
+      "sachivalaya": "17:56",
+      "infocity": "18:03",
+      "gnlu": "18:14",
+      "koteshwar-road": "18:31",
+      "motera-stadium": "18:34",
+      "old-high-court": "18:52",
+      "apmc": "19:06"
+    }
   },
   {
     "id": "NB-1716-RYVGIFT",
     "direction": "Northbound",
     "pattern": "RYV-GIFT",
-    "origin": "apmc",
-    "departure": "17:16"
+    "times": {
+      "apmc": "17:16",
+      "old-high-court": "17:30",
+      "motera-stadium": "17:48",
+      "koteshwar-road": "17:51",
+      "gnlu": "18:06",
+      "gift-city": "18:12"
+    }
   },
   {
     "id": "SB-1821-RYVGIFT",
     "direction": "Southbound",
     "pattern": "RYV-GIFT",
-    "origin": "gift-city",
-    "departure": "18:21"
+    "times": {
+      "gift-city": "18:21",
+      "gnlu": "18:28",
+      "koteshwar-road": "18:42",
+      "motera-stadium": "18:45",
+      "old-high-court": "19:03",
+      "apmc": "19:17"
+    }
   },
   {
     "id": "NB-1730-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "17:30"
+    "times": {
+      "apmc": "17:30",
+      "old-high-court": "17:44",
+      "motera-stadium": "18:02",
+      "koteshwar-road": "18:05",
+      "gnlu": "18:20",
+      "infocity": "18:29",
+      "sachivalaya": "18:37",
+      "mahatma-mandir": "18:48"
+    }
   },
   {
     "id": "SB-1808-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "18:08"
+    "times": {
+      "mahatma-mandir": "18:08",
+      "sachivalaya": "18:20",
+      "infocity": "18:27",
+      "gnlu": "18:38",
+      "koteshwar-road": "18:54",
+      "motera-stadium": "18:57",
+      "old-high-court": "19:15",
+      "apmc": "19:29"
+    }
   },
   {
     "id": "NB-1754-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "17:54"
+    "times": {
+      "apmc": "17:54",
+      "old-high-court": "18:08",
+      "motera-stadium": "18:26",
+      "koteshwar-road": "18:29",
+      "gnlu": "18:44",
+      "infocity": "18:53",
+      "sachivalaya": "19:01",
+      "mahatma-mandir": "19:12"
+    }
   },
   {
     "id": "SB-1832-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "18:32"
+    "times": {
+      "mahatma-mandir": "18:32",
+      "sachivalaya": "18:44",
+      "infocity": "18:51",
+      "gnlu": "19:02",
+      "koteshwar-road": "19:19",
+      "motera-stadium": "19:22",
+      "old-high-court": "19:40",
+      "apmc": "19:54"
+    }
   },
   {
     "id": "NB-1806-RYVGIFT",
     "direction": "Northbound",
     "pattern": "RYV-GIFT",
-    "origin": "apmc",
-    "departure": "18:06"
+    "times": {
+      "apmc": "18:06",
+      "old-high-court": "18:20",
+      "motera-stadium": "18:39",
+      "koteshwar-road": "18:42",
+      "gnlu": "18:57",
+      "gift-city": "19:03"
+    }
   },
   {
     "id": "SB-1913-RYVGIFT",
     "direction": "Southbound",
     "pattern": "RYV-GIFT",
-    "origin": "gift-city",
-    "departure": "19:13"
+    "times": {
+      "gift-city": "19:13",
+      "gnlu": "19:20",
+      "koteshwar-road": "19:35",
+      "motera-stadium": "19:38",
+      "old-high-court": "19:56",
+      "apmc": "20:10"
+    }
   },
   {
     "id": "NB-1818-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "18:18"
+    "times": {
+      "apmc": "18:18",
+      "old-high-court": "18:32",
+      "motera-stadium": "18:50",
+      "koteshwar-road": "18:53",
+      "gnlu": "19:08",
+      "infocity": "19:17",
+      "sachivalaya": "19:25",
+      "mahatma-mandir": "19:36"
+    }
   },
   {
     "id": "SB-1856-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "18:56"
+    "times": {
+      "mahatma-mandir": "18:56",
+      "sachivalaya": "19:09",
+      "infocity": "19:16",
+      "gnlu": "19:27",
+      "koteshwar-road": "19:43",
+      "motera-stadium": "19:46",
+      "old-high-court": "20:04",
+      "apmc": "20:18"
+    }
   },
   {
     "id": "NB-1843-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "18:43"
+    "times": {
+      "apmc": "18:43",
+      "old-high-court": "18:57",
+      "motera-stadium": "19:15",
+      "koteshwar-road": "19:18",
+      "gnlu": "19:33",
+      "infocity": "19:42",
+      "sachivalaya": "19:50",
+      "mahatma-mandir": "20:01"
+    }
   },
   {
     "id": "SB-1920-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "19:20"
+    "times": {
+      "mahatma-mandir": "19:20",
+      "sachivalaya": "19:32",
+      "infocity": "19:39",
+      "gnlu": "19:50",
+      "koteshwar-road": "20:07",
+      "motera-stadium": "20:10",
+      "old-high-court": "20:28",
+      "apmc": "20:42"
+    }
   },
   {
     "id": "NB-1908-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "19:08"
+    "times": {
+      "apmc": "19:08",
+      "old-high-court": "19:22",
+      "motera-stadium": "19:40",
+      "koteshwar-road": "19:43",
+      "gnlu": "19:58",
+      "infocity": "20:07",
+      "sachivalaya": "20:15",
+      "mahatma-mandir": "20:26"
+    }
   },
   {
     "id": "SB-1944-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "19:44"
+    "times": {
+      "mahatma-mandir": "19:44",
+      "sachivalaya": "19:56",
+      "infocity": "20:03",
+      "gnlu": "20:14",
+      "koteshwar-road": "20:31",
+      "motera-stadium": "20:34",
+      "old-high-court": "20:52",
+      "apmc": "21:06"
+    }
   },
   {
     "id": "NB-1942-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "19:42"
+    "times": {
+      "apmc": "19:42",
+      "old-high-court": "19:56",
+      "motera-stadium": "20:14",
+      "koteshwar-road": "20:17",
+      "gnlu": "20:32",
+      "infocity": "20:41",
+      "sachivalaya": "20:49",
+      "mahatma-mandir": "21:00"
+    }
   },
   {
     "id": "SB-2009-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "20:09"
+    "times": {
+      "mahatma-mandir": "20:09",
+      "sachivalaya": "20:21",
+      "infocity": "20:28",
+      "gnlu": "20:39",
+      "koteshwar-road": "20:56",
+      "motera-stadium": "20:59",
+      "old-high-court": "21:17",
+      "apmc": "21:31"
+    }
   },
   {
     "id": "NB-2045-RYMM",
     "direction": "Northbound",
     "pattern": "RY-MM",
-    "origin": "apmc",
-    "departure": "20:45"
+    "times": {
+      "apmc": "20:45",
+      "old-high-court": "20:59",
+      "motera-stadium": "21:17",
+      "koteshwar-road": "21:20",
+      "gnlu": "21:35",
+      "infocity": "21:44",
+      "sachivalaya": "21:52",
+      "mahatma-mandir": "22:03"
+    }
   },
   {
     "id": "SB-2100-RYMM",
     "direction": "Southbound",
     "pattern": "RY-MM",
-    "origin": "mahatma-mandir",
-    "departure": "21:00"
+    "times": {
+      "mahatma-mandir": "21:00",
+      "sachivalaya": "21:12",
+      "infocity": "21:20",
+      "gnlu": "21:31",
+      "koteshwar-road": "21:47",
+      "motera-stadium": "21:50",
+      "old-high-court": "22:09",
+      "apmc": "22:22"
+    }
   }
 ]
