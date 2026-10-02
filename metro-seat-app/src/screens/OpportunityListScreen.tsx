@@ -6,7 +6,8 @@ import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
 import { getStationById } from '../data/stations';
 import { ENABLE_PAYMENTS } from '../config/flags';
-import { getTrainLabel } from '../data/timetable';
+import { getTrainLabel, Train } from '../domain/trains';
+import trains from '../data/trains.json';
 import { translations } from '../i18n';
 
 import { notify } from '../utils/dialog';
@@ -70,7 +71,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
         </View>
         {item.trainId && (
           <Text style={styles.trainText}>
-            {t.expectedTrain}: {getTrainLabel(item.trainId)}
+            {t.expectedTrain}: {getTrainLabel(item.trainId, trains as unknown as Train[])}
           </Text>
         )}
         <Text style={styles.giverText}>

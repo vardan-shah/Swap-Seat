@@ -101,22 +101,31 @@ describe('mockStore', () => {
   });
 
   describe('getCompatibleOpportunities', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(3300000); 
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('matches valid Northbound offer', () => {
       useAppStore.setState({
         opportunities: [
           {
             id: 'opp1',
-            giverId: 'u1',
+            giverId: 'u2',
             currentStationId: 'vadaj',
             handoffStationId: 'sabarmati',
             direction: 'Northbound',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
       });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('ranip', 'motera-stadium', 'Northbound');
+      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
+      const matches = useAppStore.getState().getCompatibleOpportunities('ranip', 'motera-stadium', 'Northbound');
       expect(matches).toHaveLength(1);
     });
 
@@ -125,11 +134,13 @@ describe('mockStore', () => {
         opportunities: [
           {
             id: 'opp1',
-            giverId: 'u1',
+            giverId: 'u2',
             currentStationId: 'vadaj',
             handoffStationId: 'sabarmati',
             direction: 'Northbound',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
       });
@@ -144,17 +155,18 @@ describe('mockStore', () => {
         opportunities: [
           {
             id: 'opp1',
-            giverId: 'u1',
+            giverId: 'u2',
             currentStationId: 'vadaj',
             handoffStationId: 'sabarmati',
             direction: 'Northbound',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
       });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('motera-stadium', 'koteshwar-road', 'Northbound');
+      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
+      const matches = useAppStore.getState().getCompatibleOpportunities('motera-stadium', 'koteshwar-road', 'Northbound');
       expect(matches).toHaveLength(0);
     });
 
@@ -163,17 +175,18 @@ describe('mockStore', () => {
         opportunities: [
           {
             id: 'opp1',
-            giverId: 'u1',
+            giverId: 'u2',
             currentStationId: 'vadaj',
             handoffStationId: 'sabarmati',
             direction: 'Northbound',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
       });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('sabarmati', 'motera-stadium', 'Northbound');
+      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
+      const matches = useAppStore.getState().getCompatibleOpportunities('sabarmati', 'motera-stadium', 'Northbound');
       expect(matches).toHaveLength(1);
     });
 
@@ -182,17 +195,18 @@ describe('mockStore', () => {
         opportunities: [
           {
             id: 'opp1',
-            giverId: 'u1',
+            giverId: 'u2',
             currentStationId: 'vadaj',
             handoffStationId: 'sabarmati',
             direction: 'Northbound',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
       });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('ranip', 'sabarmati', 'Northbound');
+      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
+      const matches = useAppStore.getState().getCompatibleOpportunities('ranip', 'sabarmati', 'Northbound');
       expect(matches).toHaveLength(0);
     });
 
@@ -201,17 +215,19 @@ describe('mockStore', () => {
         opportunities: [
           {
             id: 'opp1',
-            giverId: 'u1',
-            currentStationId: 'sabarmati',
+            giverId: 'u2',
+            currentStationId: 'aec',
             handoffStationId: 'vadaj',
             direction: 'Southbound',
             status: 'ACTIVE',
+            trainId: 'SB-0640-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
       });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('aec', 'usmanpura', 'Southbound');
+      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
+      jest.setSystemTime(4200000);
+      const matches = useAppStore.getState().getCompatibleOpportunities('aec', 'usmanpura', 'Southbound');
       expect(matches).toHaveLength(1);
     });
   });
@@ -224,6 +240,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'giver1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
       });
@@ -241,6 +259,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'giver1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
         matches: [
@@ -265,6 +285,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'seeker1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
       });
@@ -304,6 +326,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'giver1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
         matches: [
@@ -344,6 +368,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'giver1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
         matches: [],
@@ -365,6 +391,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'giver1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
         matches: [],
@@ -401,6 +429,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'giver1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
         matches: [
@@ -436,6 +466,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'giver1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
         matches: [
@@ -461,6 +493,8 @@ describe('mockStore', () => {
             id: 'opp1',
             giverId: 'giver1',
             status: 'ACTIVE',
+            trainId: 'NB-0620-RYMM',
+            expiresAt: 2700000 + 3600000,
           } as SeatOpportunity,
         ],
         matches: [

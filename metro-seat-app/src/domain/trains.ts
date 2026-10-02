@@ -1,8 +1,9 @@
 import gmrcData from '../data/gmrc-network.json';
+import { Direction } from '../types';
 
 export interface Train {
   id: string;
-  direction: string;
+  direction: Direction;
   pattern: string;
   times: Record<string, string>;
 }
@@ -12,11 +13,6 @@ export function toMinutes(timeStr: string): number {
   return h * 60 + m;
 }
 
-export function toTimeStr(minutes: number): string {
-  const h = Math.floor(minutes / 60) % 24;
-  const m = Math.floor(minutes % 60);
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-}
 
 export function getISTMinutes(nowMs: number): number {
   return (Math.floor(nowMs / 60000) + 330) % 1440; // UTC+5:30
@@ -94,25 +90,45 @@ export function isRunning(train: Train, nowMs: number): boolean {
   return now >= firstTime.min && now <= lastTime.max;
 }
 
-export function handoffExpiry(train: Train, handoffStationId: string): number {
-  // handoffExpiry = today's IST date + departure + offsetWindow.max of handoff + 2 minutes grace.
-  // We can just calculate the minutes of the max handoff and map it back to UTC timestamp for today.
-  // But wait, the user's formula: "today's IST date + departure + offsetWindow.max of handoff + 2 minutes grace."
-  // Actually, timeAt already provides max which INCLUDES the +2 mins grace.
+export function handoffExpiry(train: Train, handoffStationId: string, nowMs: number): number | null {
   const t = timeAt(train, handoffStationId);
-  if (!t) return Date.now(); // fallback
+  if (!t) return null;
 
-  const nowMs = Date.now();
-  
-  
-  // IST offset is 330 minutes
-  // Let's compute midnight IST of today
   const istNowMs = nowMs + 330 * 60000;
   const istMidnightMs = istNowMs - (istNowMs % 86400000);
   
-  // Then the expiry in IST is midnight + t.max minutes
   const expiryIstMs = istMidnightMs + t.max * 60000;
-  
-  // Convert back to UTC
   return expiryIstMs - 330 * 60000;
+}
+
+export function trainsRunningNow(direction: Direction, fromId: string, toId: string, nowMs: number, allTrains: Train[]): Train[] {
+  return allTrains.filter(t => {
+    if (t.direction !== direction) return false;
+    if (!servesLeg(t, fromId, toId)) return false;
+    if (!isRunning(t, nowMs)) return false;
+    
+    const tAt = timeAt(t, fromId);
+    if (!tAt) return false;
+    
+    return tAt.max >= getISTMinutes(nowMs);
+  });
+}
+export function getTrainsByDirection(direction: Direction, allTrains: Train[]): { label: string, value: string }[] {
+  return allTrains.filter(t => t.direction === direction).map(t => {
+     const stops = getStops(t);
+     const firstTime = stops ? t.times[stops[0]] : '?';
+     const origin = direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
+     const gift = t.pattern === 'RYV-GIFT' ? ' (GIFT)' : '';
+     return { label: `Train starting from ${origin} at ${firstTime}${gift}`, value: t.id };
+  });
+}
+
+export function getTrainLabel(trainId: string, allTrains: Train[]): string {
+  const t = allTrains.find(x => x.id === trainId);
+  if (!t) return 'Unknown Train';
+  const stops = getStops(t);
+  const firstTime = stops ? t.times[stops[0]] : '?';
+  const origin = t.direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
+  const gift = t.pattern === 'RYV-GIFT' ? ' (GIFT)' : '';
+  return `Train starting from ${origin} at ${firstTime}${gift}`;
 }

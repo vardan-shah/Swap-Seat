@@ -9,7 +9,8 @@ import { ENABLE_PAYMENTS } from '../config/flags';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
-import { getTrainsByDirection } from '../data/timetable';
+import { getTrainsByDirection, Train } from '../domain/trains';
+import trains from '../data/trains.json';
 import { translations } from '../i18n';
 
 type Props = {
@@ -68,7 +69,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
     return ordered.map((s) => ({ label: s.name, value: s.id }));
   }, [direction]);
 
-  const trainItems = useMemo(() => getTrainsByDirection(direction), [direction]);
+  const trainItems = useMemo(() => getTrainsByDirection(direction, trains as unknown as Train[]), [direction]);
 
   const handleDirectionChange = (newDir: Direction) => {
     setDirection(newDir);

@@ -19,6 +19,17 @@ describe('trains.json data integrity', () => {
     ]);
   });
 
+
+  it('verifies exact SB GIFT departures', () => {
+    const sbGiftDepartures = trains
+      .filter(t => t.direction === 'Southbound' && t.pattern === 'RYV-GIFT')
+      .map(t => t.times['gift-city']);
+    
+    expect(sbGiftDepartures).toEqual([
+      '07:48', '08:37', '09:01', '10:18', '16:17', '17:08', '18:21', '19:13'
+    ]);
+  });
+
   it('has valid stations for the given pattern', () => {
     const ryPattern = gmrcData.service_patterns.find(p => p.id === 'RY-MM');
     const giftPattern = gmrcData.service_patterns.find(p => p.id === 'RYV-GIFT');
@@ -42,22 +53,28 @@ describe('trains.json data integrity', () => {
     // The exceptions explicitly found and verified against PDF:
     // (List will be populated once we run the test and find the failures)
     const exceptions = [
-      { from: 'old-high-court', to: 'motera-stadium', time: 19 },
-      { from: 'gnlu', to: 'koteshwar-road', time: 17 }, // SB GNLU->Koteshwar 17 min
-      { from: 'mahatma-mandir', to: 'sachivalaya', time: 13 } // SB-1856-RYMM
+      'NB-0734-RYVGIFT|old-high-court>motera-stadium|19',
+      'NB-1059-RYMM|old-high-court>motera-stadium|19',
+      'NB-1640-RYMM|old-high-court>motera-stadium|19',
+      'NB-1806-RYVGIFT|old-high-court>motera-stadium|19',
+      'SB-0825-RYMM|motera-stadium>old-high-court|19',
+      'SB-2100-RYMM|motera-stadium>old-high-court|19',
+      'SB-1856-RYMM|mahatma-mandir>sachivalaya|13'
     ];
     
-    const isException = (from: string, to: string, time: number) => {
-      return exceptions.some(e => 
-        (e.from === from && e.to === to && e.time === time) ||
-        (e.from === to && e.to === from && e.time === time) // allow reverse
-      );
+    const usedExceptions = new Set<string>();
+    const isException = (trainId: string, from: string, to: string, time: number) => {
+      const key = `${trainId}|${from}>${to}|${time}`;
+      if (exceptions.includes(key)) {
+        usedExceptions.add(key);
+        return true;
+      }
+      return false;
     };
 
     const getTimingBounds = (from: string, to: string) => {
       for (const seg of gmrcData.timing.segments) {
         if (seg.from === from && seg.to === to) return seg;
-        if (seg.from === to && seg.to === from) return seg;
       }
       return null;
     };
@@ -76,12 +93,13 @@ describe('trains.json data integrity', () => {
         const bounds = getTimingBounds(from, to);
         if (bounds) {
           if (diff < bounds.min || diff > bounds.max) {
-            if (!isException(from, to, diff)) {
+            if (!isException(train.id, from, to, diff)) {
                throw new Error(`Timing violation on ${train.id}: ${from}->${to} took ${diff}m (bounds ${bounds.min}-${bounds.max})`);
             }
           }
         }
       }
     }
+    expect(usedExceptions.size).toBe(exceptions.length);
   });
 });

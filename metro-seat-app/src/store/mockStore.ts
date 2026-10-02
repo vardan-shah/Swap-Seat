@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
 import { isLegValid } from '../domain/route';
+import { handoffExpiry, trainsRunningNow, Train } from '../domain/trains';
+import trainsData from '../data/trains.json';
 import { Language } from '../i18n';
 import { randomUUID } from 'expo-crypto';
 
@@ -128,6 +130,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
 
       const now = Date.now();
+      const allTrains = trainsData as unknown as Train[];
+      const train = allTrains.find(t => t.id === trainId);
+      const expiry = train ? handoffExpiry(train, handoffStationId, now) : (now + 3600000);
+      
       const newOpp: SeatOpportunity = {
         id: randomUUID(),
         giverId: state.currentUser.id,
@@ -137,7 +143,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         status: 'ACTIVE',
         createdAt: now,
         updatedAt: now,
-        expiresAt: now + 60 * 60 * 1000, // 1 hour expiry
+        expiresAt: expiry || (now + 3600000),
         price,
         trainId,
       };
@@ -279,9 +285,16 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   getCompatibleOpportunities: (currentStationId, destinationStationId, direction) => {
     const state = get();
+    const now = Date.now();
+    const activeTrains = trainsRunningNow(direction, currentStationId, destinationStationId, now, trainsData as unknown as Train[]);
+    const activeTrainIds = new Set(activeTrains.map(t => t.id));
+
     return state.opportunities.filter((opp) => {
       if (opp.status !== 'ACTIVE') return false;
       if (opp.direction !== direction) return false;
+      if (opp.giverId === state.currentUser.id) return false;
+      if (now > opp.expiresAt) return false;
+      if (!activeTrainIds.has(opp.trainId)) return false;
 
       // Handoff station must be AFTER seeker's current station (or same)
       const handoffAfterCurrent =
