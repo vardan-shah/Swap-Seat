@@ -1,5 +1,5 @@
-import { Direction } from "../types";
-import { STATIONS } from "../data/stations";
+import { Direction } from '../types';
+import { STATIONS } from '../data/stations';
 
 export function createRoute(stopIds: readonly string[]) {
   const idx = (id: string) => {
@@ -12,13 +12,13 @@ export function createRoute(stopIds: readonly string[]) {
       const f = idx(from),
         t = idx(to);
       if (f === null || t === null || f === t) return false;
-      return (dir === "Northbound") === f < t;
+      return (dir === 'Northbound') === f < t;
     },
     inferDirection(from: string, to: string): Direction | null {
       const f = idx(from),
         t = idx(to);
       if (f === null || t === null || f === t) return null;
-      return f < t ? "Northbound" : "Southbound";
+      return f < t ? 'Northbound' : 'Southbound';
     },
     stationIndex(id: string): number | null {
       return idx(id);

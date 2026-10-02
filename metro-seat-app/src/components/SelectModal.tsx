@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   Modal,
   FlatList,
   SafeAreaView,
-} from "react-native";
+} from 'react-native';
 
 interface SelectItem {
   label: string;
@@ -27,7 +27,7 @@ export default function SelectModal({
   items,
   selectedValue,
   onSelect,
-  placeholder = "Select...",
+  placeholder = 'Select...',
 }: SelectModalProps) {
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -36,29 +36,17 @@ export default function SelectModal({
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
-      <TouchableOpacity
-        style={styles.selector}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text
-          style={selectedItem ? styles.selectedText : styles.placeholderText}
-        >
+      <TouchableOpacity style={styles.selector} onPress={() => setModalVisible(true)}>
+        <Text style={selectedItem ? styles.selectedText : styles.placeholderText}>
           {selectedItem ? selectedItem.label : placeholder}
         </Text>
       </TouchableOpacity>
 
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
+      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet">
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{label}</Text>
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.closeBtn}
-            >
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtn}>
               <Text style={styles.closeBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -67,20 +55,14 @@ export default function SelectModal({
             keyExtractor={(item) => item.value}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={[
-                  styles.itemBtn,
-                  selectedValue === item.value && styles.itemBtnActive,
-                ]}
+                style={[styles.itemBtn, selectedValue === item.value && styles.itemBtnActive]}
                 onPress={() => {
                   onSelect(item.value);
                   setModalVisible(false);
                 }}
               >
                 <Text
-                  style={[
-                    styles.itemText,
-                    selectedValue === item.value && styles.itemTextActive,
-                  ]}
+                  style={[styles.itemText, selectedValue === item.value && styles.itemTextActive]}
                 >
                   {item.label}
                 </Text>
@@ -95,35 +77,35 @@ export default function SelectModal({
 
 const styles = StyleSheet.create({
   container: { marginBottom: 15 },
-  label: { fontSize: 16, fontWeight: "bold", marginBottom: 8, color: "#333" },
+  label: { fontSize: 16, fontWeight: 'bold', marginBottom: 8, color: '#333' },
   selector: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 15,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
-  placeholderText: { color: "#888", fontSize: 16 },
-  selectedText: { color: "#333", fontSize: 16 },
-  modalContainer: { flex: 1, backgroundColor: "#f8f9fa" },
+  placeholderText: { color: '#888', fontSize: 16 },
+  selectedText: { color: '#333', fontSize: 16 },
+  modalContainer: { flex: 1, backgroundColor: '#f8f9fa' },
   modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 20,
     borderBottomWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#fff",
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
   },
-  modalTitle: { fontSize: 18, fontWeight: "bold" },
+  modalTitle: { fontSize: 18, fontWeight: 'bold' },
   closeBtn: {},
-  closeBtnText: { color: "#0056b3", fontSize: 16, fontWeight: "bold" },
+  closeBtnText: { color: '#0056b3', fontSize: 16, fontWeight: 'bold' },
   itemBtn: {
     padding: 18,
     borderBottomWidth: 1,
-    borderColor: "#eee",
-    backgroundColor: "#fff",
+    borderColor: '#eee',
+    backgroundColor: '#fff',
   },
-  itemBtnActive: { backgroundColor: "#e6f2ff" },
-  itemText: { fontSize: 16, color: "#333" },
-  itemTextActive: { color: "#0056b3", fontWeight: "bold" },
+  itemBtnActive: { backgroundColor: '#e6f2ff' },
+  itemText: { fontSize: 16, color: '#333' },
+  itemTextActive: { color: '#0056b3', fontWeight: 'bold' },
 });

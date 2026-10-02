@@ -1,15 +1,13 @@
 export type Station = {
   id: string;
   name: string;
-  status: "operational" | "under_construction" | "planned";
+  status: 'operational' | 'under_construction' | 'planned';
 };
 
-export type Direction = "Northbound" | "Southbound";
+export type Direction = 'Northbound' | 'Southbound';
 
-export type OpportunityStatus =
-  "ACTIVE" | "MATCHED" | "EXPIRED" | "CANCELLED" | "COMPLETED";
-export type MatchStatus =
-  "PENDING" | "ACCEPTED" | "REJECTED" | "COMPLETED" | "CANCELLED";
+export type OpportunityStatus = 'ACTIVE' | 'MATCHED' | 'EXPIRED' | 'CANCELLED' | 'COMPLETED';
+export type MatchStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED' | 'CANCELLED';
 
 export type SeatOpportunity = {
   id: string;
