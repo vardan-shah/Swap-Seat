@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { formatReputation } from '../../domain/reputation';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -7,13 +8,13 @@ import {
   TextInput,
   ScrollView,
   Image,
-} from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { useAppStore } from "../../store/mockStore";
-import { translations } from "../../i18n";
-import { ENABLE_PAYMENTS } from "../../config/flags";
+} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { useAppStore } from '../../store/mockStore';
+import { translations } from '../../i18n';
+import { ENABLE_PAYMENTS } from '../../config/flags';
 
-import { notify } from "../../utils/dialog";
+import { notify } from '../../utils/dialog';
 
 export default function ProfileScreen() {
   const lang = useAppStore((state) => state.language);
@@ -27,11 +28,11 @@ export default function ProfileScreen() {
   const logout = useAppStore((state) => state.logout);
   const setLanguage = useAppStore((state) => state.setLanguage);
 
-  const [tempUpiId, setTempUpiId] = useState(upiId || "");
+  const [tempUpiId, setTempUpiId] = useState(upiId || '');
 
   const saveUpi = async () => {
     setUpiId(tempUpiId);
-    await notify("Saved", "UPI ID updated successfully.");
+    await notify('Saved', 'UPI ID updated successfully.');
   };
 
   const pickImage = async () => {
@@ -55,8 +56,7 @@ export default function ProfileScreen() {
         </View>
         <Text style={styles.name}>{user.displayName}</Text>
         <Text style={styles.reputation}>
-          {t.trustScore}:{" "}
-          {user.reputation === 0 ? "New" : `${user.reputation}/5.0`}
+          {t.trustScore}: {formatReputation(user)}
         </Text>
       </View>
 
@@ -64,9 +64,7 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Receive Payments (UPI)</Text>
 
-          <Text style={{ marginBottom: 5, color: "#666", fontSize: 12 }}>
-            Enter UPI ID
-          </Text>
+          <Text style={{ marginBottom: 5, color: '#666', fontSize: 12 }}>Enter UPI ID</Text>
           <TextInput
             style={styles.input}
             placeholder="e.g. name@upi"
@@ -82,9 +80,9 @@ export default function ProfileScreen() {
           <Text
             style={{
               marginBottom: 10,
-              color: "#666",
+              color: '#666',
               fontSize: 12,
-              textAlign: "center",
+              textAlign: 'center',
             }}
           >
             OR
@@ -109,34 +107,22 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>{t.changeLang}</Text>
         <View style={styles.langRow}>
           <TouchableOpacity
-            onPress={() => setLanguage("en")}
-            style={[styles.langBtn, lang === "en" && styles.langBtnActive]}
+            onPress={() => setLanguage('en')}
+            style={[styles.langBtn, lang === 'en' && styles.langBtnActive]}
           >
-            <Text
-              style={[styles.langText, lang === "en" && styles.langTextActive]}
-            >
-              EN
-            </Text>
+            <Text style={[styles.langText, lang === 'en' && styles.langTextActive]}>EN</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setLanguage("hi")}
-            style={[styles.langBtn, lang === "hi" && styles.langBtnActive]}
+            onPress={() => setLanguage('hi')}
+            style={[styles.langBtn, lang === 'hi' && styles.langBtnActive]}
           >
-            <Text
-              style={[styles.langText, lang === "hi" && styles.langTextActive]}
-            >
-              HI
-            </Text>
+            <Text style={[styles.langText, lang === 'hi' && styles.langTextActive]}>HI</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setLanguage("gu")}
-            style={[styles.langBtn, lang === "gu" && styles.langBtnActive]}
+            onPress={() => setLanguage('gu')}
+            style={[styles.langBtn, lang === 'gu' && styles.langBtnActive]}
           >
-            <Text
-              style={[styles.langText, lang === "gu" && styles.langTextActive]}
-            >
-              GU
-            </Text>
+            <Text style={[styles.langText, lang === 'gu' && styles.langTextActive]}>GU</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -149,91 +135,91 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8f9fa" },
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     padding: 30,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderColor: '#eee',
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#FF8200",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#FF8200',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 15,
   },
-  avatarText: { fontSize: 32, fontWeight: "bold", color: "#fff" },
-  name: { fontSize: 22, fontWeight: "bold", color: "#333", marginBottom: 5 },
-  reputation: { fontSize: 16, color: "#666" },
+  avatarText: { fontSize: 32, fontWeight: 'bold', color: '#fff' },
+  name: { fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 5 },
+  reputation: { fontSize: 16, color: '#666' },
 
   section: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     marginTop: 20,
     padding: 20,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderColor: '#eee',
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 15,
   },
 
   btnPrimary: {
-    backgroundColor: "#0056b3",
+    backgroundColor: '#0056b3',
     padding: 15,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
   },
-  btnPrimaryText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  btnPrimaryText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 
   btnSecondary: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#f0f0f0',
     padding: 12,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 15,
   },
-  btnSecondaryText: { color: "#333", fontWeight: "500", fontSize: 14 },
+  btnSecondaryText: { color: '#333', fontWeight: '500', fontSize: 14 },
 
-  qrContainer: { alignItems: "center", marginTop: 10 },
+  qrContainer: { alignItems: 'center', marginTop: 10 },
   qrImage: { width: 200, height: 200, borderRadius: 8 },
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
     marginBottom: 15,
   },
 
-  langRow: { flexDirection: "row", gap: 15 },
+  langRow: { flexDirection: 'row', gap: 15 },
   langBtn: {
     flex: 1,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#ccc",
-    alignItems: "center",
+    borderColor: '#ccc',
+    alignItems: 'center',
   },
-  langBtnActive: { backgroundColor: "#0056b3", borderColor: "#0056b3" },
-  langText: { fontSize: 16, color: "#666", fontWeight: "500" },
-  langTextActive: { color: "#fff" },
+  langBtnActive: { backgroundColor: '#0056b3', borderColor: '#0056b3' },
+  langText: { fontSize: 16, color: '#666', fontWeight: '500' },
+  langTextActive: { color: '#fff' },
 
   logoutBtn: {
     margin: 20,
     padding: 15,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#dc3545",
-    alignItems: "center",
+    borderColor: '#dc3545',
+    alignItems: 'center',
   },
-  logoutText: { color: "#dc3545", fontWeight: "bold", fontSize: 16 },
+  logoutText: { color: '#dc3545', fontWeight: 'bold', fontSize: 16 },
 });

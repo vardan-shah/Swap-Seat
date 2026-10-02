@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { SeatOpportunity, Match, User, Direction, MatchStatus } from "../types";
-import { isLegValid } from "../domain/route";
-import { Language } from "../i18n";
-import { randomUUID } from "expo-crypto";
+import { create } from 'zustand';
+import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
+import { isLegValid } from '../domain/route';
+import { Language } from '../i18n';
+import { randomUUID } from 'expo-crypto';
 
 interface AppState {
   // Config
@@ -33,20 +33,16 @@ interface AppState {
     handoffStationId: string,
     price: number | undefined,
     trainId: string,
-  ) => { ok: boolean; reason?: "ALREADY_OFFERING" | "INVALID_STATIONS" };
+  ) => { ok: boolean; reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' };
   cancelOpportunity: (opportunityId: string) => boolean;
   requestSeat: (
     opportunityId: string,
     seekerId: string,
   ) => {
     ok: boolean;
-    reason?: "DUPLICATE" | "OWN_OFFER" | "NOT_ACTIVE" | "NOT_FOUND";
+    reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND';
   };
-  transition: (
-    matchId: string,
-    actorId: string,
-    to: import("../types").MatchStatus,
-  ) => boolean;
+  transition: (matchId: string, actorId: string, to: import('../types').MatchStatus) => boolean;
   acceptMatch: (matchId: string) => boolean;
   rejectMatch: (matchId: string) => boolean;
   cancelMatch: (matchId: string) => boolean;
@@ -65,8 +61,8 @@ interface AppState {
 
 // Seed user
 const MOCK_USER: User = {
-  id: "u1",
-  displayName: "Current User",
+  id: 'u1',
+  displayName: 'Current User',
   reputation: 4.8,
 };
 
@@ -78,14 +74,14 @@ const INITIAL_DATA = {
   opportunities: [],
   matches: [],
   users: {
-    u1: { id: "u1", displayName: "Mock Giver", reputation: 4.8 },
-    u_me: MOCK_USER,
+    u1: { id: 'u1', displayName: 'Mock Giver', reputation: 4.8 },
+    mock_seeker_2: { id: 'mock_seeker_2', displayName: 'Mock Seeker', reputation: 4.5 },
   },
 };
 
 const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
-  PENDING: ["ACCEPTED", "REJECTED", "CANCELLED"],
-  ACCEPTED: ["COMPLETED", "CANCELLED"],
+  PENDING: ['ACCEPTED', 'REJECTED', 'CANCELLED'],
+  ACCEPTED: ['COMPLETED', 'CANCELLED'],
   REJECTED: [],
   COMPLETED: [],
   CANCELLED: [],
@@ -93,44 +89,41 @@ const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
 
 export const useAppStore = create<AppState>((set, get) => ({
   // Config
-  language: "en",
+  language: 'en',
   setLanguage: (lang) => set({ language: lang }),
 
   ...INITIAL_DATA,
 
   login: (name: string) =>
-    set({
-      isAuthenticated: true,
-      currentUser: { id: "u_me", displayName: name, reputation: 0 },
+    set((state) => {
+      const me: User = { id: 'u_me', displayName: name, reputation: 0 };
+      return {
+        isAuthenticated: true,
+        currentUser: me,
+        users: { ...state.users, [me.id]: me },
+      };
     }),
   logout: () => set(INITIAL_DATA),
   // User Profile
   setUpiId: (id) => set({ upiId: id }),
   setUpiQrUri: (uri) => set({ upiQrUri: uri }),
 
-  offerSeat: (
-    direction,
-    currentStationId,
-    handoffStationId,
-    price,
-    trainId,
-  ) => {
+  offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => {
     let result: {
       ok: boolean;
-      reason?: "ALREADY_OFFERING" | "INVALID_STATIONS";
+      reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS';
     } = { ok: false };
     set((state) => {
       const existingOffer = state.opportunities.find(
         (o) =>
-          o.giverId === state.currentUser.id &&
-          (o.status === "ACTIVE" || o.status === "MATCHED"),
+          o.giverId === state.currentUser.id && (o.status === 'ACTIVE' || o.status === 'MATCHED'),
       );
       if (existingOffer) {
-        result = { ok: false, reason: "ALREADY_OFFERING" };
+        result = { ok: false, reason: 'ALREADY_OFFERING' };
         return state;
       }
       if (!isLegValid(currentStationId, handoffStationId, direction)) {
-        result = { ok: false, reason: "INVALID_STATIONS" };
+        result = { ok: false, reason: 'INVALID_STATIONS' };
         return state;
       }
 
@@ -141,7 +134,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         direction,
         currentStationId,
         handoffStationId,
-        status: "ACTIVE",
+        status: 'ACTIVE',
         createdAt: now,
         updatedAt: now,
         expiresAt: now + 60 * 60 * 1000, // 1 hour expiry
@@ -158,22 +151,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     let success = false;
     set((state) => {
       const opp = state.opportunities.find((o) => o.id === opportunityId);
-      if (
-        !opp ||
-        opp.giverId !== state.currentUser.id ||
-        opp.status !== "ACTIVE"
-      )
-        return state;
+      if (!opp || opp.giverId !== state.currentUser.id || opp.status !== 'ACTIVE') return state;
 
       success = true;
       return {
         opportunities: state.opportunities.map((o) =>
-          o.id === opportunityId ? { ...o, status: "CANCELLED" } : o,
+          o.id === opportunityId ? { ...o, status: 'CANCELLED' } : o,
         ),
         matches: state.matches.map((m) =>
-          m.opportunityId === opportunityId &&
-          (m.status === "PENDING" || m.status === "ACCEPTED")
-            ? { ...m, status: "CANCELLED", cancelledBy: state.currentUser.id }
+          m.opportunityId === opportunityId && (m.status === 'PENDING' || m.status === 'ACCEPTED')
+            ? { ...m, status: 'CANCELLED', cancelledBy: state.currentUser.id }
             : m,
         ),
       };
@@ -184,32 +171,30 @@ export const useAppStore = create<AppState>((set, get) => ({
   requestSeat: (opportunityId, seekerId) => {
     let result: {
       ok: boolean;
-      reason?: "DUPLICATE" | "OWN_OFFER" | "NOT_ACTIVE" | "NOT_FOUND";
-    } = { ok: false, reason: "NOT_FOUND" };
+      reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND';
+    } = { ok: false, reason: 'NOT_FOUND' };
 
     set((state) => {
       const opp = state.opportunities.find((o) => o.id === opportunityId);
       if (!opp) {
-        result = { ok: false, reason: "NOT_FOUND" };
+        result = { ok: false, reason: 'NOT_FOUND' };
         return state;
       }
-      if (opp.status !== "ACTIVE") {
-        result = { ok: false, reason: "NOT_ACTIVE" };
+      if (opp.status !== 'ACTIVE') {
+        result = { ok: false, reason: 'NOT_ACTIVE' };
         return state;
       }
       if (opp.giverId === seekerId) {
-        result = { ok: false, reason: "OWN_OFFER" };
+        result = { ok: false, reason: 'OWN_OFFER' };
         return state;
       }
 
       const existingPending = state.matches.find(
         (m) =>
-          m.opportunityId === opportunityId &&
-          m.seekerId === seekerId &&
-          m.status === "PENDING",
+          m.opportunityId === opportunityId && m.seekerId === seekerId && m.status === 'PENDING',
       );
       if (existingPending) {
-        result = { ok: false, reason: "DUPLICATE" };
+        result = { ok: false, reason: 'DUPLICATE' };
         return state;
       }
 
@@ -219,7 +204,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         opportunityId,
         seekerId,
         giverId: opp.giverId,
-        status: "PENDING",
+        status: 'PENDING',
         createdAt: Date.now(),
       };
 
@@ -238,9 +223,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     const isSeeker = actorId === m.seekerId;
 
     const allowed =
-      to === "ACCEPTED" || to === "REJECTED"
+      to === 'ACCEPTED' || to === 'REJECTED'
         ? isGiver
-        : to === "CANCELLED"
+        : to === 'CANCELLED'
           ? isGiver || isSeeker
           : isGiver; // COMPLETED: decided by giver for MVP
 
@@ -252,25 +237,23 @@ export const useAppStore = create<AppState>((set, get) => ({
           ? {
               ...x,
               status: to,
-              ...(to === "CANCELLED" ? { cancelledBy: actorId } : {}),
+              ...(to === 'CANCELLED' ? { cancelledBy: actorId } : {}),
             }
-          : to === "ACCEPTED" &&
-              x.opportunityId === m.opportunityId &&
-              x.status === "PENDING"
-            ? { ...x, status: "REJECTED" }
+          : to === 'ACCEPTED' && x.opportunityId === m.opportunityId && x.status === 'PENDING'
+            ? { ...x, status: 'REJECTED' }
             : x,
       ),
       opportunities: s.opportunities.map((o) => {
         if (o.id !== m.opportunityId) return o;
-        if (to === "ACCEPTED") return { ...o, status: "MATCHED" };
-        if (to === "COMPLETED") return { ...o, status: "COMPLETED" };
-        if (to === "CANCELLED" && m.status === "ACCEPTED") {
+        if (to === 'ACCEPTED') return { ...o, status: 'MATCHED' };
+        if (to === 'COMPLETED') return { ...o, status: 'COMPLETED' };
+        if (to === 'CANCELLED' && m.status === 'ACCEPTED') {
           if (actorId === m.giverId) {
-            return { ...o, status: "CANCELLED" };
+            return { ...o, status: 'CANCELLED' };
           } else {
             return {
               ...o,
-              status: Date.now() > o.expiresAt ? "EXPIRED" : "ACTIVE",
+              status: Date.now() > o.expiresAt ? 'EXPIRED' : 'ACTIVE',
             };
           }
         }
@@ -280,32 +263,24 @@ export const useAppStore = create<AppState>((set, get) => ({
     return true;
   },
 
-  acceptMatch: (matchId) =>
-    get().transition(matchId, get().currentUser.id, "ACCEPTED"),
-  rejectMatch: (matchId) =>
-    get().transition(matchId, get().currentUser.id, "REJECTED"),
-  cancelMatch: (matchId) =>
-    get().transition(matchId, get().currentUser.id, "CANCELLED"),
-  completeMatch: (matchId) =>
-    get().transition(matchId, get().currentUser.id, "COMPLETED"),
+  acceptMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'ACCEPTED'),
+  rejectMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'REJECTED'),
+  cancelMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'CANCELLED'),
+  completeMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'COMPLETED'),
 
   expireOpportunity: (oppId) =>
     set((state) => {
       return {
         opportunities: state.opportunities.map((o) =>
-          o.id === oppId ? { ...o, status: "EXPIRED" } : o,
+          o.id === oppId ? { ...o, status: 'EXPIRED' } : o,
         ),
       };
     }),
 
-  getCompatibleOpportunities: (
-    currentStationId,
-    destinationStationId,
-    direction,
-  ) => {
+  getCompatibleOpportunities: (currentStationId, destinationStationId, direction) => {
     const state = get();
     return state.opportunities.filter((opp) => {
-      if (opp.status !== "ACTIVE") return false;
+      if (opp.status !== 'ACTIVE') return false;
       if (opp.direction !== direction) return false;
 
       // Handoff station must be AFTER seeker's current station (or same)
@@ -314,11 +289,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         isLegValid(currentStationId, opp.handoffStationId, direction);
 
       // Handoff station must be BEFORE or AT seeker's destination
-      const handoffBeforeDest = isLegValid(
-        opp.handoffStationId,
-        destinationStationId,
-        direction,
-      );
+      const handoffBeforeDest = isLegValid(opp.handoffStationId, destinationStationId, direction);
 
       return handoffAfterCurrent && handoffBeforeDest;
     });
@@ -329,16 +300,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     return state.matches.filter(
       (m) =>
         (m.seekerId === userId || m.giverId === userId) &&
-        (m.status === "PENDING" || m.status === "ACCEPTED"),
+        (m.status === 'PENDING' || m.status === 'ACCEPTED'),
     );
   },
 
   getMyOpportunity: (userId) => {
     const state = get();
     return state.opportunities.find(
-      (o) =>
-        o.giverId === userId &&
-        (o.status === "ACTIVE" || o.status === "MATCHED"),
+      (o) => o.giverId === userId && (o.status === 'ACTIVE' || o.status === 'MATCHED'),
     );
   },
 }));

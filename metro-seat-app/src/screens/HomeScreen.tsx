@@ -1,20 +1,13 @@
-import { useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-} from "react-native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../navigation";
-import { useAppStore } from "../store/mockStore";
-import { translations } from "../i18n";
-import { notify } from "../utils/dialog";
+import { useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation';
+import { useAppStore } from '../store/mockStore';
+import { translations } from '../i18n';
+import { notify } from '../utils/dialog';
 
 type Props = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "Tabs">;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Tabs'>;
 };
 
 export default function HomeScreen({ navigation }: Props) {
@@ -29,7 +22,7 @@ export default function HomeScreen({ navigation }: Props) {
       matches.filter(
         (m) =>
           (m.giverId === currentUser.id || m.seekerId === currentUser.id) &&
-          (m.status === "PENDING" || m.status === "ACCEPTED"),
+          (m.status === 'PENDING' || m.status === 'ACCEPTED'),
       ),
     [matches, currentUser.id],
   );
@@ -37,9 +30,7 @@ export default function HomeScreen({ navigation }: Props) {
   const myOpportunity = useMemo(
     () =>
       opportunities.find(
-        (o) =>
-          o.giverId === currentUser.id &&
-          (o.status === "ACTIVE" || o.status === "MATCHED"),
+        (o) => o.giverId === currentUser.id && (o.status === 'ACTIVE' || o.status === 'MATCHED'),
       ),
     [opportunities, currentUser.id],
   );
@@ -49,29 +40,23 @@ export default function HomeScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.welcome}>Hello, Commuter</Text>
-          <Text style={styles.subtitle}>
-            Ahmedabad-Gandhinagar Metro Phase 2
-          </Text>
+          <Text style={styles.subtitle}>Ahmedabad-Gandhinagar Metro Phase 2</Text>
         </View>
 
         {activeMatches.length > 0 && (
           <View style={styles.activeCard}>
             <Text style={styles.activeCardTitle}>
               {activeMatches.length === 1
-                ? "You have an active handoff!"
+                ? 'You have an active handoff!'
                 : `You have ${activeMatches.length} active handoffs!`}
             </Text>
             {activeMatches.map((match) => (
               <TouchableOpacity
                 key={match.id}
                 style={[styles.primaryButton, { marginTop: 10 }]}
-                onPress={() =>
-                  navigation.navigate("ActiveMatch", { matchId: match.id })
-                }
+                onPress={() => navigation.navigate('ActiveMatch', { matchId: match.id })}
               >
-                <Text style={styles.buttonText}>
-                  View Match ({match.status})
-                </Text>
+                <Text style={styles.buttonText}>View Match ({match.status})</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -80,32 +65,22 @@ export default function HomeScreen({ navigation }: Props) {
         {myOpportunity && (
           <View style={styles.activeCard}>
             <Text style={styles.activeCardTitle}>You are offering a seat.</Text>
-            <Text style={styles.statusText}>
-              Status: {myOpportunity.status}
-            </Text>
+            <Text style={styles.statusText}>Status: {myOpportunity.status}</Text>
             <Text style={styles.instructionText}>
               {activeMatches.length > 0
-                ? "You have pending requests to review."
-                : "Waiting for someone to request it..."}
+                ? 'You have pending requests to review.'
+                : 'Waiting for someone to request it...'}
             </Text>
 
-            {myOpportunity.status === "ACTIVE" && (
+            {myOpportunity.status === 'ACTIVE' && (
               <TouchableOpacity
-                style={[
-                  styles.primaryButton,
-                  { marginTop: 10, backgroundColor: "#dc3545" },
-                ]}
+                style={[styles.primaryButton, { marginTop: 10, backgroundColor: '#dc3545' }]}
                 onPress={async () => {
-                  const success = useAppStore
-                    .getState()
-                    .cancelOpportunity(myOpportunity.id);
+                  const success = useAppStore.getState().cancelOpportunity(myOpportunity.id);
                   if (success) {
-                    await notify("Cancelled", "Your offer has been cancelled.");
+                    await notify('Cancelled', 'Your offer has been cancelled.');
                   } else {
-                    await notify(
-                      "Error",
-                      "Failed to cancel the offer. It may not be active.",
-                    );
+                    await notify('Error', 'Failed to cancel the offer. It may not be active.');
                   }
                 }}
               >
@@ -119,44 +94,39 @@ export default function HomeScreen({ navigation }: Props) {
           <View style={styles.actionContainer}>
             <TouchableOpacity
               style={styles.largeButton}
-              onPress={() => navigation.navigate("FindSeat")}
+              onPress={() => navigation.navigate('FindSeat')}
             >
               <Text style={styles.largeButtonTitle}>{t.findSeat}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.largeButton, styles.secondaryButton]}
-              onPress={() => navigation.navigate("OfferSeat")}
+              onPress={() => navigation.navigate('OfferSeat')}
             >
               <Text style={styles.largeButtonTitle}>{t.offerSeat}</Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {process.env.EXPO_PUBLIC_DEMO_MODE === "1" && (
+        {process.env.EXPO_PUBLIC_DEMO_MODE === '1' && (
           <View
             style={{
               marginTop: 40,
               padding: 20,
-              backgroundColor: "#ffeeba",
+              backgroundColor: '#ffeeba',
               borderRadius: 8,
             }}
           >
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
-              🛠 Dev Tools
-            </Text>
+            <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>🛠 Dev Tools</Text>
             <TouchableOpacity
-              style={[styles.primaryButton, { backgroundColor: "#6c757d" }]}
+              style={[styles.primaryButton, { backgroundColor: '#6c757d' }]}
               onPress={() => {
                 const store = useAppStore.getState();
-                const isMe = store.currentUser.id === "u_me";
-                useAppStore.setState({
-                  currentUser: {
-                    id: isMe ? "mock_seeker_2" : "u_me",
-                    displayName: isMe ? "Mock Seeker" : "Me",
-                    reputation: 5.0,
-                  },
-                });
+                const nextId = store.currentUser.id === 'u_me' ? 'mock_seeker_2' : 'u_me';
+                const user = store.users[nextId];
+                if (user) {
+                  useAppStore.setState({ currentUser: user });
+                }
               }}
             >
               <Text style={styles.buttonText}>
@@ -171,58 +141,58 @@ export default function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8f9fa" },
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
   content: { padding: 20 },
   header: { marginBottom: 30 },
-  welcome: { fontSize: 24, fontWeight: "bold", color: "#333" },
-  subtitle: { fontSize: 14, color: "#666", marginTop: 4 },
+  welcome: { fontSize: 24, fontWeight: 'bold', color: '#333' },
+  subtitle: { fontSize: 14, color: '#666', marginTop: 4 },
   actionContainer: { marginTop: 10 },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 15,
-    color: "#333",
+    color: '#333',
   },
   largeButton: {
-    backgroundColor: "#0056b3",
+    backgroundColor: '#0056b3',
     padding: 24,
     borderRadius: 12,
     marginBottom: 15,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  secondaryButton: { backgroundColor: "#28a745" },
+  secondaryButton: { backgroundColor: '#28a745' },
   largeButtonTitle: {
-    color: "white",
+    color: 'white',
     fontSize: 22,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 8,
   },
-  largeButtonSub: { color: "rgba(255,255,255,0.8)", fontSize: 14 },
+  largeButtonSub: { color: 'rgba(255,255,255,0.8)', fontSize: 14 },
   activeCard: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#ddd",
-    alignItems: "center",
+    borderColor: '#ddd',
+    alignItems: 'center',
   },
-  activeCardTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 15 },
+  activeCardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
   primaryButton: {
-    backgroundColor: "#FF8200",
+    backgroundColor: '#FF8200',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
   },
-  buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   statusText: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#0056b3",
+    fontWeight: 'bold',
+    color: '#0056b3',
     marginBottom: 8,
   },
-  instructionText: { fontSize: 14, color: "#666" },
+  instructionText: { fontSize: 14, color: '#666' },
 });
