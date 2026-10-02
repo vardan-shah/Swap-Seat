@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
 import { isLegValid } from '../domain/route';
-import { trainsRunningNow, Train, checkOffer } from '../domain/trains';
+import { Train, checkOffer, servesLeg, timeAt, getISTMinutes } from '../domain/trains';
 import trainsData from '../data/trains.json';
 import { Language } from '../i18n';
 import { randomUUID } from 'expo-crypto';
@@ -35,7 +35,15 @@ interface AppState {
     handoffStationId: string,
     price: number | undefined,
     trainId: string,
-  ) => { ok: boolean; reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' | 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING' };
+  ) => {
+    ok: boolean;
+    reason?:
+      | 'ALREADY_OFFERING'
+      | 'INVALID_STATIONS'
+      | 'UNKNOWN_TRAIN'
+      | 'TRAIN_NOT_ON_LEG'
+      | 'TRAIN_NOT_RUNNING';
+  };
   cancelOpportunity: (opportunityId: string) => boolean;
   requestSeat: (
     opportunityId: string,
@@ -113,7 +121,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => {
     let result: {
       ok: boolean;
-      reason?: 'ALREADY_OFFERING' | 'INVALID_STATIONS' | 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING';
+      reason?:
+        | 'ALREADY_OFFERING'
+        | 'INVALID_STATIONS'
+        | 'UNKNOWN_TRAIN'
+        | 'TRAIN_NOT_ON_LEG'
+        | 'TRAIN_NOT_RUNNING';
     } = { ok: false };
     set((state) => {
       const existingOffer = state.opportunities.find(
@@ -131,13 +144,20 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       const now = Date.now();
       const allTrains = trainsData as unknown as Train[];
-      
-      const validation = checkOffer(trainId, direction, currentStationId, handoffStationId, now, allTrains);
+
+      const validation = checkOffer(
+        trainId,
+        direction,
+        currentStationId,
+        handoffStationId,
+        now,
+        allTrains,
+      );
       if (!validation.ok) {
         result = { ok: false, reason: validation.reason };
         return state;
       }
-      
+
       const newOpp: SeatOpportunity = {
         id: randomUUID(),
         giverId: state.currentUser.id,
@@ -290,15 +310,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   getCompatibleOpportunities: (currentStationId, destinationStationId, direction) => {
     const state = get();
     const now = Date.now();
-    const activeTrains = trainsRunningNow(direction, currentStationId, destinationStationId, now, trainsData as unknown as Train[]);
-    const activeTrainIds = new Set(activeTrains.map(t => t.id));
+    const allTrains = trainsData as unknown as Train[];
 
     return state.opportunities.filter((opp) => {
       if (opp.status !== 'ACTIVE') return false;
       if (opp.direction !== direction) return false;
       if (opp.giverId === state.currentUser.id) return false;
       if (now > opp.expiresAt) return false;
-      if (!activeTrainIds.has(opp.trainId)) return false;
+      const train = allTrains.find((t) => t.id === opp.trainId);
+      if (!train) return false;
+      if (!servesLeg(train, currentStationId, destinationStationId)) return false;
+      const tAt = timeAt(train, currentStationId);
+      if (!tAt || tAt.max < getISTMinutes(now)) return false;
 
       // Handoff station must be AFTER seeker's current station (or same)
       const handoffAfterCurrent =

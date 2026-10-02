@@ -9,7 +9,7 @@ import { ENABLE_PAYMENTS } from '../config/flags';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
-import { trainsRunningNow, Train } from '../domain/trains';
+import { trainsForOffer, Train } from '../domain/trains';
 import trains from '../data/trains.json';
 import { translations } from '../i18n';
 
@@ -46,11 +46,16 @@ export default function OfferSeatScreen({ navigation }: Props) {
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
     const res = offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
     if (!res.ok) {
-      const msg = res.reason === 'ALREADY_OFFERING' ? 'You already have an active offer.' :
-                  res.reason === 'INVALID_STATIONS' ? 'Handoff station must be after your current station.' :
-                  res.reason === 'UNKNOWN_TRAIN' ? 'Unknown train selected.' :
-                  res.reason === 'TRAIN_NOT_ON_LEG' ? 'Selected train does not serve this leg.' :
-                  'Selected train has already passed.';
+      const msg =
+        res.reason === 'ALREADY_OFFERING'
+          ? 'You already have an active offer.'
+          : res.reason === 'INVALID_STATIONS'
+            ? 'Handoff station must be after your current station.'
+            : res.reason === 'UNKNOWN_TRAIN'
+              ? 'Unknown train selected.'
+              : res.reason === 'TRAIN_NOT_ON_LEG'
+                ? 'Selected train does not serve this leg.'
+                : 'Selected train has already passed.';
       await notify('Error', msg);
       return;
     }
@@ -71,20 +76,26 @@ export default function OfferSeatScreen({ navigation }: Props) {
 
   const trainItems = useMemo(() => {
     if (!currentStationId || !handoffStationId) return [];
-    
+
     // Ensure leg is valid in this direction
     const ordered = [...STATIONS].sort((a, b) =>
       direction === 'Northbound'
         ? stationIndex(a.id) - stationIndex(b.id)
         : stationIndex(b.id) - stationIndex(a.id),
     );
-    const currIdx = ordered.findIndex(s => s.id === currentStationId);
-    const handoffIdx = ordered.findIndex(s => s.id === handoffStationId);
+    const currIdx = ordered.findIndex((s) => s.id === currentStationId);
+    const handoffIdx = ordered.findIndex((s) => s.id === handoffStationId);
     if (currIdx < 0 || handoffIdx < 0 || handoffIdx <= currIdx) return [];
 
-    const activeTrains = trainsRunningNow(direction, currentStationId, handoffStationId, Date.now(), trains as unknown as Train[]);
-    
-    return activeTrains.map(t => {
+    const activeTrains = trainsForOffer(
+      direction,
+      currentStationId,
+      handoffStationId,
+      Date.now(),
+      trains as unknown as Train[],
+    );
+
+    return activeTrains.map((t) => {
       // Find origin name from pattern
       const origin = direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
       const gift = t.pattern === 'RYV-GIFT' ? ' (GIFT)' : '';
@@ -125,8 +136,6 @@ export default function OfferSeatScreen({ navigation }: Props) {
           <Text style={styles.smallText}>(Towards APMC)</Text>
         </TouchableOpacity>
       </View>
-
-      
 
       <SelectModal
         label={`2. ${t.whereAreYou}`}

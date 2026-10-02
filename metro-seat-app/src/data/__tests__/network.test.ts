@@ -14,7 +14,7 @@ describe('GMRC Network Data Integrity', () => {
   });
 
   it('ensures every stop in every service pattern exists in stations', () => {
-    const stationIds = new Set(gmrcData.stations.map(s => s.id));
+    const stationIds = new Set(gmrcData.stations.map((s) => s.id));
     for (const pattern of gmrcData.service_patterns) {
       for (const stopId of pattern.stops) {
         expect(stationIds.has(stopId)).toBe(true);
@@ -23,16 +23,16 @@ describe('GMRC Network Data Integrity', () => {
   });
 
   it('STATIONS equals RY-MM stops filtered by status', () => {
-    const ryPattern = gmrcData.service_patterns.find(p => p.id === 'RY-MM')!;
+    const ryPattern = gmrcData.service_patterns.find((p) => p.id === 'RY-MM')!;
     const ryStops = ryPattern.stops;
-    
+
     // Find stations that are operational
-    const expectedOperationalIds = ryStops.filter(id => {
-      const s = gmrcData.stations.find(st => st.id === id);
+    const expectedOperationalIds = ryStops.filter((id) => {
+      const s = gmrcData.stations.find((st) => st.id === id);
       return s && s.status === 'operational';
     });
 
-    const actualIds = STATIONS.map(s => s.id);
+    const actualIds = STATIONS.map((s) => s.id);
     expect(actualIds).toEqual(expectedOperationalIds);
     expect(actualIds).not.toContain('sabarmati-railway-station');
   });
