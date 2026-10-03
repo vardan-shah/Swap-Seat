@@ -76,7 +76,7 @@ describe('mockStore', () => {
         .getState()
         .offerSeat('Northbound', 'motera-stadium', 'sabarmati', undefined, 'NB-0620-RYMM');
       expect(res.ok).toBe(false);
-      expect(res.reason).toBe('INVALID_STATIONS');
+      if (!res.ok) expect(res.reason).toBe('INVALID_STATIONS');
     });
 
     it('rejects UNKNOWN_TRAIN when train does not exist', () => {
@@ -84,7 +84,7 @@ describe('mockStore', () => {
         .getState()
         .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'train1');
       expect(res.ok).toBe(false);
-      expect(res.reason).toBe('UNKNOWN_TRAIN');
+      if (!res.ok) expect(res.reason).toBe('UNKNOWN_TRAIN');
     });
 
     it('rejects ALREADY_OFFERING and leaves state unchanged', () => {
@@ -102,236 +102,196 @@ describe('mockStore', () => {
         .getState()
         .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM');
       expect(res.ok).toBe(false);
-      expect(res.reason).toBe('ALREADY_OFFERING');
+      if (!res.ok) expect(res.reason).toBe('ALREADY_OFFERING');
       expect(useAppStore.getState().opportunities).toHaveLength(1);
     });
   });
 
   describe('getCompatibleOpportunities', () => {
+    const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
+    const seeker = { id: 'u3', displayName: 'Me', reputation: 0 };
+    const opp = (o: Partial<SeatOpportunity>) =>
+      ({
+        id: 'opp1',
+        giverId: 'u2',
+        status: 'ACTIVE',
+        direction: 'Northbound',
+        ...o,
+      }) as SeatOpportunity;
+    const find = (from: string, to: string) =>
+      useAppStore.getState().getCompatibleOpportunities(from, to, 'Northbound');
+
     beforeEach(() => {
       jest.useFakeTimers();
-      jest.setSystemTime(new Date('2026-10-05T06:28:00+05:30').getTime());
     });
     afterEach(() => {
       jest.useRealTimers();
     });
 
     it('matches valid Northbound offer', () => {
+      jest.setSystemTime(ist('06:28'));
       useAppStore.setState({
+        currentUser: seeker,
         opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
+          opp({
+            trainId: 'NB-0620-RYMM',
             currentStationId: 'vadaj',
             handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
-          } as SeatOpportunity,
+            expiresAt: ist('06:54'),
+          }),
         ],
       });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('ranip', 'motera-stadium', 'Northbound');
-      expect(matches).toHaveLength(1);
-    });
-
-    it('no match when handoff is after destination', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
-          } as SeatOpportunity,
-        ],
-      });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('apmc', 'ranip', 'Northbound');
-      expect(matches).toHaveLength(0);
-    });
-
-    it('no match when handoff is before boarding', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
-          } as SeatOpportunity,
-        ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('motera-stadium', 'koteshwar-road', 'Northbound');
-      expect(matches).toHaveLength(0);
-    });
-
-    it('matches when handoff equals boarding station (boundary)', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
-          } as SeatOpportunity,
-        ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('sabarmati', 'motera-stadium', 'Northbound');
-      expect(matches).toHaveLength(1);
-    });
-
-    it('no match when handoff equals destination', () => {
-      useAppStore.setState({
-        opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
-          } as SeatOpportunity,
-        ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('ranip', 'sabarmati', 'Northbound');
-      expect(matches).toHaveLength(0);
+      expect(find('ranip', 'motera-stadium')).toHaveLength(1);
     });
 
     it('own offer excluded', () => {
+      jest.setSystemTime(ist('06:28'));
       useAppStore.setState({
+        currentUser: seeker,
         opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u3', // own offer
+          opp({
+            giverId: 'u3',
+            trainId: 'NB-0620-RYMM',
             currentStationId: 'vadaj',
             handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T06:54:00+05:30').getTime(),
-          } as SeatOpportunity,
+            expiresAt: ist('06:54'),
+          }),
         ],
       });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('ranip', 'motera-stadium', 'Northbound');
-      expect(matches).toHaveLength(0);
+      expect(find('ranip', 'motera-stadium')).toHaveLength(0);
     });
 
     it('expired offer excluded', () => {
+      jest.setSystemTime(ist('06:28'));
       useAppStore.setState({
+        currentUser: seeker,
         opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
+          opp({
+            trainId: 'NB-0620-RYMM',
             currentStationId: 'vadaj',
             handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T06:20:00+05:30').getTime(), // Already expired
-          } as SeatOpportunity,
+            expiresAt: ist('06:20'),
+          }),
         ],
-      });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('ranip', 'motera-stadium', 'Northbound');
-      expect(matches).toHaveLength(0);
+      }); // Expired at 06:20 (past), but train at 06:28 has not reached boarding yet (so boardingStillAhead is true)
+      expect(find('ranip', 'motera-stadium')).toHaveLength(0);
     });
 
-    it('a train that already passed the seeker station excluded', () => {
+    it('no match when handoff is after destination', () => {
+      jest.setSystemTime(ist('06:28'));
       useAppStore.setState({
+        currentUser: seeker,
         opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'sabarmati',
+          opp({
+            trainId: 'NB-0620-RYMM',
+            currentStationId: 'vadaj',
+            handoffStationId: 'sabarmati',
+            expiresAt: ist('06:54'),
+          }),
+        ],
+      });
+      expect(find('usmanpura', 'ranip')).toHaveLength(0); // only the destination rule can exclude this
+    });
+
+    it('no match when handoff is before boarding', () => {
+      jest.setSystemTime(ist('06:28'));
+      useAppStore.setState({
+        currentUser: seeker,
+        opportunities: [
+          opp({
+            trainId: 'NB-0620-RYMM',
+            currentStationId: 'vadaj',
+            handoffStationId: 'sabarmati',
+            expiresAt: ist('06:54'),
+          }),
+        ],
+      });
+      expect(find('motera-stadium', 'koteshwar-road')).toHaveLength(0);
+    });
+
+    it('matches when handoff equals boarding station (boundary)', () => {
+      jest.setSystemTime(ist('06:48'));
+      useAppStore.setState({
+        currentUser: seeker,
+        opportunities: [
+          opp({
+            trainId: 'NB-0620-RYMM',
+            currentStationId: 'vadaj',
+            handoffStationId: 'sabarmati',
+            expiresAt: ist('06:54'),
+          }),
+        ],
+      });
+      expect(find('sabarmati', 'motera-stadium')).toHaveLength(1);
+    });
+
+    it('no match when handoff equals destination', () => {
+      jest.setSystemTime(ist('06:28'));
+      useAppStore.setState({
+        currentUser: seeker,
+        opportunities: [
+          opp({
+            trainId: 'NB-0620-RYMM',
+            currentStationId: 'vadaj',
+            handoffStationId: 'sabarmati',
+            expiresAt: ist('06:54'),
+          }),
+        ],
+      });
+      expect(find('ranip', 'sabarmati')).toHaveLength(0);
+    });
+
+    it("excludes an offer once its train has passed the seeker's boarding station", () => {
+      useAppStore.setState({
+        currentUser: seeker,
+        opportunities: [
+          opp({
+            trainId: 'NB-0620-RYMM',
+            currentStationId: 'vadaj',
             handoffStationId: 'motera-stadium',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T06:54:00+05:30').getTime(),
-          } as SeatOpportunity,
+            expiresAt: ist('06:54'),
+          }),
         ],
       });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      jest.setSystemTime(new Date('2026-10-05T06:40:00+05:30').getTime()); // passed sabarmati at 06:31
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('sabarmati', 'motera-stadium', 'Northbound');
-      expect(matches).toHaveLength(0);
+      jest.setSystemTime(ist('06:46')); // Ranip window closes 06:47
+      expect(find('ranip', 'koteshwar-road')).toHaveLength(1);
+      jest.setSystemTime(ist('06:48'));
+      expect(find('ranip', 'koteshwar-road')).toHaveLength(0);
     });
 
-    it('a train not serving the seeker leg excluded', () => {
+    it.each([
+      ['NB-0658-RYMM', 1, ist('07:50')], // control: stops at both GNLU and Raysan
+      ['NB-0645-RYVGIFT', 0, ist('07:38')], // GIFT train never stops at Raysan
+    ])('seeker gnlu→raysan with %s gives %i match(es)', (trainId, expected, expiresAt) => {
+      jest.setSystemTime(ist('07:30'));
       useAppStore.setState({
+        currentUser: seeker,
         opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
-            currentStationId: 'vadaj',
-            handoffStationId: 'sabarmati',
-            direction: 'Northbound',
-            status: 'ACTIVE',
-            trainId: 'NB-0645-RYVGIFT', // GIFT train
-            expiresAt: new Date('2026-10-05T07:54:00+05:30').getTime(),
-          } as SeatOpportunity,
+          opp({
+            trainId,
+            currentStationId: 'koba-gam',
+            handoffStationId: 'gnlu',
+            expiresAt,
+          }),
         ],
       });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      jest.setSystemTime(new Date('2026-10-05T07:15:00+05:30').getTime()); // valid for GIFT train at gnlu
-      const matches = useAppStore
-        .getState()
-        .getCompatibleOpportunities('gnlu', 'mahatma-mandir', 'Northbound');
-      expect(matches).toHaveLength(0);
+      expect(find('gnlu', 'raysan')).toHaveLength(expected);
     });
 
     it('matches valid Southbound offer', () => {
+      jest.setSystemTime(ist('07:30'));
       useAppStore.setState({
+        currentUser: seeker,
         opportunities: [
-          {
-            id: 'opp1',
-            giverId: 'u2',
+          opp({
+            direction: 'Southbound',
+            trainId: 'SB-0640-RYMM',
             currentStationId: 'aec',
             handoffStationId: 'vadaj',
-            direction: 'Southbound',
-            status: 'ACTIVE',
-            trainId: 'SB-0640-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
-          } as SeatOpportunity,
+            expiresAt: ist('07:44'),
+          }),
         ],
       });
-      useAppStore.setState({ currentUser: { id: 'u3', displayName: 'Me', reputation: 5.0 } });
-      jest.setSystemTime(new Date('2026-10-05T07:35:00+05:30').getTime());
       const matches = useAppStore
         .getState()
         .getCompatibleOpportunities('aec', 'usmanpura', 'Southbound');
@@ -382,7 +342,7 @@ describe('mockStore', () => {
       });
       const res = useAppStore.getState().requestSeat('opp1', 'seeker1');
       expect(res.ok).toBe(false);
-      expect(res.reason).toBe('DUPLICATE');
+      if (!res.ok) expect(res.reason).toBe('DUPLICATE');
     });
 
     it('rejects request for own offer', () => {
@@ -399,7 +359,7 @@ describe('mockStore', () => {
       });
       const res = useAppStore.getState().requestSeat('opp1', 'seeker1');
       expect(res.ok).toBe(false);
-      expect(res.reason).toBe('OWN_OFFER');
+      if (!res.ok) expect(res.reason).toBe('OWN_OFFER');
     });
 
     it('rejects request for non-ACTIVE opportunity', () => {
@@ -414,13 +374,13 @@ describe('mockStore', () => {
       });
       const res = useAppStore.getState().requestSeat('opp1', 'seeker1');
       expect(res.ok).toBe(false);
-      expect(res.reason).toBe('NOT_ACTIVE');
+      if (!res.ok) expect(res.reason).toBe('NOT_ACTIVE');
     });
     it('rejects request for unknown opportunity', () => {
       useAppStore.setState({ opportunities: [] });
       const res = useAppStore.getState().requestSeat('opp99', 'seeker1');
       expect(res.ok).toBe(false);
-      expect(res.reason).toBe('NOT_FOUND');
+      if (!res.ok) expect(res.reason).toBe('NOT_FOUND');
     });
   });
 
@@ -455,7 +415,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().cancelOpportunity('opp1');
-      expect(success).toBe(true);
+      expect(success).toEqual({ ok: true });
       const state = useAppStore.getState();
       expect(state.opportunities[0].status).toBe('CANCELLED');
 
@@ -482,7 +442,7 @@ describe('mockStore', () => {
         matches: [],
       });
       const success = useAppStore.getState().cancelOpportunity('opp1');
-      expect(success).toBe(true);
+      expect(success).toEqual({ ok: true });
       expect(useAppStore.getState().opportunities[0].status).toBe('CANCELLED');
     });
 
@@ -505,7 +465,7 @@ describe('mockStore', () => {
         matches: [],
       });
       const success = useAppStore.getState().cancelOpportunity('opp1');
-      expect(success).toBe(false);
+      expect(success.ok).toBe(false);
       expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE');
     });
 
@@ -522,7 +482,7 @@ describe('mockStore', () => {
         matches: [],
       });
       const success = useAppStore.getState().cancelOpportunity('opp1');
-      expect(success).toBe(false);
+      expect(success.ok).toBe(false);
       expect(useAppStore.getState().opportunities[0].status).toBe('COMPLETED');
     });
   });
@@ -558,7 +518,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().acceptMatch('m1');
-      expect(success).toBe(true);
+      expect(success).toEqual({ ok: true });
       const state = useAppStore.getState();
       expect(state.opportunities[0].status).toBe('MATCHED');
       expect(state.matches.find((m) => m.id === 'm1')?.status).toBe('ACCEPTED');
@@ -588,7 +548,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().rejectMatch('m1');
-      expect(success).toBe(true);
+      expect(success).toEqual({ ok: true });
       expect(useAppStore.getState().matches[0].status).toBe('REJECTED');
       expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE'); // Remains active
     });
@@ -615,7 +575,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().transition('m1', 's1', 'ACCEPTED');
-      expect(success).toBe(false);
+      expect(success.ok).toBe(false);
       expect(useAppStore.getState().matches[0].status).toBe('PENDING'); // Unchanged
     });
 
@@ -640,7 +600,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().transition('m1', 's1', 'CANCELLED');
-      expect(success).toBe(true);
+      expect(success).toEqual({ ok: true });
       expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE');
     });
 
@@ -670,7 +630,7 @@ describe('mockStore', () => {
 
       jest.setSystemTime(now);
       const success = useAppStore.getState().transition('m1', 's1', 'CANCELLED');
-      expect(success).toBe(true);
+      expect(success).toEqual({ ok: true });
       expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
     });
 
@@ -694,7 +654,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().transition('m1', 'giver1', 'CANCELLED');
-      expect(success).toBe(true);
+      expect(success).toEqual({ ok: true });
       expect(useAppStore.getState().opportunities[0].status).toBe('CANCELLED');
     });
 
@@ -718,7 +678,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().transition('m1', 's1', 'COMPLETED');
-      expect(success).toBe(false);
+      expect(success.ok).toBe(false);
       expect(useAppStore.getState().matches[0].status).toBe('ACCEPTED'); // Unchanged
     });
 
@@ -743,7 +703,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().transition('m1', 'giver1', 'COMPLETED');
-      expect(success).toBe(true);
+      expect(success).toEqual({ ok: true });
       expect(useAppStore.getState().matches[0].status).toBe('COMPLETED');
       expect(useAppStore.getState().opportunities[0].status).toBe('COMPLETED');
     });
@@ -768,7 +728,7 @@ describe('mockStore', () => {
         ],
       });
       const success = useAppStore.getState().transition('m1', 'random_guy', 'CANCELLED');
-      expect(success).toBe(false);
+      expect(success.ok).toBe(false);
       expect(useAppStore.getState().matches[0].status).toBe('ACCEPTED'); // Unchanged
     });
   });

@@ -1,15 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { STATIONS } from '../data/stations';
-import { stationIndex } from '../domain/route';
+import { stationIndex, isLegValid } from '../domain/route';
 import { ENABLE_PAYMENTS } from '../config/flags';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
-import { trainsForOffer, Train } from '../domain/trains';
+import { trainsForOffer, Train, getTrainLabel } from '../domain/trains';
 import trains from '../data/trains.json';
 import { translations } from '../i18n';
 
@@ -22,7 +22,17 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const [currentStationId, setCurrentStationId] = useState<string>('');
   const [handoffStationId, setHandoffStationId] = useState<string>('');
   const [trainId, setTrainId] = useState<string>('');
+  const [now, setNow] = useState(Date.now());
   const [price, setPrice] = useState<string>('');
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    setTrainId('');
+  }, [currentStationId, handoffStationId]);
 
   const offerSeat = useAppStore((state) => state.offerSeat);
   const lang = useAppStore((state) => state.language);
@@ -77,33 +87,25 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const trainItems = useMemo(() => {
     if (!currentStationId || !handoffStationId) return [];
 
-    // Ensure leg is valid in this direction
-    const ordered = [...STATIONS].sort((a, b) =>
-      direction === 'Northbound'
-        ? stationIndex(a.id) - stationIndex(b.id)
-        : stationIndex(b.id) - stationIndex(a.id),
-    );
-    const currIdx = ordered.findIndex((s) => s.id === currentStationId);
-    const handoffIdx = ordered.findIndex((s) => s.id === handoffStationId);
-    if (currIdx < 0 || handoffIdx < 0 || handoffIdx <= currIdx) return [];
+    if (currentStationId === handoffStationId || !isLegValid(currentStationId, handoffStationId, direction)) return [];
 
     const activeTrains = trainsForOffer(
       direction,
       currentStationId,
       handoffStationId,
-      Date.now(),
+      now,
       trains as unknown as Train[],
     );
 
     return activeTrains.map((t) => {
-      // Find origin name from pattern
-      const origin = direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
-      const gift = t.pattern === 'RYV-GIFT' ? ' (GIFT)' : '';
-      const firstStop = Object.keys(t.times)[0];
-      const firstTime = t.times[firstStop];
-      return { label: `Train starting from ${origin} at ${firstTime}${gift}`, value: t.id };
+      const expectedTrain = getTrainLabel(t.id, trains as unknown as Train[]);
+      return {
+        label: expectedTrain,
+        value: t.id,
+        expectedTrain,
+      };
     });
-  }, [direction, currentStationId, handoffStationId]);
+  }, [direction, currentStationId, handoffStationId, now]);
 
   const handleDirectionChange = (newDir: Direction) => {
     setDirection(newDir);

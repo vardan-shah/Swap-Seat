@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
 import { isLegValid } from '../domain/route';
-import { Train, checkOffer, servesLeg, timeAt, getISTMinutes } from '../domain/trains';
+import { Train, checkOffer, servesLeg, boardingStillAhead } from '../domain/trains';
+import { reconcile } from '../domain/offers';
+import { now as clockNow } from '../utils/clock';
 import trainsData from '../data/trains.json';
 import { Language } from '../i18n';
 import { randomUUID } from 'expo-crypto';
@@ -44,7 +46,8 @@ interface AppState {
       | 'TRAIN_NOT_ON_LEG'
       | 'TRAIN_NOT_RUNNING';
   };
-  cancelOpportunity: (opportunityId: string) => boolean;
+  cancelOpportunity: (opportunityId: string) => { ok: boolean };
+  reconcile: () => void;
   requestSeat: (
     opportunityId: string,
     seekerId: string,
@@ -52,11 +55,18 @@ interface AppState {
     ok: boolean;
     reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND';
   };
-  transition: (matchId: string, actorId: string, to: import('../types').MatchStatus) => boolean;
-  acceptMatch: (matchId: string) => boolean;
-  rejectMatch: (matchId: string) => boolean;
-  cancelMatch: (matchId: string) => boolean;
-  completeMatch: (matchId: string) => boolean;
+  transition: (
+    matchId: string,
+    actorId: string,
+    to: import('../types').MatchStatus,
+  ) => { ok: boolean; reason?: 'EXPIRED' | 'NOT_FOUND' | 'NOT_PENDING' | 'NOT_ALLOWED' };
+  acceptMatch: (matchId: string) => {
+    ok: boolean;
+    reason?: 'EXPIRED' | 'NOT_FOUND' | 'NOT_PENDING' | 'NOT_ALLOWED';
+  };
+  rejectMatch: (matchId: string) => { ok: boolean };
+  cancelMatch: (matchId: string) => { ok: boolean };
+  completeMatch: (matchId: string) => { ok: boolean };
   expireOpportunity: (oppId: string) => void;
 
   // Queries
@@ -142,7 +152,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         return state;
       }
 
-      const now = Date.now();
+      const now = clockNow();
       const allTrains = trainsData as unknown as Train[];
 
       const validation = checkOffer(
@@ -177,6 +187,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     return result;
   },
 
+  reconcile: () => {
+    set((state) => {
+      const res = reconcile(state.opportunities, state.matches, clockNow());
+      if (res.opportunities !== state.opportunities) {
+        return { opportunities: res.opportunities, matches: res.matches };
+      }
+      return {};
+    });
+  },
   cancelOpportunity: (opportunityId) => {
     let success = false;
     set((state) => {
@@ -195,7 +214,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         ),
       };
     });
-    return success;
+    return { ok: success };
   },
 
   requestSeat: (opportunityId, seekerId) => {
@@ -235,7 +254,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         seekerId,
         giverId: opp.giverId,
         status: 'PENDING',
-        createdAt: Date.now(),
+        createdAt: clockNow(),
       };
 
       return { matches: [...state.matches, newMatch] };
@@ -243,11 +262,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     return result;
   },
 
-  transition: (matchId: string, actorId: string, to: MatchStatus): boolean => {
+  transition: (
+    matchId: string,
+    actorId: string,
+    to: MatchStatus,
+  ): { ok: boolean; reason?: 'EXPIRED' | 'NOT_FOUND' | 'NOT_PENDING' | 'NOT_ALLOWED' } => {
     const state = get();
     const m = state.matches.find((x) => x.id === matchId);
 
-    if (!m || !TRANSITIONS[m.status].includes(to)) return false;
+    if (!m) return { ok: false, reason: 'NOT_FOUND' };
+    if (!TRANSITIONS[m.status].includes(to)) return { ok: false, reason: 'NOT_PENDING' };
 
     const isGiver = actorId === m.giverId;
     const isSeeker = actorId === m.seekerId;
@@ -259,7 +283,12 @@ export const useAppStore = create<AppState>((set, get) => ({
           ? isGiver || isSeeker
           : isGiver; // COMPLETED: decided by giver for MVP
 
-    if (!allowed) return false;
+    if (!allowed) return { ok: false, reason: 'NOT_ALLOWED' };
+
+    const opp = state.opportunities.find((o) => o.id === m.opportunityId);
+    if (to === 'ACCEPTED' && opp && clockNow() > opp.expiresAt) {
+      return { ok: false, reason: 'EXPIRED' };
+    }
 
     set((s) => ({
       matches: s.matches.map((x) =>
@@ -283,14 +312,14 @@ export const useAppStore = create<AppState>((set, get) => ({
           } else {
             return {
               ...o,
-              status: Date.now() > o.expiresAt ? 'EXPIRED' : 'ACTIVE',
+              status: clockNow() > o.expiresAt ? 'EXPIRED' : 'ACTIVE',
             };
           }
         }
         return o;
       }),
     }));
-    return true;
+    return { ok: true };
   },
 
   acceptMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'ACCEPTED'),
@@ -309,7 +338,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   getCompatibleOpportunities: (currentStationId, destinationStationId, direction) => {
     const state = get();
-    const now = Date.now();
+    const now = clockNow();
     const allTrains = trainsData as unknown as Train[];
 
     return state.opportunities.filter((opp) => {
@@ -320,8 +349,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const train = allTrains.find((t) => t.id === opp.trainId);
       if (!train) return false;
       if (!servesLeg(train, currentStationId, destinationStationId)) return false;
-      const tAt = timeAt(train, currentStationId);
-      if (!tAt || tAt.max < getISTMinutes(now)) return false;
+      if (!boardingStillAhead(train, currentStationId, now)) return false;
 
       // Handoff station must be AFTER seeker's current station (or same)
       const handoffAfterCurrent =

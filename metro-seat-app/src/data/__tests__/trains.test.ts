@@ -63,7 +63,7 @@ describe('trains.json data integrity', () => {
       return h * 60 + m;
     };
 
-    // The exceptions explicitly found and verified against PDF:
+    // The exceptions explicitly found and matches the transcription:
     // (List will be populated once we run the test and find the failures)
     const exceptions = [
       'NB-0734-RYVGIFT|old-high-court>motera-stadium|19',
@@ -104,13 +104,14 @@ describe('trains.json data integrity', () => {
 
         const diff = t2 - t1;
         const bounds = getTimingBounds(from, to, train.direction as 'Northbound' | 'Southbound');
-        if (bounds) {
-          if (diff < bounds.min || diff > bounds.max) {
-            if (!isException(train.id, from, to, diff)) {
-              throw new Error(
-                `Timing violation on ${train.id}: ${from}->${to} took ${diff}m (bounds ${bounds.min}-${bounds.max})`,
-              );
-            }
+        if (!bounds) {
+          throw new Error(`Missing timing bounds for ${train.direction} segment ${from}->${to}`);
+        }
+        if (diff < bounds.min || diff > bounds.max) {
+          if (!isException(train.id, from, to, diff)) {
+            throw new Error(
+              `Timing violation on ${train.id}: ${from}->${to} took ${diff}m (bounds ${bounds.min}-${bounds.max})`,
+            );
           }
         }
       }

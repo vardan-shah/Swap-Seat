@@ -1,5 +1,12 @@
 import { describe, it, expect } from '@jest/globals';
-import { timeAt, servesLeg, isRunning, handoffExpiry, checkOffer } from '../trains';
+import {
+  timeAt,
+  servesLeg,
+  handoffExpiry,
+  checkOffer,
+  trainsForOffer,
+  boardingStillAhead,
+} from '../trains';
 import trains from '../../data/trains.json';
 import { Train } from '../trains';
 
@@ -20,6 +27,53 @@ describe('trains domain', () => {
     });
   });
 
+  const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
+
+  describe('trainsForOffer', () => {
+    it('returns NB-0620-RYMM between sabarmati and motera-stadium at 06:48, but not 06:30 or 06:56', () => {
+      const active48 = trainsForOffer(
+        'Northbound',
+        'sabarmati',
+        'motera-stadium',
+        ist('06:48'),
+        allTrains,
+      );
+      expect(active48.map((t) => t.id)).toContain('NB-0620-RYMM');
+
+      const active30 = trainsForOffer(
+        'Northbound',
+        'sabarmati',
+        'motera-stadium',
+        ist('06:30'),
+        allTrains,
+      );
+      expect(active30.map((t) => t.id)).not.toContain('NB-0620-RYMM');
+
+      const active56 = trainsForOffer(
+        'Northbound',
+        'sabarmati',
+        'motera-stadium',
+        ist('06:56'),
+        allTrains,
+      );
+      expect(active56.map((t) => t.id)).not.toContain('NB-0620-RYMM');
+    });
+
+    it('returns [] for Northbound gnlu to raysan at 07:36 (only GIFT train is there)', () => {
+      const active = trainsForOffer('Northbound', 'gnlu', 'raysan', ist('07:36'), allTrains);
+      expect(active).toHaveLength(0);
+    });
+  });
+
+  describe('boardingStillAhead', () => {
+    it('returns true if train has not yet passed the boarding station', () => {
+      const train = allTrains.find((t) => t.id === 'NB-0620-RYMM') as unknown as Train;
+      expect(boardingStillAhead(train, 'vadaj', ist('06:40'))).toBe(true);
+      expect(boardingStillAhead(train, 'vadaj', ist('06:43'))).toBe(true);
+      expect(boardingStillAhead(train, 'vadaj', ist('07:00'))).toBe(false);
+    });
+  });
+
   describe('servesLeg', () => {
     it('returns true if train visits A then B', () => {
       const sb = allTrains.find((t) => t.id === 'SB-0640-RYMM')!;
@@ -28,14 +82,6 @@ describe('trains domain', () => {
 
       const gift = allTrains.find((t) => t.id === 'NB-0645-RYVGIFT')!;
       expect(servesLeg(gift, 'koba-gam', 'mahatma-mandir')).toBe(false);
-    });
-  });
-
-  describe('isRunning', () => {
-    it('returns true if now is within first time - 2m and last time + 2m', () => {
-      const nb = allTrains.find((t) => t.id === 'NB-0620-RYMM')!; // last time 07:38 = 458
-      expect(isRunning(nb, at(460))).toBe(true);
-      expect(isRunning(nb, at(461))).toBe(false);
     });
   });
 

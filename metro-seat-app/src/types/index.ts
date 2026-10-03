@@ -39,3 +39,15 @@ export type User = {
   reputation: number;
   upiId?: string;
 };
+
+export type OfferSeatResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason:
+        | 'ALREADY_OFFERING'
+        | 'INVALID_STATIONS'
+        | 'UNKNOWN_TRAIN'
+        | 'TRAIN_NOT_ON_LEG'
+        | 'TRAIN_NOT_RUNNING';
+    };

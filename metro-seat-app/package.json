@@ -36,7 +36,8 @@
     "web": "expo start --web",
     "test": "jest",
     "format": "npx prettier --write \"src/**/*.{ts,tsx}\" App.tsx",
-    "validate:data": "jest src/data"
+    "validate:data": "jest src/data",
+    "verify": "npx tsc --noEmit && npm run test"
   },
   "private": true
 }

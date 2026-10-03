@@ -1,5 +1,5 @@
 import gmrcData from '../data/gmrc-network.json';
-import { Direction } from '../types';
+import { Direction, OfferSeatResult } from '../types';
 
 export interface Train {
   id: string;
@@ -79,22 +79,6 @@ export function servesLeg(train: Train, fromId: string, toId: string): boolean {
   return fromIdx !== -1 && toIdx !== -1 && fromIdx < toIdx;
 }
 
-export function isRunning(train: Train, nowMs: number): boolean {
-  const stops = getStops(train);
-  if (!stops) return false;
-
-  const firstStation = stops[0];
-  const lastStation = stops[stops.length - 1];
-
-  const firstTime = timeAt(train, firstStation);
-  const lastTime = timeAt(train, lastStation);
-
-  if (!firstTime || !lastTime) return false;
-
-  const now = getISTMinutes(nowMs);
-  return now >= firstTime.min && now <= lastTime.max;
-}
-
 export function handoffExpiry(
   train: Train,
   handoffStationId: string,
@@ -156,7 +140,7 @@ export function getTrainLabel(trainId: string, allTrains: Train[]): string {
 
 export type OfferValidation =
   | { ok: true; expiresAt: number }
-  | { ok: false; reason: 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING' };
+  | Extract<OfferSeatResult, { ok: false }>;
 
 export function checkOffer(
   trainId: string,
@@ -178,7 +162,17 @@ export function checkOffer(
   }
 
   const expires = handoffExpiry(train, handoffStationId, nowMs);
-  if (!expires) return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
+  if (expires === null) return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
 
   return { ok: true, expiresAt: expires };
+}
+
+export function boardingStillAhead(
+  train: Train,
+  boardingStationId: string,
+  nowMs: number,
+): boolean {
+  const tAt = timeAt(train, boardingStationId);
+  if (!tAt) return false;
+  return tAt.max >= getISTMinutes(nowMs);
 }

@@ -1,5 +1,16 @@
 import { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  AppState,
+  AppStateStatus,
+} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useEffect } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
@@ -16,6 +27,25 @@ export default function HomeScreen({ navigation }: Props) {
   const matches = useAppStore((s) => s.matches);
   const opportunities = useAppStore((s) => s.opportunities);
   const t = translations[language];
+
+  const { reconcile } = useAppStore();
+
+  useFocusEffect(
+    useCallback(() => {
+      reconcile();
+    }, [reconcile]),
+  );
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        reconcile();
+      }
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, [reconcile]);
 
   const activeMatches = useMemo(
     () =>
