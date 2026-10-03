@@ -87,7 +87,11 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const trainItems = useMemo(() => {
     if (!currentStationId || !handoffStationId) return [];
 
-    if (currentStationId === handoffStationId || !isLegValid(currentStationId, handoffStationId, direction)) return [];
+    if (
+      currentStationId === handoffStationId ||
+      !isLegValid(currentStationId, handoffStationId, direction)
+    )
+      return [];
 
     const activeTrains = trainsForOffer(
       direction,
