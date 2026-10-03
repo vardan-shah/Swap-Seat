@@ -1,5 +1,7 @@
 import { useAppStore } from '../mockStore';
-import { SeatOpportunity, Match } from '../../types';
+import { SeatOpportunity, Match, User } from '../../types';
+import { setDemoTime, resetDemoTime } from '../../utils/clock';
+
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
 describe('mockStore', () => {
@@ -300,6 +302,35 @@ describe('mockStore', () => {
   });
 
   describe('requestSeat', () => {
+    const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
+    it('rejects request for an EXPIRED opportunity', () => {
+      const o: SeatOpportunity = {
+        id: 'o1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        direction: 'Northbound',
+        trainId: 't1',
+        currentStationId: 's1',
+        handoffStationId: 's2',
+        expiresAt: ist('06:30'),
+        createdAt: ist('06:00'),
+        updatedAt: ist('06:00'),
+      };
+      useAppStore.setState({
+        opportunities: [o],
+        currentUser: { id: 'u2', displayName: 'Seeker', reputation: 4.8 } as User,
+        matches: [],
+      });
+      setDemoTime(ist('06:31'));
+
+      const { requestSeat } = useAppStore.getState();
+      const res = requestSeat('o1', 'u2');
+      expect(res).toEqual({ ok: false, reason: 'EXPIRED' });
+      expect(useAppStore.getState().matches).toHaveLength(0);
+
+      resetDemoTime();
+    });
+
     it('creates a PENDING match when requesting an ACTIVE opportunity', () => {
       useAppStore.setState({
         opportunities: [
@@ -488,6 +519,43 @@ describe('mockStore', () => {
   });
 
   describe('transition', () => {
+    const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
+    it('rejects ACCEPT for an expired opportunity', () => {
+      const o: SeatOpportunity = {
+        id: 'o1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        direction: 'Northbound',
+        trainId: 't1',
+        currentStationId: 's1',
+        handoffStationId: 's2',
+        expiresAt: ist('06:30'),
+        createdAt: ist('06:00'),
+        updatedAt: ist('06:00'),
+      };
+      const m: Match = {
+        id: 'm1',
+        opportunityId: 'o1',
+        giverId: 'u1',
+        seekerId: 'u2',
+        status: 'PENDING',
+        createdAt: ist('06:29'),
+      };
+      useAppStore.setState({
+        opportunities: [o],
+        matches: [m],
+        currentUser: { id: 'u1', displayName: 'Giver', reputation: 4.8 } as User,
+      });
+      setDemoTime(ist('06:31'));
+
+      const { transition } = useAppStore.getState();
+      const res = transition('m1', 'u1', 'ACCEPTED');
+      expect(res).toEqual({ ok: false, reason: 'EXPIRED' });
+      expect(useAppStore.getState().matches[0].status).toBe('PENDING'); // no change
+
+      resetDemoTime();
+    });
+
     it('allows giver to ACCEPT and auto-rejects siblings', () => {
       useAppStore.setState({
         currentUser: { id: 'giver1', displayName: 'Giver', reputation: 5.0 },
@@ -730,6 +798,112 @@ describe('mockStore', () => {
       const success = useAppStore.getState().transition('m1', 'random_guy', 'CANCELLED');
       expect(success.ok).toBe(false);
       expect(useAppStore.getState().matches[0].status).toBe('ACCEPTED'); // Unchanged
+    });
+  });
+
+  describe('reconcile', () => {
+    const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
+
+    it('exactly expiresAt -> still ACTIVE (no cancel)', () => {
+      const exp = ist('06:30');
+      const opp = {
+        id: 'o1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        direction: 'Northbound',
+        trainId: 't1',
+        currentStationId: 's1',
+        handoffStationId: 's2',
+        expiresAt: exp,
+        createdAt: exp - 1000,
+        updatedAt: exp - 1000,
+      } as SeatOpportunity;
+      useAppStore.setState({ opportunities: [opp], matches: [] });
+      setDemoTime(exp);
+      useAppStore.getState().reconcile();
+      expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE');
+      resetDemoTime();
+    });
+
+    it('exactly expiresAt + 1 min -> EXPIRED', () => {
+      const exp = ist('06:30');
+      const opp = {
+        id: 'o1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        direction: 'Northbound',
+        trainId: 't1',
+        currentStationId: 's1',
+        handoffStationId: 's2',
+        expiresAt: exp,
+        createdAt: exp - 1000,
+        updatedAt: exp - 1000,
+      } as SeatOpportunity;
+      useAppStore.setState({ opportunities: [opp], matches: [] });
+      setDemoTime(exp + 60000); // 1 min past
+      useAppStore.getState().reconcile();
+      expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
+      resetDemoTime();
+    });
+
+    it('exactly expiresAt + 10 min -> still MATCHED (no cancel)', () => {
+      const exp = ist('06:30');
+      const opp = {
+        id: 'o1',
+        giverId: 'u1',
+        status: 'MATCHED',
+        direction: 'Northbound',
+        trainId: 't1',
+        currentStationId: 's1',
+        handoffStationId: 's2',
+        expiresAt: exp,
+        createdAt: exp - 1000,
+        updatedAt: exp - 1000,
+      } as SeatOpportunity;
+      const m: Match = {
+        id: 'm1',
+        opportunityId: 'o1',
+        giverId: 'u1',
+        seekerId: 'u2',
+        status: 'ACCEPTED',
+        createdAt: exp - 1000,
+      };
+      useAppStore.setState({ opportunities: [opp], matches: [m] });
+      setDemoTime(exp + 10 * 60000);
+      useAppStore.getState().reconcile();
+      expect(useAppStore.getState().opportunities[0].status).toBe('MATCHED');
+      expect(useAppStore.getState().matches[0].status).toBe('ACCEPTED');
+      resetDemoTime();
+    });
+
+    it('exactly expiresAt + 10 min + 1 sec -> EXPIRED and CANCELLED', () => {
+      const exp = ist('06:30');
+      const opp = {
+        id: 'o1',
+        giverId: 'u1',
+        status: 'MATCHED',
+        direction: 'Northbound',
+        trainId: 't1',
+        currentStationId: 's1',
+        handoffStationId: 's2',
+        expiresAt: exp,
+        createdAt: exp - 1000,
+        updatedAt: exp - 1000,
+      } as SeatOpportunity;
+      const m: Match = {
+        id: 'm1',
+        opportunityId: 'o1',
+        giverId: 'u1',
+        seekerId: 'u2',
+        status: 'ACCEPTED',
+        createdAt: exp - 1000,
+      };
+      useAppStore.setState({ opportunities: [opp], matches: [m] });
+      setDemoTime(exp + 10 * 60000 + 1000);
+      useAppStore.getState().reconcile();
+      expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
+      expect(useAppStore.getState().matches[0].status).toBe('CANCELLED');
+      resetDemoTime();
     });
   });
 

@@ -9,3 +9,4 @@
     - old-high-court -> motera-stadium takes 19 mins (bound 18) for rows 5 and 16 NB, and row 6 SB.
     - gnlu -> koteshwar-road takes 17 mins (bound 14-16) for row 19 SB.
     - mahatma-mandir -> sachivalaya takes 13 mins (bound 11-12) for row 38 SB.
+7. **Directional Segments Timing Bounds**: The `timing.directional_segments` section in `gmrc-network.json` lacks explicit official sources, so we have added a `basis` note stating it was derived from observations of the timetable PDF.

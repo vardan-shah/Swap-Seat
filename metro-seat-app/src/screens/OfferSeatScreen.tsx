@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { now as clockNow } from '../utils/clock';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { notify } from '../utils/dialog';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -22,11 +23,11 @@ export default function OfferSeatScreen({ navigation }: Props) {
   const [currentStationId, setCurrentStationId] = useState<string>('');
   const [handoffStationId, setHandoffStationId] = useState<string>('');
   const [trainId, setTrainId] = useState<string>('');
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(clockNow());
   const [price, setPrice] = useState<string>('');
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 60000);
+    const timer = setInterval(() => setNow(clockNow()), 60000);
     return () => clearInterval(timer);
   }, []);
 
@@ -48,11 +49,13 @@ export default function OfferSeatScreen({ navigation }: Props) {
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (ENABLE_PAYMENTS && !price.trim()) {
       await notify('Error', 'Please enter a requested amount.');
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
     const res = offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId);
     if (!res.ok) {
@@ -167,6 +170,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
         placeholder={t.expectedTrain + '...'}
       />
 
+      {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
       {ENABLE_PAYMENTS && (
         <View style={styles.priceContainer}>
           <Text style={styles.label}>5. {t.amount}</Text>

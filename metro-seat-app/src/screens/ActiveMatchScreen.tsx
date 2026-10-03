@@ -33,12 +33,14 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
   }
 
   const opp = opportunities.find((o) => o.id === match.opportunityId);
+  if (!opp) return <Text>Opportunity not found</Text>;
   const isGiver = match.giverId === currentUser.id;
-  const handoffStation = getStationById(opp?.handoffStationId || '');
+  const handoffStation = getStationById(opp.handoffStationId || '');
 
   const handleComplete = async () => {
-    if (!completeMatch(match.id)) {
-      await notify('Not allowed', 'Only the seat holder can confirm the handoff.');
+    const res = completeMatch(match.id);
+    if (!res.ok) {
+      await notify('Not allowed', `Failed to complete: ${res.reason}`);
       return;
     }
     await notify('Success', 'Handoff completed!');
@@ -46,8 +48,9 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
   };
 
   const handleCancel = async () => {
-    if (!cancelMatch(match.id)) {
-      await notify('Error', 'Unable to cancel this handoff.');
+    const res = cancelMatch(match.id);
+    if (!res.ok) {
+      await notify('Error', `Unable to cancel this handoff: ${res.reason}`);
       return;
     }
     await notify('Cancelled', 'Handoff cancelled.');
@@ -75,7 +78,7 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
           )}
         </View>
 
-        {opp?.price !== undefined && opp?.price > 0 && (
+        {opp.price !== undefined && opp.price > 0 && (
           <View style={styles.priceBox}>
             <Text style={styles.priceLabel}>Requested Amount</Text>
             <Text style={styles.priceValue}>₹{opp.price}</Text>
@@ -86,13 +89,19 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
           <View style={styles.actionRow}>
             <TouchableOpacity
               style={[styles.btn, styles.acceptBtn]}
-              onPress={() => acceptMatch(match.id)}
+              onPress={() => {
+                const res = acceptMatch(match.id);
+                if (!res.ok) notify('Error', `Cannot accept: ${res.reason}`);
+              }}
             >
               <Text style={styles.btnText}>Accept Request</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.btn, styles.rejectBtn]}
-              onPress={() => rejectMatch(match.id)}
+              onPress={() => {
+                const res = rejectMatch(match.id);
+                if (!res.ok) notify('Error', `Cannot reject: ${res.reason}`);
+              }}
             >
               <Text style={styles.btnText}>Reject</Text>
             </TouchableOpacity>

@@ -106,8 +106,8 @@ export default function HomeScreen({ navigation }: Props) {
               <TouchableOpacity
                 style={[styles.primaryButton, { marginTop: 10, backgroundColor: '#dc3545' }]}
                 onPress={async () => {
-                  const success = useAppStore.getState().cancelOpportunity(myOpportunity.id);
-                  if (success) {
+                  const res = useAppStore.getState().cancelOpportunity(myOpportunity.id);
+                  if (res.ok) {
                     await notify('Cancelled', 'Your offer has been cancelled.');
                   } else {
                     await notify('Error', 'Failed to cancel the offer. It may not be active.');
@@ -154,6 +154,7 @@ export default function HomeScreen({ navigation }: Props) {
                 const store = useAppStore.getState();
                 const nextId = store.currentUser.id === 'u_me' ? 'mock_seeker_2' : 'u_me';
                 const user = store.users[nextId];
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (user) {
                   useAppStore.setState({ currentUser: user });
                 }

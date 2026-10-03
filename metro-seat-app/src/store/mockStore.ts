@@ -53,20 +53,29 @@ interface AppState {
     seekerId: string,
   ) => {
     ok: boolean;
-    reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND';
+    reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND' | 'EXPIRED';
   };
   transition: (
     matchId: string,
     actorId: string,
     to: import('../types').MatchStatus,
-  ) => { ok: boolean; reason?: 'EXPIRED' | 'NOT_FOUND' | 'NOT_PENDING' | 'NOT_ALLOWED' };
+  ) => { ok: boolean; reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED' };
   acceptMatch: (matchId: string) => {
     ok: boolean;
-    reason?: 'EXPIRED' | 'NOT_FOUND' | 'NOT_PENDING' | 'NOT_ALLOWED';
+    reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED';
   };
-  rejectMatch: (matchId: string) => { ok: boolean };
-  cancelMatch: (matchId: string) => { ok: boolean };
-  completeMatch: (matchId: string) => { ok: boolean };
+  rejectMatch: (matchId: string) => {
+    ok: boolean;
+    reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED';
+  };
+  cancelMatch: (matchId: string) => {
+    ok: boolean;
+    reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED';
+  };
+  completeMatch: (matchId: string) => {
+    ok: boolean;
+    reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED';
+  };
   expireOpportunity: (oppId: string) => void;
 
   // Queries
@@ -220,7 +229,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   requestSeat: (opportunityId, seekerId) => {
     let result: {
       ok: boolean;
-      reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND';
+      reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND' | 'EXPIRED';
     } = { ok: false, reason: 'NOT_FOUND' };
 
     set((state) => {
@@ -231,6 +240,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       if (opp.status !== 'ACTIVE') {
         result = { ok: false, reason: 'NOT_ACTIVE' };
+        return state;
+      }
+      if (clockNow() > opp.expiresAt) {
+        result = { ok: false, reason: 'EXPIRED' };
         return state;
       }
       if (opp.giverId === seekerId) {
@@ -266,12 +279,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     matchId: string,
     actorId: string,
     to: MatchStatus,
-  ): { ok: boolean; reason?: 'EXPIRED' | 'NOT_FOUND' | 'NOT_PENDING' | 'NOT_ALLOWED' } => {
+  ): { ok: boolean; reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED' } => {
     const state = get();
     const m = state.matches.find((x) => x.id === matchId);
 
     if (!m) return { ok: false, reason: 'NOT_FOUND' };
-    if (!TRANSITIONS[m.status].includes(to)) return { ok: false, reason: 'NOT_PENDING' };
+    if (!TRANSITIONS[m.status].includes(to)) return { ok: false, reason: 'ILLEGAL_TRANSITION' };
 
     const isGiver = actorId === m.giverId;
     const isSeeker = actorId === m.seekerId;

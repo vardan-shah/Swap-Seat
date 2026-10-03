@@ -61,7 +61,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
     navigation.popToTop();
   };
 
-  const renderItem = ({ item }: { item: any }) => {
+  const renderItem = ({ item }: { item: import('../types').SeatOpportunity }) => {
     const handoffStation = getStationById(item.handoffStationId);
     const giver = users[item.giverId];
     return (
@@ -78,6 +78,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
           {t.trustScore}: {formatReputation(giver)}
         </Text>
 
+        {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
         {ENABLE_PAYMENTS && item.price !== undefined && (
           <Text style={styles.priceText}>
             {t.amount.replace(' (₹)', '')}: ₹{item.price}

@@ -132,10 +132,11 @@ export function getTrainLabel(trainId: string, allTrains: Train[]): string {
   const t = allTrains.find((x) => x.id === trainId);
   if (!t) return 'Unknown Train';
   const stops = getStops(t);
-  const firstTime = stops ? t.times[stops[0]] : '?';
-  const origin = t.direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
-  const gift = t.pattern === 'RYV-GIFT' ? ' (GIFT)' : '';
-  return `Train starting from ${origin} at ${firstTime}${gift}`;
+  const firstStopId = stops ? stops[0] : null;
+  const firstTime = firstStopId ? t.times[firstStopId] : '?';
+  const station = gmrcData.stations.find((s) => s.id === firstStopId);
+  const originName = station ? station.name : t.direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
+  return `Train starting from ${originName} at ${firstTime}`;
 }
 
 export type OfferValidation =

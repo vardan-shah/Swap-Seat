@@ -10,7 +10,7 @@ export function reconcile(
   matches: Match[],
   nowMs: number,
 ): ReconcileResult {
-  let updatedOpportunities = [...opportunities];
+  const updatedOpportunities = [...opportunities];
   let updatedMatches = [...matches];
   let changed = false;
 
