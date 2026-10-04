@@ -50,9 +50,6 @@ describe('mockStore', () => {
       // 06:15 IST = 45 * 60000 = 2700000 UTC
       jest.setSystemTime(ist('06:48'));
     });
-    afterEach(() => {
-      jest.useRealTimers();
-    });
 
     it('creates a valid Northbound offer', () => {
       const res = useAppStore
@@ -133,9 +130,6 @@ describe('mockStore', () => {
     const find = (from: string, to: string) =>
       useAppStore.getState().getCompatibleOpportunities(from, to, 'Northbound');
 
-    afterEach(() => {
-      jest.useRealTimers();
-    });
 
     it('matches valid Northbound offer', () => {
       jest.setSystemTime(ist('06:28'));
