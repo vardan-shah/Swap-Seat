@@ -1,1 +1,1 @@
-export const ENABLE_PAYMENTS = false;
+export const ENABLE_PAYMENTS: boolean = false;

@@ -1,4 +1,5 @@
 import { formatReputation } from '../domain/reputation';
+import { translateReason } from '../utils/messages';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -45,14 +46,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
 
     const result = requestSeat(oppId, currentUser.id);
     if (!result.ok) {
-      const msg =
-        result.reason === 'DUPLICATE'
-          ? 'You already have an active request.'
-          : result.reason === 'OWN_OFFER'
-            ? 'You cannot request your own offer.'
-            : result.reason === 'NOT_ACTIVE'
-              ? 'This seat is no longer available.'
-              : 'Could not request this seat. It might be taken or expired.';
+      const msg = translateReason(result.reason);
       await notify('Error', msg);
       return;
     }
@@ -78,7 +72,6 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
           {t.trustScore}: {formatReputation(giver)}
         </Text>
 
-        {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
         {ENABLE_PAYMENTS && item.price !== undefined && (
           <Text style={styles.priceText}>
             {t.amount.replace(' (₹)', '')}: ₹{item.price}

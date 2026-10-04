@@ -133,10 +133,13 @@ export function getTrainLabel(trainId: string, allTrains: Train[]): string {
   if (!t) return 'Unknown Train';
   const stops = getStops(t);
   const firstStopId = stops ? stops[0] : null;
+  const lastStopId = stops ? stops[stops.length - 1] : null;
   const firstTime = firstStopId ? t.times[firstStopId] : '?';
   const station = gmrcData.stations.find((s) => s.id === firstStopId);
+  const lastStation = gmrcData.stations.find((s) => s.id === lastStopId);
   const originName = station ? station.name : t.direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
-  return `Train starting from ${originName} at ${firstTime}`;
+  const destName = lastStation ? lastStation.name : '';
+  return `${originName} ${firstTime} → ${destName}`;
 }
 
 export type OfferValidation =

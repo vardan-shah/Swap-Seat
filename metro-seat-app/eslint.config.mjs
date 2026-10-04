@@ -1,8 +1,12 @@
 import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default tseslint.config(
   ...tseslint.configs.recommended,
   {
+    plugins: {
+      'react-hooks': reactHooks,
+    },
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -11,6 +15,7 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-unnecessary-condition': 'error',
+      ...reactHooks.configs.recommended.rules,
     },
   },
   {

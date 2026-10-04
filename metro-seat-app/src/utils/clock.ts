@@ -1,16 +1,29 @@
-let demoOffset = 0;
+let offsetMs = 0;
+let hasInitialized = false;
 
-export const setDemoTime = (timeMs: number) => {
-  demoOffset = timeMs - Date.now();
-};
-
-export const resetDemoTime = () => {
-  demoOffset = 0;
-};
-
-export const now = () => {
-  if (process.env.EXPO_PUBLIC_DEMO_TIME) {
-    return parseInt(process.env.EXPO_PUBLIC_DEMO_TIME, 10);
+function initDemoTime() {
+  if (hasInitialized) return;
+  hasInitialized = true;
+  const demoStr = process.env.EXPO_PUBLIC_DEMO_TIME;
+  if (demoStr) {
+    const d = new Date(demoStr);
+    if (!isNaN(d.getTime())) {
+      offsetMs = d.getTime() - Date.now();
+    }
   }
-  return Date.now() + demoOffset;
-};
+}
+
+export function now(): number {
+  if (process.env.NODE_ENV !== 'test') {
+    initDemoTime();
+  }
+  return Date.now() + offsetMs;
+}
+
+export function setDemoTime(timestamp: number) {
+  offsetMs = timestamp - Date.now();
+}
+
+export function resetDemoTime() {
+  offsetMs = 0;
+}

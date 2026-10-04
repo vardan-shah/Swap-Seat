@@ -1,6 +1,5 @@
 import { useAppStore } from '../mockStore';
 import { SeatOpportunity, Match, User } from '../../types';
-import { setDemoTime, resetDemoTime } from '../../utils/clock';
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
@@ -321,14 +320,13 @@ describe('mockStore', () => {
         currentUser: { id: 'u2', displayName: 'Seeker', reputation: 4.8 } as User,
         matches: [],
       });
-      setDemoTime(ist('06:31'));
+      jest.useFakeTimers();
+      jest.setSystemTime(ist('06:31'));
 
       const { requestSeat } = useAppStore.getState();
       const res = requestSeat('o1', 'u2');
       expect(res).toEqual({ ok: false, reason: 'EXPIRED' });
       expect(useAppStore.getState().matches).toHaveLength(0);
-
-      resetDemoTime();
     });
 
     it('creates a PENDING match when requesting an ACTIVE opportunity', () => {
@@ -546,14 +544,13 @@ describe('mockStore', () => {
         matches: [m],
         currentUser: { id: 'u1', displayName: 'Giver', reputation: 4.8 } as User,
       });
-      setDemoTime(ist('06:31'));
+      jest.useFakeTimers();
+      jest.setSystemTime(ist('06:31'));
 
       const { transition } = useAppStore.getState();
       const res = transition('m1', 'u1', 'ACCEPTED');
       expect(res).toEqual({ ok: false, reason: 'EXPIRED' });
       expect(useAppStore.getState().matches[0].status).toBe('PENDING'); // no change
-
-      resetDemoTime();
     });
 
     it('allows giver to ACCEPT and auto-rejects siblings', () => {
@@ -819,10 +816,10 @@ describe('mockStore', () => {
         updatedAt: exp - 1000,
       } as SeatOpportunity;
       useAppStore.setState({ opportunities: [opp], matches: [] });
-      setDemoTime(exp);
+      jest.useFakeTimers();
+      jest.setSystemTime(exp);
       useAppStore.getState().reconcile();
       expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE');
-      resetDemoTime();
     });
 
     it('exactly expiresAt + 1 min -> EXPIRED', () => {
@@ -840,10 +837,10 @@ describe('mockStore', () => {
         updatedAt: exp - 1000,
       } as SeatOpportunity;
       useAppStore.setState({ opportunities: [opp], matches: [] });
-      setDemoTime(exp + 60000); // 1 min past
+      jest.useFakeTimers();
+      jest.setSystemTime(exp + 60000); // 1 min past
       useAppStore.getState().reconcile();
       expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
-      resetDemoTime();
     });
 
     it('exactly expiresAt + 10 min -> still MATCHED (no cancel)', () => {
@@ -869,11 +866,11 @@ describe('mockStore', () => {
         createdAt: exp - 1000,
       };
       useAppStore.setState({ opportunities: [opp], matches: [m] });
-      setDemoTime(exp + 10 * 60000);
+      jest.useFakeTimers();
+      jest.setSystemTime(exp + 10 * 60000);
       useAppStore.getState().reconcile();
       expect(useAppStore.getState().opportunities[0].status).toBe('MATCHED');
       expect(useAppStore.getState().matches[0].status).toBe('ACCEPTED');
-      resetDemoTime();
     });
 
     it('exactly expiresAt + 10 min + 1 sec -> EXPIRED and CANCELLED', () => {
@@ -899,11 +896,11 @@ describe('mockStore', () => {
         createdAt: exp - 1000,
       };
       useAppStore.setState({ opportunities: [opp], matches: [m] });
-      setDemoTime(exp + 10 * 60000 + 1000);
+      jest.useFakeTimers();
+      jest.setSystemTime(exp + 10 * 60000 + 1000);
       useAppStore.getState().reconcile();
       expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
       expect(useAppStore.getState().matches[0].status).toBe('CANCELLED');
-      resetDemoTime();
     });
   });
 
@@ -912,7 +909,7 @@ describe('mockStore', () => {
       useAppStore.setState({
         isAuthenticated: true,
         upiId: 'test@upi',
-        opportunities: [{ id: '1' } as any],
+        opportunities: [{ id: '1' } as unknown as import('../../types').SeatOpportunity],
       });
       useAppStore.getState().logout();
       const state = useAppStore.getState();

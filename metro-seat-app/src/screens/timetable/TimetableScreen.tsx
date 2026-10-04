@@ -23,12 +23,14 @@ export default function TimetableScreen() {
         showsVerticalScrollIndicator={true}
       >
         <Image
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           source={require('../../../assets/Timetable2.png')}
           style={{ width: screenWidth, height: imageHeight }}
           resizeMode="contain"
         />
         <View style={styles.divider} />
         <Image
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           source={require('../../../assets/Timetable.png')}
           style={{ width: screenWidth, height: imageHeight }}
           resizeMode="contain"

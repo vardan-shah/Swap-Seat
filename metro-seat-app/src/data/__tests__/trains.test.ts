@@ -97,8 +97,8 @@ describe('trains.json data integrity', () => {
       for (let i = 1; i < stations.length; i++) {
         const from = stations[i - 1];
         const to = stations[i];
-        const t1 = toMinutes((train.times as any)[from]);
-        const t2 = toMinutes((train.times as any)[to]);
+        const t1 = toMinutes((train.times as unknown as Record<string, string>)[from]);
+        const t2 = toMinutes((train.times as unknown as Record<string, string>)[to]);
 
         expect(t2).toBeGreaterThan(t1); // Strictly increasing
 

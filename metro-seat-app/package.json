@@ -27,6 +27,7 @@
     "@typescript-eslint/eslint-plugin": "^8.71.0",
     "@typescript-eslint/parser": "^8.71.0",
     "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "jest": "~29.7.0",
     "prettier": "3.3.3",
     "ts-jest": "^29.4.14",
@@ -42,7 +43,7 @@
     "format": "npx prettier --write \"src/**/*.{ts,tsx}\" App.tsx",
     "validate:data": "jest src/data",
     "verify": "npx tsc --noEmit && npm run lint && npx prettier --check \"src/**/*.{ts,tsx}\" App.tsx && npm run test",
-    "lint": "eslint src/**/*.{ts,tsx}"
+    "lint": "eslint \"src/**/*.{ts,tsx}\""
   },
   "private": true
 }

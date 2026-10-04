@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { translateReason } from '../utils/messages';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation';
@@ -40,7 +41,7 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
   const handleComplete = async () => {
     const res = completeMatch(match.id);
     if (!res.ok) {
-      await notify('Not allowed', `Failed to complete: ${res.reason}`);
+      await notify('Not allowed', `Failed to complete: ${translateReason(res.reason)}`);
       return;
     }
     await notify('Success', 'Handoff completed!');
@@ -50,7 +51,7 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
   const handleCancel = async () => {
     const res = cancelMatch(match.id);
     if (!res.ok) {
-      await notify('Error', `Unable to cancel this handoff: ${res.reason}`);
+      await notify('Error', `Unable to cancel this handoff: ${translateReason(res.reason)}`);
       return;
     }
     await notify('Cancelled', 'Handoff cancelled.');
@@ -91,7 +92,7 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
               style={[styles.btn, styles.acceptBtn]}
               onPress={() => {
                 const res = acceptMatch(match.id);
-                if (!res.ok) notify('Error', `Cannot accept: ${res.reason}`);
+                if (!res.ok) notify('Error', `Cannot accept: ${translateReason(res.reason)}`);
               }}
             >
               <Text style={styles.btnText}>Accept Request</Text>
@@ -100,7 +101,7 @@ export default function ActiveMatchScreen({ navigation, route }: Props) {
               style={[styles.btn, styles.rejectBtn]}
               onPress={() => {
                 const res = rejectMatch(match.id);
-                if (!res.ok) notify('Error', `Cannot reject: ${res.reason}`);
+                if (!res.ok) notify('Error', `Cannot reject: ${translateReason(res.reason)}`);
               }}
             >
               <Text style={styles.btnText}>Reject</Text>

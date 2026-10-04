@@ -4,6 +4,7 @@ import {
   servesLeg,
   handoffExpiry,
   checkOffer,
+  getTrainLabel,
   trainsForOffer,
   boardingStillAhead,
 } from '../trains';
@@ -185,15 +186,12 @@ describe('trains domain', () => {
       );
     });
   });
-});
-
-describe('getTrainLabel', () => {
-  it('builds label from first stop station name', () => {
-    const { getTrainLabel } = require('../trains');
-    const dummyTrains = [
-      { id: 't1', direction: 'Southbound', pattern: 'RYV-GIFT', times: { 'gift-city': '07:48' } },
-    ];
-    // gift-city name is GIFT City
-    expect(getTrainLabel('t1', dummyTrains)).toBe('Train starting from GIFT City at 07:48');
+  describe('getTrainLabel', () => {
+    it('builds label from first stop station name', () => {
+      const dummyTrains = [
+        { id: 't1', direction: 'Southbound', pattern: 'RYV-GIFT', times: { 'gift-city': '07:48' } },
+      ] as unknown as Train[];
+      expect(getTrainLabel('t1', dummyTrains)).toBe('GIFT City 07:48 → APMC');
+    });
   });
 });
