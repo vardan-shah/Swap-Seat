@@ -58,8 +58,8 @@ export default function OfferSeatScreen({ navigation }: Props) {
       handoffStationId,
       priceNum,
       trainId,
-      'GENERAL',
-      2,
+      'GENERAL', // TODO(3c)
+      2, // TODO(3c)
     );
     if (!res.ok) {
       const msg = translateReason(res.reason);

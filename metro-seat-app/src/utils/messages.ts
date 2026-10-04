@@ -13,8 +13,8 @@ export const REASON_MESSAGES: Record<Reason, string> = {
   TRAIN_NOT_ON_LEG: 'The train does not travel between these stations at this time.',
   TRAIN_NOT_RUNNING: 'The selected train has already passed or is not running.',
   NOT_FOUND: 'The match or opportunity could not be found.',
-  NOT_ALLOWED: "You can't do that for this handoff.",
-  PRIORITY_SEAT: 'You cannot offer priority seats.',
+  NOT_ALLOWED: 'You cannot do that for this handoff.',
+  PRIORITY_SEAT: "Seats reserved for priority passengers can't be handed off through the app.",
   INVALID_COACH: 'Invalid coach number.',
 };
 

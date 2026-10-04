@@ -15,6 +15,7 @@ import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
 import { translations } from '../i18n';
 import { notify } from '../utils/dialog';
+import { translateReason } from '../utils/messages';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Tabs'>;
@@ -115,7 +116,7 @@ export default function HomeScreen({ navigation }: Props) {
                   if (res.ok) {
                     await notify('Cancelled', 'Your offer has been cancelled.');
                   } else {
-                    await notify('Error', 'Failed to cancel the offer. It may not be active.');
+                    await notify('Error', translateReason(res.reason));
                   }
                 }}
               >

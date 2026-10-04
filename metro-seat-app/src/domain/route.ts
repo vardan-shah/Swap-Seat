@@ -35,3 +35,11 @@ export const stationIndex = (id: string) => {
   if (i === null) throw new Error(`Unknown station: ${id}`);
   return i;
 };
+
+export function isHandoffReachable(
+  boardingId: string,
+  handoffId: string,
+  direction: Direction,
+): boolean {
+  return handoffId === boardingId || isLegValid(boardingId, handoffId, direction);
+}

@@ -7,7 +7,7 @@ import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
 import { getStationById } from '../data/stations';
 import { ENABLE_PAYMENTS } from '../config/flags';
-import { trainLabel } from '../domain/trains';
+import { trainLabel, offerWindow } from '../domain/trains';
 import { trainById } from '../data/trains';
 import { translations } from '../i18n';
 
@@ -44,7 +44,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
       return;
     }
 
-    const result = requestSeat(oppId, currentUser.id, 'sabarmati');
+    const result = requestSeat(oppId, currentUser.id, currentStationId);
     if (!result.ok) {
       const msg = translateReason(result.reason);
       await notify('Error', msg);
@@ -58,19 +58,34 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
   const renderItem = ({ item }: { item: import('../types').SeatOpportunity }) => {
     const handoffStation = getStationById(item.handoffStationId);
     const giver = users[item.giverId];
+    const train = item.trainId ? trainById(item.trainId) : undefined;
+    const window = train ? offerWindow(train, currentStationId, item.handoffStationId) : null;
+    const formatTime = (min: number) => {
+      const h = Math.floor((min % 1440) / 60)
+        .toString()
+        .padStart(2, '0');
+      const m = Math.floor(min % 60)
+        .toString()
+        .padStart(2, '0');
+      return `${h}:${m}`;
+    };
+
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.stationText}>Becomes available at: {handoffStation?.name}</Text>
         </View>
-        {item.trainId && (
-          <Text style={styles.trainText}>
-            {translation.expectedTrain}:{' '}
-            {(() => {
-              const train = trainById(item.trainId);
-              return train ? trainLabel(train) : 'Unknown Train';
-            })()}
-          </Text>
+        {train && (
+          <>
+            <Text style={styles.trainText}>
+              {translation.expectedTrain}: {trainLabel(train)}
+            </Text>
+            {window && (
+              <Text style={styles.trainText}>
+                Offer Window: {formatTime(window.min)} - {formatTime(window.max)}
+              </Text>
+            )}
+          </>
         )}
         <Text style={styles.giverText}>
           {translation.trustScore}: {formatReputation(giver)}

@@ -24,6 +24,7 @@ describe('mockStore', () => {
   });
 
   // Set T0 to midnight IST of whatever today is
+
   const T0 = Date.UTC(2026, 9, 4, 18, 30);
 
   const ist = (hhmm: string) => {
@@ -114,19 +115,24 @@ describe('mockStore', () => {
     });
 
     it('rejects coach outside 1..COACHES_PER_TRAIN with INVALID_COACH', () => {
-      const res = useAppStore
-        .getState()
-        .offerSeat(
+      const state = useAppStore.getState();
+      const tryCoach = (c: number) =>
+        state.offerSeat(
           'Northbound',
           'sabarmati',
           'motera-stadium',
           undefined,
           'NB-0620-RYMM',
           'GENERAL',
-          4,
+          c,
         );
-      expect(res.ok).toBe(false);
-      if (!res.ok) expect(res.reason).toBe('INVALID_COACH');
+      expect(tryCoach(0)).toEqual({ ok: false, reason: 'INVALID_COACH' });
+      expect(tryCoach(2.5)).toEqual({ ok: false, reason: 'INVALID_COACH' });
+      expect(tryCoach(NaN)).toEqual({ ok: false, reason: 'INVALID_COACH' });
+      expect(tryCoach(4)).toEqual({ ok: false, reason: 'INVALID_COACH' });
+      expect(tryCoach(1)).toEqual({ ok: true });
+      state.cancelOpportunity(useAppStore.getState().opportunities[0].id);
+      expect(tryCoach(3)).toEqual({ ok: true });
     });
 
     it('saves seatType and coach on the opportunity', () => {
@@ -383,6 +389,9 @@ describe('mockStore', () => {
   });
 
   describe('requestSeat', () => {
+    beforeEach(() => {
+      jest.setSystemTime(ist('06:45'));
+    });
     it('rejects request for an EXPIRED opportunity', () => {
       const o: SeatOpportunity = {
         id: 'o1',
@@ -419,6 +428,8 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
+            direction: 'Northbound',
+            handoffStationId: 'motera-stadium',
             expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
@@ -435,7 +446,10 @@ describe('mockStore', () => {
         id: 'opp1',
         giverId: 'u1',
         status: 'ACTIVE',
-        expiresAt: Date.now() + 100000,
+        trainId: 'NB-0620-RYMM',
+        direction: 'Northbound',
+        handoffStationId: 'motera-stadium',
+        expiresAt: ist('13:00'),
       } as SeatOpportunity;
       useAppStore.setState({ opportunities: [opp], matches: [] });
       useAppStore.getState().requestSeat('opp1', 'u2', 'sabarmati');
@@ -450,6 +464,8 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
+            direction: 'Northbound',
+            handoffStationId: 'motera-stadium',
             expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
@@ -499,6 +515,68 @@ describe('mockStore', () => {
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.reason).toBe('NOT_ACTIVE');
     });
+
+    it('rejects unknown station with INVALID_STATIONS', () => {
+      const opp = {
+        id: 'opp1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        trainId: 'NB-0620-RYMM',
+        direction: 'Northbound',
+        handoffStationId: 'motera-stadium',
+        expiresAt: ist('13:00'),
+      } as SeatOpportunity;
+      useAppStore.setState({ opportunities: [opp], matches: [] });
+      const res = useAppStore.getState().requestSeat('opp1', 'u2', 'fake-station');
+      expect(res).toEqual({ ok: false, reason: 'INVALID_STATIONS' });
+    });
+
+    it('rejects handoff before boarding with INVALID_STATIONS', () => {
+      const opp = {
+        id: 'opp1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        trainId: 'NB-0620-RYMM',
+        direction: 'Northbound',
+        handoffStationId: 'sabarmati',
+        expiresAt: ist('13:00'),
+      } as SeatOpportunity;
+      useAppStore.setState({ opportunities: [opp], matches: [] });
+      const res = useAppStore.getState().requestSeat('opp1', 'u2', 'motera-stadium');
+      expect(res).toEqual({ ok: false, reason: 'INVALID_STATIONS' });
+    });
+
+    it('rejects train not serving leg with TRAIN_NOT_ON_LEG', () => {
+      const opp = {
+        id: 'opp1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        trainId: 'NB-0645-RYVGIFT',
+        direction: 'Northbound',
+        handoffStationId: 'raysan',
+        expiresAt: ist('13:00'),
+      } as SeatOpportunity;
+      useAppStore.setState({ opportunities: [opp], matches: [] });
+      const res = useAppStore.getState().requestSeat('opp1', 'u2', 'gnlu');
+      expect(res).toEqual({ ok: false, reason: 'TRAIN_NOT_ON_LEG' });
+    });
+
+    it('rejects train already passed with TRAIN_NOT_RUNNING', () => {
+      const opp = {
+        id: 'opp1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        trainId: 'NB-0620-RYMM',
+        direction: 'Northbound',
+        handoffStationId: 'motera-stadium',
+        expiresAt: ist('13:00'),
+      } as SeatOpportunity;
+      useAppStore.setState({ opportunities: [opp], matches: [] });
+      jest.setSystemTime(ist('07:00')); // Sabarmati is at 06:48
+      const res = useAppStore.getState().requestSeat('opp1', 'u2', 'sabarmati');
+      expect(res).toEqual({ ok: false, reason: 'TRAIN_NOT_RUNNING' });
+    });
+
     it('rejects request for unknown opportunity', () => {
       useAppStore.setState({ opportunities: [] });
       const res = useAppStore.getState().requestSeat('opp99', 'seeker1', 'sabarmati');
@@ -517,6 +595,8 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
+            direction: 'Northbound',
+            handoffStationId: 'motera-stadium',
             expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
@@ -559,6 +639,8 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
+            direction: 'Northbound',
+            handoffStationId: 'motera-stadium',
             expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
@@ -582,6 +664,8 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
+            direction: 'Northbound',
+            handoffStationId: 'motera-stadium',
             expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
@@ -657,6 +741,8 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
+            direction: 'Northbound',
+            handoffStationId: 'motera-stadium',
             expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
@@ -690,7 +776,7 @@ describe('mockStore', () => {
         id: 'opp1',
         giverId: 'u1',
         status: 'ACTIVE',
-        expiresAt: Date.now() + 100000,
+        expiresAt: ist('13:00'),
         seatType: 'GENERAL',
         coach: 2,
       } as SeatOpportunity;
@@ -718,6 +804,8 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
+            direction: 'Northbound',
+            handoffStationId: 'motera-stadium',
             expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
@@ -745,6 +833,8 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
+            direction: 'Northbound',
+            handoffStationId: 'motera-stadium',
             expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],

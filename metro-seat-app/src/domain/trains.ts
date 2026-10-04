@@ -79,26 +79,15 @@ export function servesLeg(train: Train, fromId: string, toId: string): boolean {
   return fromIdx !== -1 && toIdx !== -1 && fromIdx < toIdx;
 }
 
-export function handoffExpiry(
-  train: Train,
-  handoffStationId: string,
-  nowMs: number,
-): number | null {
-  const t = timeAt(train, handoffStationId);
-  if (!t) return null;
-
-  const istNowMs = nowMs + 330 * 60000;
-  const istMidnightMs = istNowMs - (istNowMs % 86400000);
-
-  const expiryIstMs = istMidnightMs + t.max * 60000;
-  return expiryIstMs - 330 * 60000;
-}
-
-function inOfferWindow(t: Train, from: string, handoff: string, nowMs: number): boolean {
-  const a = timeAt(t, from),
-    b = timeAt(t, handoff),
-    now = getISTMinutes(nowMs);
-  return !!a && !!b && now >= a.min && now <= b.max;
+export function offerWindow(
+  t: Train,
+  from: string,
+  handoff: string,
+): { min: number; max: number } | null {
+  const a = timeAt(t, from);
+  const b = timeAt(t, handoff);
+  if (!a || !b) return null;
+  return { min: a.min, max: b.max };
 }
 
 export function trainsForOffer(
@@ -108,10 +97,12 @@ export function trainsForOffer(
   nowMs: number,
   all: Train[],
 ): Train[] {
-  return all.filter(
-    (t) =>
-      t.direction === dir && servesLeg(t, from, handoff) && inOfferWindow(t, from, handoff, nowMs),
-  );
+  const now = getISTMinutes(nowMs);
+  return all.filter((t) => {
+    if (t.direction !== dir || !servesLeg(t, from, handoff)) return false;
+    const win = offerWindow(t, from, handoff);
+    return win && now >= win.min && now <= win.max;
+  });
 }
 
 export function trainLabel(t: Train): string {
@@ -148,14 +139,19 @@ export function checkOffer(
     return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
   }
 
-  if (!inOfferWindow(train, currentStationId, handoffStationId, nowMs)) {
+  const win = offerWindow(train, currentStationId, handoffStationId);
+  if (!win) return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
+  const now = getISTMinutes(nowMs);
+  if (now < win.min || now > win.max) {
     return { ok: false, reason: 'TRAIN_NOT_RUNNING' };
   }
 
-  const expires = handoffExpiry(train, handoffStationId, nowMs);
-  if (expires === null) return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
+  const istNowMs = nowMs + 330 * 60000;
+  const istMidnightMs = istNowMs - (istNowMs % 86400000);
+  const expiryIstMs = istMidnightMs + win.max * 60000;
+  const expiresAt = expiryIstMs - 330 * 60000;
 
-  return { ok: true, expiresAt: expires };
+  return { ok: true, expiresAt };
 }
 
 export function boardingStillAhead(

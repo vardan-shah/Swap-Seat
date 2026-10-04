@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import {
   timeAt,
   servesLeg,
-  handoffExpiry,
+  offerWindow,
   checkOffer,
   trainLabel,
   trainsForOffer,
@@ -12,8 +12,6 @@ import { trains as allTrains } from '../../data/trains';
 import { Train } from '../trains';
 
 describe('trains domain', () => {
-  const at = (istMin: number) => (istMin - 330) * 60000;
-
   describe('timeAt', () => {
     it('handles Southbound reversal and interpolation', () => {
       const sb = allTrains.find((t) => t.id === 'SB-0640-RYMM')!;
@@ -85,17 +83,17 @@ describe('trains domain', () => {
     });
   });
 
-  describe('handoffExpiry', () => {
-    it('returns expected UTC timestamp', () => {
-      const nb = allTrains.find((t) => t.id === 'NB-0620-RYMM')!;
-      // old-high-court 06:34 = 394 + 2 = 396 max.
-      const nowMs = at(390); // arbitrary time on the day
-      const expiry = handoffExpiry(nb, 'old-high-court', nowMs);
-      expect(expiry).toBe(at(396));
+  describe('offerWindow', () => {
+    it('returns exactly min and max window for a valid leg', () => {
+      const t = allTrains.find((t) => t.id === 'NB-0620-RYMM')!;
+      const w = offerWindow(t, 'sabarmati', 'motera-stadium');
+      expect(w).toEqual({ min: 407, max: 414 });
     });
-    it('returns null for unknown station', () => {
-      const nb = allTrains.find((t) => t.id === 'NB-0620-RYMM')!;
-      expect(handoffExpiry(nb, 'unknown-station', at(390))).toBeNull();
+
+    it('returns window for southbound motera to sabarmati', () => {
+      const t = allTrains.find((t) => t.id === 'SB-0640-RYMM')!;
+      const w = offerWindow(t, 'motera-stadium', 'sabarmati');
+      expect(w).toEqual({ min: 446, max: 453 });
     });
   });
 

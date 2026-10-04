@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus, Result, SeatType } from '../types';
-import { isLegValid } from '../domain/route';
+import { isLegValid, isHandoffReachable } from '../domain/route';
+import { STATIONS } from '../data/stations';
 import { checkOffer, servesLeg, boardingStillAhead } from '../domain/trains';
+import { COACHES_PER_TRAIN } from '../config/constants';
 import { reconcile } from '../domain/offers';
 import { now as clockNow } from '../utils/clock';
 import { trains as trainsData } from '../data/trains';
 import { Language } from '../i18n';
-import { randomUUID } from 'expo-crypto';
+import * as Crypto from 'expo-crypto';
 
 interface AppState {
   // Config
@@ -88,8 +90,6 @@ const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
   CANCELLED: [],
 };
 
-export const COACHES_PER_TRAIN = 3;
-
 export const useAppStore = create<AppState>((set, get) => ({
   // Config
   language: 'en',
@@ -120,64 +120,56 @@ export const useAppStore = create<AppState>((set, get) => ({
     seatType,
     coach,
   ): Result => {
-    let result: Result = { ok: true };
-    set((state) => {
-      const existingOffer = state.opportunities.find(
-        (o) =>
-          o.giverId === state.currentUser.id && (o.status === 'ACTIVE' || o.status === 'MATCHED'),
-      );
-      if (existingOffer) {
-        result = { ok: false, reason: 'ALREADY_OFFERING' };
-        return state;
-      }
-      if (!isLegValid(currentStationId, handoffStationId, direction)) {
-        result = { ok: false, reason: 'INVALID_STATIONS' };
-        return state;
-      }
-      if (seatType === 'PRIORITY') {
-        result = { ok: false, reason: 'PRIORITY_SEAT' };
-        return state;
-      }
-      if (coach < 1 || coach > COACHES_PER_TRAIN) {
-        result = { ok: false, reason: 'INVALID_COACH' };
-        return state;
-      }
+    const state = get();
+    const existingOffer = state.opportunities.find(
+      (o) =>
+        o.giverId === state.currentUser.id && (o.status === 'ACTIVE' || o.status === 'MATCHED'),
+    );
+    if (existingOffer) {
+      return { ok: false, reason: 'ALREADY_OFFERING' };
+    }
+    if (!isLegValid(currentStationId, handoffStationId, direction)) {
+      return { ok: false, reason: 'INVALID_STATIONS' };
+    }
+    if (seatType === 'PRIORITY') {
+      return { ok: false, reason: 'PRIORITY_SEAT' };
+    }
+    if (!Number.isInteger(coach) || coach < 1 || coach > COACHES_PER_TRAIN) {
+      return { ok: false, reason: 'INVALID_COACH' };
+    }
 
-      const now = clockNow();
-      const allTrains = trainsData;
+    const now = clockNow();
+    const allTrains = trainsData;
 
-      const validation = checkOffer(
-        trainId,
-        direction,
-        currentStationId,
-        handoffStationId,
-        now,
-        allTrains,
-      );
-      if (!validation.ok) {
-        result = { ok: false, reason: validation.reason };
-        return state;
-      }
+    const validation = checkOffer(
+      trainId,
+      direction,
+      currentStationId,
+      handoffStationId,
+      now,
+      allTrains,
+    );
+    if (!validation.ok) {
+      return { ok: false, reason: validation.reason };
+    }
 
-      const newOpp: SeatOpportunity = {
-        id: randomUUID(),
-        giverId: state.currentUser.id,
-        direction,
-        currentStationId,
-        handoffStationId,
-        status: 'ACTIVE',
-        createdAt: now,
-        updatedAt: now,
-        expiresAt: validation.expiresAt,
-        price,
-        trainId,
-        seatType,
-        coach,
-      };
-      result = { ok: true };
-      return { opportunities: [...state.opportunities, newOpp] };
-    });
-    return result;
+    const newOpp: SeatOpportunity = {
+      id: Crypto.randomUUID(),
+      giverId: state.currentUser.id,
+      direction,
+      currentStationId,
+      handoffStationId,
+      status: 'ACTIVE',
+      createdAt: now,
+      updatedAt: now,
+      expiresAt: validation.expiresAt,
+      price,
+      trainId,
+      seatType,
+      coach,
+    };
+    set({ opportunities: [...state.opportunities, newOpp] });
+    return { ok: true };
   },
 
   reconcile: () => {
@@ -190,81 +182,83 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   },
   cancelOpportunity: (opportunityId): Result => {
-    let result: Result = { ok: true };
-    set((state) => {
-      const opp = state.opportunities.find((o) => o.id === opportunityId);
-      if (!opp) {
-        result = { ok: false, reason: 'NOT_FOUND' };
-        return state;
-      }
-      if (opp.status !== 'ACTIVE') {
-        result = { ok: false, reason: 'NOT_ACTIVE' };
-        return state;
-      }
-      if (opp.giverId !== state.currentUser.id) {
-        result = { ok: false, reason: 'NOT_ALLOWED' };
-        return state;
-      }
+    const state = get();
+    const opp = state.opportunities.find((o) => o.id === opportunityId);
+    if (!opp) {
+      return { ok: false, reason: 'NOT_FOUND' };
+    }
+    if (opp.status !== 'ACTIVE') {
+      return { ok: false, reason: 'NOT_ACTIVE' };
+    }
+    if (opp.giverId !== state.currentUser.id) {
+      return { ok: false, reason: 'NOT_ALLOWED' };
+    }
 
-      return {
-        opportunities: state.opportunities.map((o) =>
-          o.id === opportunityId ? { ...o, status: 'CANCELLED' } : o,
-        ),
-        matches: state.matches.map((m) =>
-          m.opportunityId === opportunityId && (m.status === 'PENDING' || m.status === 'ACCEPTED')
-            ? { ...m, status: 'CANCELLED', cancelledBy: state.currentUser.id }
-            : m,
-        ),
-      };
+    set({
+      opportunities: state.opportunities.map((o) =>
+        o.id === opportunityId ? { ...o, status: 'CANCELLED' } : o,
+      ),
+      matches: state.matches.map((m) =>
+        m.opportunityId === opportunityId && (m.status === 'PENDING' || m.status === 'ACCEPTED')
+          ? { ...m, status: 'CANCELLED', cancelledBy: state.currentUser.id }
+          : m,
+      ),
     });
-    return result;
+    return { ok: true };
   },
 
   requestSeat: (opportunityId, seekerId, seekerBoardingStationId): Result => {
-    let result: Result = { ok: false, reason: 'NOT_FOUND' };
+    const state = get();
+    const opp = state.opportunities.find((o) => o.id === opportunityId);
+    if (!opp) return { ok: false, reason: 'NOT_FOUND' };
 
-    set((state) => {
-      const opp = state.opportunities.find((o) => o.id === opportunityId);
-      if (!opp) {
-        result = { ok: false, reason: 'NOT_FOUND' };
-        return state;
-      }
-      if (opp.status !== 'ACTIVE') {
-        result = { ok: false, reason: 'NOT_ACTIVE' };
-        return state;
-      }
-      if (clockNow() > opp.expiresAt) {
-        result = { ok: false, reason: 'EXPIRED' };
-        return state;
-      }
-      if (opp.giverId === seekerId) {
-        result = { ok: false, reason: 'OWN_OFFER' };
-        return state;
-      }
+    if (opp.status === 'EXPIRED' || clockNow() > opp.expiresAt) {
+      return { ok: false, reason: 'EXPIRED' };
+    }
+    if (opp.status !== 'ACTIVE') {
+      return { ok: false, reason: 'NOT_ACTIVE' };
+    }
+    if (opp.giverId === seekerId) {
+      return { ok: false, reason: 'OWN_OFFER' };
+    }
 
-      const existingPending = state.matches.find(
-        (m) =>
-          m.opportunityId === opportunityId && m.seekerId === seekerId && m.status === 'PENDING',
-      );
-      if (existingPending) {
-        result = { ok: false, reason: 'DUPLICATE' };
-        return state;
-      }
+    const existingRequest = state.matches.find(
+      (m) => m.opportunityId === opportunityId && m.seekerId === seekerId && m.status === 'PENDING',
+    );
+    if (existingRequest) {
+      return { ok: false, reason: 'DUPLICATE' };
+    }
 
-      result = { ok: true };
-      const newMatch: Match = {
-        id: randomUUID(),
-        opportunityId,
-        seekerId,
-        giverId: opp.giverId,
-        seekerBoardingStationId,
-        status: 'PENDING',
-        createdAt: clockNow(),
-      };
+    if (!STATIONS.find((s) => s.id === seekerBoardingStationId)) {
+      return { ok: false, reason: 'INVALID_STATIONS' };
+    }
 
-      return { matches: [...state.matches, newMatch] };
-    });
-    return result;
+    if (!isHandoffReachable(seekerBoardingStationId, opp.handoffStationId, opp.direction)) {
+      return { ok: false, reason: 'INVALID_STATIONS' };
+    }
+
+    const train = trainsData.find((t) => t.id === opp.trainId);
+    if (!train || !servesLeg(train, seekerBoardingStationId, opp.handoffStationId)) {
+      return { ok: false, reason: 'TRAIN_NOT_ON_LEG' };
+    }
+
+    if (!boardingStillAhead(train, seekerBoardingStationId, clockNow())) {
+      return { ok: false, reason: 'TRAIN_NOT_RUNNING' };
+    }
+
+    const newMatch: Match = {
+      id: Crypto.randomUUID(),
+      opportunityId,
+      seekerId,
+      giverId: opp.giverId,
+      status: 'PENDING',
+      createdAt: clockNow(),
+
+      seekerBoardingStationId,
+    };
+
+    set({ matches: [...state.matches, newMatch] });
+    return { ok: true };
   },
 
   transition: (matchId: string, actorId: string, to: MatchStatus): Result => {
@@ -299,7 +293,14 @@ export const useAppStore = create<AppState>((set, get) => ({
               status: to,
               ...(to === 'CANCELLED' ? { cancelledBy: actorId } : {}),
               ...(to === 'ACCEPTED'
-                ? { handoffCode: Math.floor(1000 + Math.random() * 9000).toString() }
+                ? {
+                    handoffCode: (
+                      ((Crypto.getRandomBytes(2)[0] << 8) | Crypto.getRandomBytes(2)[1]) %
+                      10000
+                    )
+                      .toString()
+                      .padStart(4, '0'),
+                  }
                 : {}),
             }
           : to === 'ACCEPTED' && x.opportunityId === m.opportunityId && x.status === 'PENDING'
@@ -356,9 +357,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (!boardingStillAhead(train, currentStationId, now)) return false;
 
       // Handoff station must be AFTER seeker's current station (or same)
-      const handoffAfterCurrent =
-        opp.handoffStationId === currentStationId ||
-        isLegValid(currentStationId, opp.handoffStationId, direction);
+      const handoffAfterCurrent = isHandoffReachable(
+        currentStationId,
+        opp.handoffStationId,
+        direction,
+      );
 
       // Handoff station must be strictly BEFORE seeker's destination
       const handoffBeforeDest = isLegValid(opp.handoffStationId, destinationStationId, direction);
