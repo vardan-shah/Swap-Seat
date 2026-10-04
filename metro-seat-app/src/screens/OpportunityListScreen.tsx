@@ -8,7 +8,7 @@ import { useAppStore } from '../store/mockStore';
 import { getStationById } from '../data/stations';
 import { ENABLE_PAYMENTS } from '../config/flags';
 import { trainLabel } from '../domain/trains';
-import { trains } from '../data/trains';
+import { trainById } from '../data/trains';
 import { translations } from '../i18n';
 
 import { notify } from '../utils/dialog';
@@ -28,7 +28,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
     language,
     users,
   } = useAppStore();
-  const t = translations[language];
+  const translation = translations[language];
 
   const opportunities = getCompatibleOpportunities(
     currentStationId,
@@ -65,21 +65,21 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
         </View>
         {item.trainId && (
           <Text style={styles.trainText}>
-            {t.expectedTrain}: {trainLabel(trains.find((t) => t.id === item.trainId)!)}
+            {translation.expectedTrain}: {(() => { const train = trainById(item.trainId); return train ? trainLabel(train) : 'Unknown Train'; })()}
           </Text>
         )}
         <Text style={styles.giverText}>
-          {t.trustScore}: {formatReputation(giver)}
+          {translation.trustScore}: {formatReputation(giver)}
         </Text>
 
         {ENABLE_PAYMENTS && item.price !== undefined && (
           <Text style={styles.priceText}>
-            {t.amount.replace(' (₹)', '')}: ₹{item.price}
+            {translation.amount.replace(' (₹)', '')}: ₹{item.price}
           </Text>
         )}
 
         <TouchableOpacity style={styles.requestBtn} onPress={() => handleRequest(item.id)}>
-          <Text style={styles.requestBtnText}>{t.requestHandoff}</Text>
+          <Text style={styles.requestBtnText}>{translation.requestHandoff}</Text>
         </TouchableOpacity>
       </View>
     );
