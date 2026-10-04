@@ -113,20 +113,6 @@ export function trainsForOffer(
       t.direction === dir && servesLeg(t, from, handoff) && inOfferWindow(t, from, handoff, nowMs),
   );
 }
-export function getTrainsByDirection(
-  direction: Direction,
-  allTrains: Train[],
-): { label: string; value: string }[] {
-  return allTrains
-    .filter((t) => t.direction === direction)
-    .map((t) => {
-      const stops = getStops(t);
-      const firstTime = stops ? t.times[stops[0]] : '?';
-      const origin = direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
-      const gift = t.pattern === 'RYV-GIFT' ? ' (GIFT)' : '';
-      return { label: `Train starting from ${origin} at ${firstTime}${gift}`, value: t.id };
-    });
-}
 
 export function trainLabel(t: Train): string {
   const stops = getStops(t);
