@@ -9,6 +9,8 @@ export type Direction = 'Northbound' | 'Southbound';
 export type OpportunityStatus = 'ACTIVE' | 'MATCHED' | 'EXPIRED' | 'CANCELLED' | 'COMPLETED';
 export type MatchStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED' | 'CANCELLED';
 
+export type SeatType = 'GENERAL' | 'PRIORITY';
+
 export type SeatOpportunity = {
   id: string;
   giverId: string;
@@ -21,6 +23,8 @@ export type SeatOpportunity = {
   expiresAt: number;
   price?: number; // Optional price if monetization is enabled
   trainId: string;
+  seatType: SeatType;
+  coach: number;
 };
 
 export type Match = {
@@ -28,9 +32,11 @@ export type Match = {
   opportunityId: string;
   seekerId: string;
   giverId: string;
+  seekerBoardingStationId: string;
   status: MatchStatus;
   createdAt: number;
   cancelledBy?: string;
+  handoffCode?: string;
 };
 
 export type User = {
@@ -52,5 +58,7 @@ export type Reason =
   | 'TRAIN_NOT_ON_LEG'
   | 'TRAIN_NOT_RUNNING'
   | 'NOT_FOUND'
-  | 'NOT_ALLOWED';
+  | 'NOT_ALLOWED'
+  | 'PRIORITY_SEAT'
+  | 'INVALID_COACH';
 export type Result = { ok: true } | { ok: false; reason: Reason };

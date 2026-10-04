@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SeatOpportunity, Match, User, Direction, MatchStatus, Result } from '../types';
+import { SeatOpportunity, Match, User, Direction, MatchStatus, Result, SeatType } from '../types';
 import { isLegValid } from '../domain/route';
 import { checkOffer, servesLeg, boardingStillAhead } from '../domain/trains';
 import { reconcile } from '../domain/offers';
@@ -37,12 +37,15 @@ interface AppState {
     handoffStationId: string,
     price: number | undefined,
     trainId: string,
+    seatType: SeatType,
+    coach: number,
   ) => Result;
   cancelOpportunity: (opportunityId: string) => Result;
   reconcile: () => void;
   requestSeat: (
     opportunityId: string,
     seekerId: string,
+    seekerBoardingStationId: string,
   ) => Result;
   transition: (
     matchId: string,
@@ -93,6 +96,8 @@ const TRANSITIONS: Record<MatchStatus, MatchStatus[]> = {
   CANCELLED: [],
 };
 
+export const COACHES_PER_TRAIN = 3;
+
 export const useAppStore = create<AppState>((set, get) => ({
   // Config
   language: 'en',
@@ -114,7 +119,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUpiId: (id) => set({ upiId: id }),
   setUpiQrUri: (uri) => set({ upiQrUri: uri }),
 
-  offerSeat: (direction, currentStationId, handoffStationId, price, trainId): Result => {
+  offerSeat: (direction, currentStationId, handoffStationId, price, trainId, seatType, coach): Result => {
     let result: Result = { ok: true };
     set((state) => {
       const existingOffer = state.opportunities.find(
@@ -127,6 +132,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       if (!isLegValid(currentStationId, handoffStationId, direction)) {
         result = { ok: false, reason: 'INVALID_STATIONS' };
+        return state;
+      }
+      if (seatType === 'PRIORITY') {
+        result = { ok: false, reason: 'PRIORITY_SEAT' };
+        return state;
+      }
+      if (coach < 1 || coach > COACHES_PER_TRAIN) {
+        result = { ok: false, reason: 'INVALID_COACH' };
         return state;
       }
 
@@ -157,8 +170,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         updatedAt: now,
         expiresAt: validation.expiresAt,
         price,
-        trainId,
-      };
+          trainId,
+          seatType,
+          coach,
+        };
       result = { ok: true };
       return { opportunities: [...state.opportunities, newOpp] };
     });
@@ -205,7 +220,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     return result;
   },
 
-  requestSeat: (opportunityId, seekerId) => {
+  requestSeat: (opportunityId, seekerId, seekerBoardingStationId): Result => {
     let result: Result = { ok: false, reason: 'NOT_FOUND' };
 
     set((state) => {
@@ -241,8 +256,9 @@ export const useAppStore = create<AppState>((set, get) => ({
         id: randomUUID(),
         opportunityId,
         seekerId,
-        giverId: opp.giverId,
-        status: 'PENDING',
+          giverId: opp.giverId,
+          seekerBoardingStationId,
+          status: 'PENDING',
         createdAt: clockNow(),
       };
 
@@ -286,6 +302,7 @@ export const useAppStore = create<AppState>((set, get) => ({
               ...x,
               status: to,
               ...(to === 'CANCELLED' ? { cancelledBy: actorId } : {}),
+              ...(to === 'ACCEPTED' ? { handoffCode: Math.floor(1000 + Math.random() * 9000).toString() } : {}),
             }
           : to === 'ACCEPTED' && x.opportunityId === m.opportunityId && x.status === 'PENDING'
             ? { ...x, status: 'REJECTED' }

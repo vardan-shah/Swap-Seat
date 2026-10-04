@@ -24,11 +24,11 @@ describe('mockStore', () => {
   });
 
   // Set T0 to midnight IST of whatever today is
-  const T0 = new Date();
-  T0.setUTCHours(18, 30, 0, 0); // 18:30 UTC = 00:00 IST the next day, close enough for a fixed base
+  const T0 = Date.UTC(2026, 9, 4, 18, 30);
+  
   const ist = (hhmm: string) => {
     const [h, m] = hhmm.split(':').map(Number);
-    return T0.getTime() + (h * 60 + m) * 60000;
+    return T0 + (h * 60 + m) * 60000;
   };
 
   beforeEach(() => {
@@ -54,7 +54,7 @@ describe('mockStore', () => {
     it('creates a valid Northbound offer', () => {
       const res = useAppStore
         .getState()
-        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM');
+        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM', 'GENERAL', 2);
       expect(res.ok).toBe(true);
       expect(useAppStore.getState().opportunities[0]).toMatchObject({
         currentStationId: 'sabarmati',
@@ -70,7 +70,7 @@ describe('mockStore', () => {
       jest.setSystemTime(ist('07:30'));
       const res = useAppStore
         .getState()
-        .offerSeat('Southbound', 'motera-stadium', 'sabarmati', undefined, 'SB-0640-RYMM');
+        .offerSeat('Southbound', 'motera-stadium', 'sabarmati', undefined, 'SB-0640-RYMM', 'GENERAL', 2);
       expect(res.ok).toBe(true);
       expect(useAppStore.getState().opportunities[0]).toMatchObject({
         currentStationId: 'motera-stadium',
@@ -81,10 +81,29 @@ describe('mockStore', () => {
       });
     });
 
+    it('rejects PRIORITY seats with PRIORITY_SEAT', () => {
+      const res = useAppStore.getState().offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM', 'PRIORITY', 2);
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.reason).toBe('PRIORITY_SEAT');
+    });
+
+    it('rejects coach outside 1..COACHES_PER_TRAIN with INVALID_COACH', () => {
+      const res = useAppStore.getState().offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM', 'GENERAL', 4);
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.reason).toBe('INVALID_COACH');
+    });
+
+    it('saves seatType and coach on the opportunity', () => {
+      useAppStore.getState().offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM', 'GENERAL', 2);
+      const opp = useAppStore.getState().opportunities[0];
+      expect(opp.seatType).toBe('GENERAL');
+      expect(opp.coach).toBe(2);
+    });
+
     it('rejects INVALID_STATIONS when handoff is before current', () => {
       const res = useAppStore
         .getState()
-        .offerSeat('Northbound', 'motera-stadium', 'sabarmati', undefined, 'NB-0620-RYMM');
+        .offerSeat('Northbound', 'motera-stadium', 'sabarmati', undefined, 'NB-0620-RYMM', 'GENERAL', 2);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.reason).toBe('INVALID_STATIONS');
     });
@@ -92,7 +111,7 @@ describe('mockStore', () => {
     it('rejects UNKNOWN_TRAIN when train does not exist', () => {
       const res = useAppStore
         .getState()
-        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'train1');
+        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'train1', 'GENERAL', 2);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.reason).toBe('UNKNOWN_TRAIN');
     });
@@ -110,7 +129,7 @@ describe('mockStore', () => {
       });
       const res = useAppStore
         .getState()
-        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM');
+        .offerSeat('Northbound', 'sabarmati', 'motera-stadium', undefined, 'NB-0620-RYMM', 'GENERAL', 2);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.reason).toBe('ALREADY_OFFERING');
       expect(useAppStore.getState().opportunities).toHaveLength(1);
@@ -313,6 +332,8 @@ describe('mockStore', () => {
         currentStationId: 's1',
         handoffStationId: 's2',
         expiresAt: ist('06:30'),
+        seatType: 'GENERAL',
+        coach: 2,
         createdAt: ist('06:00'),
         updatedAt: ist('06:00'),
       };
@@ -324,7 +345,7 @@ describe('mockStore', () => {
       jest.setSystemTime(ist('06:31'));
 
       const { requestSeat } = useAppStore.getState();
-      const res = requestSeat('o1', 'u2');
+      const res = requestSeat('o1', 'u2', 'sabarmati');
       expect(res).toEqual({ ok: false, reason: 'EXPIRED' });
       expect(useAppStore.getState().matches).toHaveLength(0);
     });
@@ -341,11 +362,23 @@ describe('mockStore', () => {
           } as SeatOpportunity,
         ],
       });
-      const res = useAppStore.getState().requestSeat('opp1', 'seeker1');
+      const res = useAppStore.getState().requestSeat('opp1', 'seeker1', 'sabarmati');
       expect(res.ok).toBe(true);
       const matches = useAppStore.getState().matches;
       expect(matches.length).toBe(1);
       expect(matches[0].status).toBe('PENDING');
+    });
+
+    it('saves seekerBoardingStationId on the match', () => {
+      const opp = {
+        id: 'opp1',
+        giverId: 'u1',
+        status: 'ACTIVE',
+        expiresAt: Date.now() + 100000,
+      } as SeatOpportunity;
+      useAppStore.setState({ opportunities: [opp], matches: [] });
+      useAppStore.getState().requestSeat('opp1', 'u2', 'sabarmati');
+      expect(useAppStore.getState().matches[0].seekerBoardingStationId).toBe('sabarmati');
     });
 
     it('rejects duplicate requests', () => {
@@ -369,7 +402,7 @@ describe('mockStore', () => {
           } as Match,
         ],
       });
-      const res = useAppStore.getState().requestSeat('opp1', 'seeker1');
+      const res = useAppStore.getState().requestSeat('opp1', 'seeker1', 'sabarmati');
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.reason).toBe('DUPLICATE');
     });
@@ -386,7 +419,7 @@ describe('mockStore', () => {
           } as SeatOpportunity,
         ],
       });
-      const res = useAppStore.getState().requestSeat('opp1', 'seeker1');
+      const res = useAppStore.getState().requestSeat('opp1', 'seeker1', 'sabarmati');
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.reason).toBe('OWN_OFFER');
     });
@@ -401,13 +434,13 @@ describe('mockStore', () => {
           } as SeatOpportunity,
         ],
       });
-      const res = useAppStore.getState().requestSeat('opp1', 'seeker1');
+      const res = useAppStore.getState().requestSeat('opp1', 'seeker1', 'sabarmati');
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.reason).toBe('NOT_ACTIVE');
     });
     it('rejects request for unknown opportunity', () => {
       useAppStore.setState({ opportunities: [] });
-      const res = useAppStore.getState().requestSeat('opp99', 'seeker1');
+      const res = useAppStore.getState().requestSeat('opp99', 'seeker1', 'sabarmati');
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.reason).toBe('NOT_FOUND');
     });
@@ -527,6 +560,8 @@ describe('mockStore', () => {
         currentStationId: 's1',
         handoffStationId: 's2',
         expiresAt: ist('06:30'),
+        seatType: 'GENERAL',
+        coach: 2,
         createdAt: ist('06:00'),
         updatedAt: ist('06:00'),
       };
@@ -534,6 +569,7 @@ describe('mockStore', () => {
         id: 'm1',
         opportunityId: 'o1',
         giverId: 'u1',
+        seekerBoardingStationId: 'sabarmati',
         seekerId: 'u2',
         status: 'PENDING',
         createdAt: ist('06:29'),
@@ -586,6 +622,15 @@ describe('mockStore', () => {
       expect(state.opportunities[0].status).toBe('MATCHED');
       expect(state.matches.find((m) => m.id === 'm1')?.status).toBe('ACCEPTED');
       expect(state.matches.find((m) => m.id === 'm2')?.status).toBe('REJECTED');
+    });
+
+    it('generates a 4-digit handoffCode when ACCEPTED', () => {
+      const opp = { id: 'opp1', giverId: 'u1', status: 'ACTIVE', expiresAt: Date.now() + 100000, seatType: 'GENERAL', coach: 2 } as SeatOpportunity;
+      const m1 = { id: 'm1', opportunityId: 'opp1', seekerId: 'u2', giverId: 'u1', seekerBoardingStationId: 'sabarmati', status: 'PENDING', createdAt: 123 } as Match;
+      useAppStore.setState({ opportunities: [opp], matches: [m1] });
+      useAppStore.getState().acceptMatch('m1');
+      const updatedMatch = useAppStore.getState().matches[0];
+      expect(updatedMatch.handoffCode).toMatch(/^\d{4}$/);
     });
 
     it('allows giver to REJECT a match', () => {
@@ -854,6 +899,7 @@ describe('mockStore', () => {
         id: 'm1',
         opportunityId: 'o1',
         giverId: 'u1',
+        seekerBoardingStationId: 'sabarmati',
         seekerId: 'u2',
         status: 'ACCEPTED',
         createdAt: exp - 1000,
@@ -883,6 +929,7 @@ describe('mockStore', () => {
         id: 'm1',
         opportunityId: 'o1',
         giverId: 'u1',
+        seekerBoardingStationId: 'sabarmati',
         seekerId: 'u2',
         status: 'ACCEPTED',
         createdAt: exp - 1000,

@@ -44,7 +44,7 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
       return;
     }
 
-    const result = requestSeat(oppId, currentUser.id);
+    const result = requestSeat(oppId, currentUser.id, 'sabarmati');
     if (!result.ok) {
       const msg = translateReason(result.reason);
       await notify('Error', msg);
