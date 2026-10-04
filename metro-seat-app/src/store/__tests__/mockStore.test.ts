@@ -23,6 +23,20 @@ describe('mockStore', () => {
     jest.useRealTimers();
   });
 
+  // Set T0 to midnight IST of whatever today is
+  const T0 = new Date();
+  T0.setUTCHours(18, 30, 0, 0); // 18:30 UTC = 00:00 IST the next day, close enough for a fixed base
+  const ist = (hhmm: string) => {
+    const [h, m] = hhmm.split(':').map(Number);
+    return T0.getTime() + (h * 60 + m) * 60000;
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(ist('12:00')); // default to noon
+  });
+
+
   beforeEach(() => {
     useAppStore.setState(initialState, true);
     useAppStore.setState({
@@ -34,9 +48,8 @@ describe('mockStore', () => {
 
   describe('offerSeat', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
       // 06:15 IST = 45 * 60000 = 2700000 UTC
-      jest.setSystemTime(new Date('2026-10-05T06:48:00+05:30').getTime());
+      jest.setSystemTime(ist('06:48'));
     });
     afterEach(() => {
       jest.useRealTimers();
@@ -58,7 +71,7 @@ describe('mockStore', () => {
 
     it('creates a valid Southbound offer', () => {
       // For Southbound, let's use 06:40 IST = 70 * 60000 = 4200000 UTC for SB-0640-RYMM
-      jest.setSystemTime(new Date('2026-10-05T07:30:00+05:30').getTime());
+      jest.setSystemTime(ist('07:30'));
       const res = useAppStore
         .getState()
         .offerSeat('Southbound', 'motera-stadium', 'sabarmati', undefined, 'SB-0640-RYMM');
@@ -109,8 +122,7 @@ describe('mockStore', () => {
   });
 
   describe('getCompatibleOpportunities', () => {
-    const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
-    const seeker = { id: 'u3', displayName: 'Me', reputation: 0 };
+        const seeker = { id: 'u3', displayName: 'Me', reputation: 0 };
     const opp = (o: Partial<SeatOpportunity>) =>
       ({
         id: 'opp1',
@@ -122,10 +134,7 @@ describe('mockStore', () => {
     const find = (from: string, to: string) =>
       useAppStore.getState().getCompatibleOpportunities(from, to, 'Northbound');
 
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-    afterEach(() => {
+        afterEach(() => {
       jest.useRealTimers();
     });
 
@@ -301,8 +310,7 @@ describe('mockStore', () => {
   });
 
   describe('requestSeat', () => {
-    const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
-    it('rejects request for an EXPIRED opportunity', () => {
+        it('rejects request for an EXPIRED opportunity', () => {
       const o: SeatOpportunity = {
         id: 'o1',
         giverId: 'u1',
@@ -320,7 +328,6 @@ describe('mockStore', () => {
         currentUser: { id: 'u2', displayName: 'Seeker', reputation: 4.8 } as User,
         matches: [],
       });
-      jest.useFakeTimers();
       jest.setSystemTime(ist('06:31'));
 
       const { requestSeat } = useAppStore.getState();
@@ -337,7 +344,7 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
       });
@@ -356,7 +363,7 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
         matches: [
@@ -382,7 +389,7 @@ describe('mockStore', () => {
             giverId: 'seeker1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
       });
@@ -423,7 +430,7 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
         matches: [
@@ -465,7 +472,7 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
         matches: [],
@@ -488,7 +495,7 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
         matches: [],
@@ -517,8 +524,7 @@ describe('mockStore', () => {
   });
 
   describe('transition', () => {
-    const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
-    it('rejects ACCEPT for an expired opportunity', () => {
+        it('rejects ACCEPT for an expired opportunity', () => {
       const o: SeatOpportunity = {
         id: 'o1',
         giverId: 'u1',
@@ -544,7 +550,6 @@ describe('mockStore', () => {
         matches: [m],
         currentUser: { id: 'u1', displayName: 'Giver', reputation: 4.8 } as User,
       });
-      jest.useFakeTimers();
       jest.setSystemTime(ist('06:31'));
 
       const { transition } = useAppStore.getState();
@@ -562,7 +567,7 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
         matches: [
@@ -599,7 +604,7 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
         matches: [
@@ -626,7 +631,7 @@ describe('mockStore', () => {
             giverId: 'giver1',
             status: 'ACTIVE',
             trainId: 'NB-0620-RYMM',
-            expiresAt: new Date('2026-10-05T20:00:00+05:30').getTime(),
+            expiresAt: ist('20:00'),
           } as SeatOpportunity,
         ],
         matches: [
@@ -670,7 +675,6 @@ describe('mockStore', () => {
     });
 
     it('expires the seat when an ACCEPTED match is CANCELLED by seeker and seat is expired', () => {
-      jest.useFakeTimers();
       const now = Date.now();
 
       useAppStore.setState({
@@ -799,8 +803,7 @@ describe('mockStore', () => {
   });
 
   describe('reconcile', () => {
-    const ist = (hhmm: string) => new Date(`2026-10-05T${hhmm}:00+05:30`).getTime();
-
+    
     it('exactly expiresAt -> still ACTIVE (no cancel)', () => {
       const exp = ist('06:30');
       const opp = {
@@ -816,7 +819,6 @@ describe('mockStore', () => {
         updatedAt: exp - 1000,
       } as SeatOpportunity;
       useAppStore.setState({ opportunities: [opp], matches: [] });
-      jest.useFakeTimers();
       jest.setSystemTime(exp);
       useAppStore.getState().reconcile();
       expect(useAppStore.getState().opportunities[0].status).toBe('ACTIVE');
@@ -837,7 +839,6 @@ describe('mockStore', () => {
         updatedAt: exp - 1000,
       } as SeatOpportunity;
       useAppStore.setState({ opportunities: [opp], matches: [] });
-      jest.useFakeTimers();
       jest.setSystemTime(exp + 60000); // 1 min past
       useAppStore.getState().reconcile();
       expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
@@ -866,7 +867,6 @@ describe('mockStore', () => {
         createdAt: exp - 1000,
       };
       useAppStore.setState({ opportunities: [opp], matches: [m] });
-      jest.useFakeTimers();
       jest.setSystemTime(exp + 10 * 60000);
       useAppStore.getState().reconcile();
       expect(useAppStore.getState().opportunities[0].status).toBe('MATCHED');
@@ -896,7 +896,6 @@ describe('mockStore', () => {
         createdAt: exp - 1000,
       };
       useAppStore.setState({ opportunities: [opp], matches: [m] });
-      jest.useFakeTimers();
       jest.setSystemTime(exp + 10 * 60000 + 1000);
       useAppStore.getState().reconcile();
       expect(useAppStore.getState().opportunities[0].status).toBe('EXPIRED');
