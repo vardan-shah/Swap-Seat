@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
 import { isLegValid } from '../domain/route';
-import { Train, checkOffer, servesLeg, boardingStillAhead } from '../domain/trains';
+import { checkOffer, servesLeg, boardingStillAhead } from '../domain/trains';
 import { reconcile } from '../domain/offers';
 import { now as clockNow } from '../utils/clock';
-import trainsData from '../data/trains.json';
+import { trains as trainsData } from '../data/trains';
 import { Language } from '../i18n';
 import { randomUUID } from 'expo-crypto';
 
@@ -162,7 +162,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
 
       const now = clockNow();
-      const allTrains = trainsData as unknown as Train[];
+      const allTrains = trainsData;
 
       const validation = checkOffer(
         trainId,
@@ -352,7 +352,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   getCompatibleOpportunities: (currentStationId, destinationStationId, direction) => {
     const state = get();
     const now = clockNow();
-    const allTrains = trainsData as unknown as Train[];
+    const allTrains = trainsData;
 
     return state.opportunities.filter((opp) => {
       if (opp.status !== 'ACTIVE') return false;

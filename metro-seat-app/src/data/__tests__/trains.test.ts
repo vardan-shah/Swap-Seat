@@ -63,7 +63,7 @@ describe('trains.json data integrity', () => {
       return h * 60 + m;
     };
 
-    // The exceptions explicitly found and matches the transcription:
+    // Exceptions explicitly noted in the transcribed timetable:
     // (List will be populated once we run the test and find the failures)
     const exceptions = [
       'NB-0734-RYVGIFT|old-high-court>motera-stadium|19',

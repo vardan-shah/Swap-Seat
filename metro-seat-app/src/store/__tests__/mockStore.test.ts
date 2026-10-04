@@ -36,7 +36,6 @@ describe('mockStore', () => {
     jest.setSystemTime(ist('12:00')); // default to noon
   });
 
-
   beforeEach(() => {
     useAppStore.setState(initialState, true);
     useAppStore.setState({
@@ -122,7 +121,7 @@ describe('mockStore', () => {
   });
 
   describe('getCompatibleOpportunities', () => {
-        const seeker = { id: 'u3', displayName: 'Me', reputation: 0 };
+    const seeker = { id: 'u3', displayName: 'Me', reputation: 0 };
     const opp = (o: Partial<SeatOpportunity>) =>
       ({
         id: 'opp1',
@@ -134,7 +133,7 @@ describe('mockStore', () => {
     const find = (from: string, to: string) =>
       useAppStore.getState().getCompatibleOpportunities(from, to, 'Northbound');
 
-        afterEach(() => {
+    afterEach(() => {
       jest.useRealTimers();
     });
 
@@ -310,7 +309,7 @@ describe('mockStore', () => {
   });
 
   describe('requestSeat', () => {
-        it('rejects request for an EXPIRED opportunity', () => {
+    it('rejects request for an EXPIRED opportunity', () => {
       const o: SeatOpportunity = {
         id: 'o1',
         giverId: 'u1',
@@ -524,7 +523,7 @@ describe('mockStore', () => {
   });
 
   describe('transition', () => {
-        it('rejects ACCEPT for an expired opportunity', () => {
+    it('rejects ACCEPT for an expired opportunity', () => {
       const o: SeatOpportunity = {
         id: 'o1',
         giverId: 'u1',
@@ -803,7 +802,6 @@ describe('mockStore', () => {
   });
 
   describe('reconcile', () => {
-    
     it('exactly expiresAt -> still ACTIVE (no cancel)', () => {
       const exp = ist('06:30');
       const opp = {

@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,7 +9,7 @@ import {
   AppStateStatus,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation';
 import { useAppStore } from '../store/mockStore';
@@ -27,8 +26,14 @@ export default function HomeScreen({ navigation }: Props) {
   const matches = useAppStore((s) => s.matches);
   const opportunities = useAppStore((s) => s.opportunities);
   const t = translations[language];
+  const reconcile = useAppStore((s) => s.reconcile);
 
-  const { reconcile } = useAppStore();
+  useEffect(() => {
+    const timer = setInterval(() => {
+      useAppStore.getState().reconcile();
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {

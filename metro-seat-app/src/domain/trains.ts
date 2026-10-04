@@ -128,16 +128,14 @@ export function getTrainsByDirection(
     });
 }
 
-export function getTrainLabel(trainId: string, allTrains: Train[]): string {
-  const t = allTrains.find((x) => x.id === trainId);
-  if (!t) return 'Unknown Train';
+export function trainLabel(t: Train): string {
   const stops = getStops(t);
   const firstStopId = stops ? stops[0] : null;
   const lastStopId = stops ? stops[stops.length - 1] : null;
   const firstTime = firstStopId ? t.times[firstStopId] : '?';
   const station = gmrcData.stations.find((s) => s.id === firstStopId);
   const lastStation = gmrcData.stations.find((s) => s.id === lastStopId);
-  const originName = station ? station.name : t.direction === 'Northbound' ? 'APMC' : 'Gandhinagar';
+  const originName = station ? station.name : t.direction === 'Northbound' ? 'APMC' : 'Unknown';
   const destName = lastStation ? lastStation.name : '';
   return `${originName} ${firstTime} → ${destName}`;
 }

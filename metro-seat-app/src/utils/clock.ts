@@ -23,7 +23,3 @@ export function now(): number {
 export function setDemoTime(timestamp: number) {
   offsetMs = timestamp - Date.now();
 }
-
-export function resetDemoTime() {
-  offsetMs = 0;
-}

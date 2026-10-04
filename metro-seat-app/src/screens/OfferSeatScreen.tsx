@@ -11,8 +11,8 @@ import { ENABLE_PAYMENTS } from '../config/flags';
 import { useAppStore } from '../store/mockStore';
 import { Direction } from '../types';
 import SelectModal from '../components/SelectModal';
-import { trainsForOffer, Train, getTrainLabel } from '../domain/trains';
-import trains from '../data/trains.json';
+import { trainsForOffer, Train, trainLabel } from '../domain/trains';
+import { trains } from '../data/trains';
 import { translations } from '../i18n';
 
 type Props = {
@@ -31,11 +31,6 @@ export default function OfferSeatScreen({ navigation }: Props) {
     const timer = setInterval(() => setNow(clockNow()), 60000);
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line
-    setTrainId('');
-  }, [currentStationId, handoffStationId]);
 
   const offerSeat = useAppStore((state) => state.offerSeat);
   const lang = useAppStore((state) => state.language);
@@ -96,7 +91,7 @@ export default function OfferSeatScreen({ navigation }: Props) {
     );
 
     return activeTrains.map((t) => {
-      const expectedTrain = getTrainLabel(t.id, trains as unknown as Train[]);
+      const expectedTrain = trainLabel(t);
       return {
         label: expectedTrain,
         value: t.id,
@@ -141,7 +136,10 @@ export default function OfferSeatScreen({ navigation }: Props) {
         label={`2. ${t.whereAreYou}`}
         items={stationItems}
         selectedValue={currentStationId}
-        onSelect={setCurrentStationId}
+        onSelect={(id) => {
+          setCurrentStationId(id);
+          setTrainId('');
+        }}
         placeholder={t.whereAreYou}
       />
 
@@ -149,7 +147,10 @@ export default function OfferSeatScreen({ navigation }: Props) {
         label={`3. ${t.whereVacate}`}
         items={stationItems}
         selectedValue={handoffStationId}
-        onSelect={setHandoffStationId}
+        onSelect={(id) => {
+          setHandoffStationId(id);
+          setTrainId('');
+        }}
         placeholder={t.whereVacate}
       />
 
