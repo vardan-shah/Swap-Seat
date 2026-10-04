@@ -15,7 +15,7 @@ export const REASON_MESSAGES: Record<Reason, string> = {
   NOT_ALLOWED: 'You can\'t do that for this handoff.',
 };
 
-export function translateReason(reason?: string): string {
-  if (!reason) return 'An unknown error occurred.';
-  return REASON_MESSAGES[reason as Reason] || reason;
+export function translateReason(reason: Reason): string {
+  
+  return REASON_MESSAGES[reason];
 }

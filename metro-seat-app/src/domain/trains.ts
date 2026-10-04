@@ -1,5 +1,5 @@
 import gmrcData from '../data/gmrc-network.json';
-import { Direction, OfferSeatResult } from '../types';
+import { Direction, Reason } from '../types';
 
 export interface Train {
   id: string;
@@ -142,7 +142,7 @@ export function trainLabel(t: Train): string {
 
 export type OfferValidation =
   | { ok: true; expiresAt: number }
-  | Extract<OfferSeatResult, { ok: false }>;
+  | { ok: false; reason: Extract<Reason, 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING'> };
 
 export function checkOffer(
   trainId: string,

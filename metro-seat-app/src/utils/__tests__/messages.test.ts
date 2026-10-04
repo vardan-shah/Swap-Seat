@@ -25,8 +25,4 @@ describe('messages', () => {
       expect(translateReason(reason)).toBe(REASON_MESSAGES[reason]);
     });
   });
-
-  it('falls back to raw string if unknown', () => {
-    expect(translateReason('UNKNOWN_CODE')).toBe('UNKNOWN_CODE');
-  });
 });

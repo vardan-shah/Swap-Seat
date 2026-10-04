@@ -40,18 +40,6 @@ export type User = {
   upiId?: string;
 };
 
-export type OfferSeatResult =
-  | { ok: true }
-  | {
-      ok: false;
-      reason:
-        | 'ALREADY_OFFERING'
-        | 'INVALID_STATIONS'
-        | 'UNKNOWN_TRAIN'
-        | 'TRAIN_NOT_ON_LEG'
-        | 'TRAIN_NOT_RUNNING';
-    };
-
 export type Reason =
   | 'EXPIRED'
   | 'OWN_OFFER'
@@ -65,5 +53,4 @@ export type Reason =
   | 'TRAIN_NOT_RUNNING'
   | 'NOT_FOUND'
   | 'NOT_ALLOWED';
-
-export type StoreResult<T = void> = { ok: true; data?: T } | { ok: false; reason: Reason };
+export type Result = { ok: true } | { ok: false; reason: Reason };

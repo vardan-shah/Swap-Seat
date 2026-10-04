@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SeatOpportunity, Match, User, Direction, MatchStatus } from '../types';
+import { SeatOpportunity, Match, User, Direction, MatchStatus, Result } from '../types';
 import { isLegValid } from '../domain/route';
 import { checkOffer, servesLeg, boardingStillAhead } from '../domain/trains';
 import { reconcile } from '../domain/offers';
@@ -37,45 +37,22 @@ interface AppState {
     handoffStationId: string,
     price: number | undefined,
     trainId: string,
-  ) => {
-    ok: boolean;
-    reason?:
-      | 'ALREADY_OFFERING'
-      | 'INVALID_STATIONS'
-      | 'UNKNOWN_TRAIN'
-      | 'TRAIN_NOT_ON_LEG'
-      | 'TRAIN_NOT_RUNNING';
-  };
-  cancelOpportunity: (opportunityId: string) => { ok: boolean };
+  ) => Result;
+  cancelOpportunity: (opportunityId: string) => Result;
   reconcile: () => void;
   requestSeat: (
     opportunityId: string,
     seekerId: string,
-  ) => {
-    ok: boolean;
-    reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND' | 'EXPIRED';
-  };
+  ) => Result;
   transition: (
     matchId: string,
     actorId: string,
-    to: import('../types').MatchStatus,
-  ) => { ok: boolean; reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED' };
-  acceptMatch: (matchId: string) => {
-    ok: boolean;
-    reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED';
-  };
-  rejectMatch: (matchId: string) => {
-    ok: boolean;
-    reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED';
-  };
-  cancelMatch: (matchId: string) => {
-    ok: boolean;
-    reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED';
-  };
-  completeMatch: (matchId: string) => {
-    ok: boolean;
-    reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED';
-  };
+    to: MatchStatus,
+  ) => Result;
+  acceptMatch: (matchId: string) => Result;
+  rejectMatch: (matchId: string) => Result;
+  cancelMatch: (matchId: string) => Result;
+  completeMatch: (matchId: string) => Result;
   expireOpportunity: (oppId: string) => void;
 
   // Queries
@@ -137,16 +114,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUpiId: (id) => set({ upiId: id }),
   setUpiQrUri: (uri) => set({ upiQrUri: uri }),
 
-  offerSeat: (direction, currentStationId, handoffStationId, price, trainId) => {
-    let result: {
-      ok: boolean;
-      reason?:
-        | 'ALREADY_OFFERING'
-        | 'INVALID_STATIONS'
-        | 'UNKNOWN_TRAIN'
-        | 'TRAIN_NOT_ON_LEG'
-        | 'TRAIN_NOT_RUNNING';
-    } = { ok: false };
+  offerSeat: (direction, currentStationId, handoffStationId, price, trainId): Result => {
+    let result: Result = { ok: true };
     set((state) => {
       const existingOffer = state.opportunities.find(
         (o) =>
@@ -205,13 +174,23 @@ export const useAppStore = create<AppState>((set, get) => ({
       return {};
     });
   },
-  cancelOpportunity: (opportunityId) => {
-    let success = false;
+  cancelOpportunity: (opportunityId): Result => {
+    let result: Result = { ok: true };
     set((state) => {
       const opp = state.opportunities.find((o) => o.id === opportunityId);
-      if (!opp || opp.giverId !== state.currentUser.id || opp.status !== 'ACTIVE') return state;
+      if (!opp) {
+        result = { ok: false, reason: 'NOT_FOUND' };
+        return state;
+      }
+      if (opp.status !== 'ACTIVE') {
+        result = { ok: false, reason: 'NOT_ACTIVE' };
+        return state;
+      }
+      if (opp.giverId !== state.currentUser.id) {
+        result = { ok: false, reason: 'NOT_ALLOWED' };
+        return state;
+      }
 
-      success = true;
       return {
         opportunities: state.opportunities.map((o) =>
           o.id === opportunityId ? { ...o, status: 'CANCELLED' } : o,
@@ -223,14 +202,11 @@ export const useAppStore = create<AppState>((set, get) => ({
         ),
       };
     });
-    return { ok: success };
+    return result;
   },
 
   requestSeat: (opportunityId, seekerId) => {
-    let result: {
-      ok: boolean;
-      reason?: 'DUPLICATE' | 'OWN_OFFER' | 'NOT_ACTIVE' | 'NOT_FOUND' | 'EXPIRED';
-    } = { ok: false, reason: 'NOT_FOUND' };
+    let result: Result = { ok: false, reason: 'NOT_FOUND' };
 
     set((state) => {
       const opp = state.opportunities.find((o) => o.id === opportunityId);
@@ -279,7 +255,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     matchId: string,
     actorId: string,
     to: MatchStatus,
-  ): { ok: boolean; reason?: 'EXPIRED' | 'NOT_FOUND' | 'ILLEGAL_TRANSITION' | 'NOT_ALLOWED' } => {
+  ): Result => {
     const state = get();
     const m = state.matches.find((x) => x.id === matchId);
 
@@ -335,10 +311,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     return { ok: true };
   },
 
-  acceptMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'ACCEPTED'),
-  rejectMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'REJECTED'),
-  cancelMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'CANCELLED'),
-  completeMatch: (matchId) => get().transition(matchId, get().currentUser.id, 'COMPLETED'),
+  acceptMatch: (matchId): Result => get().transition(matchId, get().currentUser.id, 'ACCEPTED'),
+  rejectMatch: (matchId): Result => get().transition(matchId, get().currentUser.id, 'REJECTED'),
+  cancelMatch: (matchId): Result => get().transition(matchId, get().currentUser.id, 'CANCELLED'),
+  completeMatch: (matchId): Result => get().transition(matchId, get().currentUser.id, 'COMPLETED'),
 
   expireOpportunity: (oppId) =>
     set((state) => {
