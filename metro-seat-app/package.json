@@ -41,7 +41,8 @@
     "format": "npx prettier --write \"src/**/*.{ts,tsx}\" App.tsx",
     "validate:data": "jest src/data",
     "verify": "npx tsc --noEmit && npm run lint && npx prettier --check \"src/**/*.{ts,tsx}\" App.tsx && npm run test",
-    "lint": "eslint \"src/**/*.{ts,tsx}\""
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "mutation": "node scripts/mutation-check.mjs"
   },
   "private": true
 }
