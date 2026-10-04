@@ -65,7 +65,11 @@ export default function OpportunityListScreen({ navigation, route }: Props) {
         </View>
         {item.trainId && (
           <Text style={styles.trainText}>
-            {translation.expectedTrain}: {(() => { const train = trainById(item.trainId); return train ? trainLabel(train) : 'Unknown Train'; })()}
+            {translation.expectedTrain}:{' '}
+            {(() => {
+              const train = trainById(item.trainId);
+              return train ? trainLabel(train) : 'Unknown Train';
+            })()}
           </Text>
         )}
         <Text style={styles.giverText}>

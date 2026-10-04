@@ -128,7 +128,10 @@ export function trainLabel(t: Train): string {
 
 export type OfferValidation =
   | { ok: true; expiresAt: number }
-  | { ok: false; reason: Extract<Reason, 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING'> };
+  | {
+      ok: false;
+      reason: Extract<Reason, 'UNKNOWN_TRAIN' | 'TRAIN_NOT_ON_LEG' | 'TRAIN_NOT_RUNNING'>;
+    };
 
 export function checkOffer(
   trainId: string,

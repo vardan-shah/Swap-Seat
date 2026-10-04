@@ -52,7 +52,15 @@ export default function OfferSeatScreen({ navigation }: Props) {
     }
 
     const priceNum = ENABLE_PAYMENTS && price ? parseInt(price, 10) : undefined;
-    const res = offerSeat(direction, currentStationId, handoffStationId, priceNum, trainId, 'GENERAL', 2);
+    const res = offerSeat(
+      direction,
+      currentStationId,
+      handoffStationId,
+      priceNum,
+      trainId,
+      'GENERAL',
+      2,
+    );
     if (!res.ok) {
       const msg = translateReason(res.reason);
       await notify('Error', msg);

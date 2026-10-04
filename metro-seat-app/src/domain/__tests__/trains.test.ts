@@ -195,16 +195,17 @@ describe('trains domain', () => {
   });
 });
 
-  describe('trainLabel', () => {
-    it('formats a real Northbound train', () => {
-      const train = {
-        id: 'NB-0620-RYMM',
-        direction: 'Northbound', pattern: 'RY-MM',
-        times: {
-          'apmc': '06:20',
-          'mahatma-mandir': '07:11'
-        }
-      } as any;
-      expect(trainLabel(train)).toBe('APMC 06:20 → Mahatma Mandir');
-    });
+describe('trainLabel', () => {
+  it('formats a real Northbound train', () => {
+    const train = {
+      id: 'NB-0620-RYMM',
+      direction: 'Northbound',
+      pattern: 'RY-MM',
+      times: {
+        apmc: '06:20',
+        'mahatma-mandir': '07:11',
+      },
+    } as unknown as Train;
+    expect(trainLabel(train)).toBe('APMC 06:20 → Mahatma Mandir');
   });
+});

@@ -42,16 +42,8 @@ interface AppState {
   ) => Result;
   cancelOpportunity: (opportunityId: string) => Result;
   reconcile: () => void;
-  requestSeat: (
-    opportunityId: string,
-    seekerId: string,
-    seekerBoardingStationId: string,
-  ) => Result;
-  transition: (
-    matchId: string,
-    actorId: string,
-    to: MatchStatus,
-  ) => Result;
+  requestSeat: (opportunityId: string, seekerId: string, seekerBoardingStationId: string) => Result;
+  transition: (matchId: string, actorId: string, to: MatchStatus) => Result;
   acceptMatch: (matchId: string) => Result;
   rejectMatch: (matchId: string) => Result;
   cancelMatch: (matchId: string) => Result;
@@ -119,7 +111,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUpiId: (id) => set({ upiId: id }),
   setUpiQrUri: (uri) => set({ upiQrUri: uri }),
 
-  offerSeat: (direction, currentStationId, handoffStationId, price, trainId, seatType, coach): Result => {
+  offerSeat: (
+    direction,
+    currentStationId,
+    handoffStationId,
+    price,
+    trainId,
+    seatType,
+    coach,
+  ): Result => {
     let result: Result = { ok: true };
     set((state) => {
       const existingOffer = state.opportunities.find(
@@ -170,10 +170,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         updatedAt: now,
         expiresAt: validation.expiresAt,
         price,
-          trainId,
-          seatType,
-          coach,
-        };
+        trainId,
+        seatType,
+        coach,
+      };
       result = { ok: true };
       return { opportunities: [...state.opportunities, newOpp] };
     });
@@ -256,9 +256,9 @@ export const useAppStore = create<AppState>((set, get) => ({
         id: randomUUID(),
         opportunityId,
         seekerId,
-          giverId: opp.giverId,
-          seekerBoardingStationId,
-          status: 'PENDING',
+        giverId: opp.giverId,
+        seekerBoardingStationId,
+        status: 'PENDING',
         createdAt: clockNow(),
       };
 
@@ -267,11 +267,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     return result;
   },
 
-  transition: (
-    matchId: string,
-    actorId: string,
-    to: MatchStatus,
-  ): Result => {
+  transition: (matchId: string, actorId: string, to: MatchStatus): Result => {
     const state = get();
     const m = state.matches.find((x) => x.id === matchId);
 
@@ -302,7 +298,9 @@ export const useAppStore = create<AppState>((set, get) => ({
               ...x,
               status: to,
               ...(to === 'CANCELLED' ? { cancelledBy: actorId } : {}),
-              ...(to === 'ACCEPTED' ? { handoffCode: Math.floor(1000 + Math.random() * 9000).toString() } : {}),
+              ...(to === 'ACCEPTED'
+                ? { handoffCode: Math.floor(1000 + Math.random() * 9000).toString() }
+                : {}),
             }
           : to === 'ACCEPTED' && x.opportunityId === m.opportunityId && x.status === 'PENDING'
             ? { ...x, status: 'REJECTED' }
