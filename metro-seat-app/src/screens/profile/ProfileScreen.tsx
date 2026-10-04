@@ -15,6 +15,7 @@ import { translations } from '../../i18n';
 import { ENABLE_PAYMENTS } from '../../config/flags';
 
 import { notify } from '../../utils/dialog';
+import { getStationById } from '../../data/stations';
 
 export default function ProfileScreen() {
   const lang = useAppStore((state) => state.language);
@@ -29,6 +30,13 @@ export default function ProfileScreen() {
   const setLanguage = useAppStore((state) => state.setLanguage);
 
   const [tempUpiId, setTempUpiId] = useState(upiId || '');
+
+  const matches = useAppStore((state) => state.matches);
+  const opportunities = useAppStore((state) => state.opportunities);
+
+  const pastTransactions = matches.filter(
+    (m) => (m.seekerId === user.id || m.giverId === user.id) && m.status === 'COMPLETED',
+  );
 
   const saveUpi = async () => {
     setUpiId(tempUpiId);
@@ -102,6 +110,35 @@ export default function ProfileScreen() {
           )}
         </View>
       )}
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Past Handoffs</Text>
+        {pastTransactions.length === 0 ? (
+          <Text style={{ color: '#666' }}>No completed handoffs yet.</Text>
+        ) : (
+          pastTransactions.map((m) => {
+            const opp = opportunities.find((o) => o.id === m.opportunityId);
+            if (!opp) return null;
+            const role = m.seekerId === user.id ? 'Received' : 'Gave';
+            const station = getStationById(opp.handoffStationId)?.name || 'Unknown';
+            const date = new Date(m.createdAt).toLocaleDateString();
+            return (
+              <View
+                key={m.id}
+                style={{ paddingVertical: 10, borderBottomWidth: 1, borderColor: '#eee' }}
+              >
+                <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                  {role} seat at {station}
+                </Text>
+                <Text style={{ color: '#666', fontSize: 14 }}>{date}</Text>
+                {ENABLE_PAYMENTS && opp.price && (
+                  <Text style={{ color: '#28a745', fontWeight: 'bold' }}>₹{opp.price}</Text>
+                )}
+              </View>
+            );
+          })
+        )}
+      </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t.changeLang}</Text>
